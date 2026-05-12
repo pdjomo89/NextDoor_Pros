@@ -109,6 +109,30 @@
       "catering": {
         "title": "Traiteur",
         "description": "Traiteur événementiel, chefs privés, plateaux à emporter et buffets à domicile."
+      },
+      "insurance": {
+        "title": "Assurance",
+        "description": "Assurance auto, habitation, locataire et vie — devis et couverture auprès d'agents et courtiers locaux."
+      },
+      "carrepair": {
+        "title": "Réparation automobile",
+        "description": "Mécaniciens pour freins, vidanges, diagnostics, pneus et carrosserie — à domicile ou en atelier."
+      },
+      "shoesclothes": {
+        "title": "Chaussures et vêtements",
+        "description": "Achat, vente et retouche de chaussures et vêtements — ajustements, réparations et revendeurs locaux."
+      },
+      "rental": {
+        "title": "Location d'appartement et de chambre",
+        "description": "Appartements, chambres et logements partagés à louer — court et long terme, auprès d'hôtes locaux."
+      },
+      "windowtinting": {
+        "title": "Teinte de vitres",
+        "description": "Teinte de vitres auto et résidentielle — réduction des UV et de la chaleur, film d'intimité, revêtements céramiques."
+      },
+      "carpool": {
+        "title": "Covoiturage",
+        "description": "Partagez des trajets et les frais — navettes quotidiennes, transferts aéroport et covoiturage interville."
       }
     },
     "viewPros": "Voir les pros disponibles",

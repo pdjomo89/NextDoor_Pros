@@ -109,6 +109,30 @@
       "catering": {
         "title": "Catering",
         "description": "Event catering, private chefs, drop-off platters, and party food at your door."
+      },
+      "insurance": {
+        "title": "Insurance",
+        "description": "Auto, home, renters, and life insurance — quotes and coverage from local agents and brokers."
+      },
+      "carrepair": {
+        "title": "Car repair",
+        "description": "Mechanics for brakes, oil changes, diagnostics, tires, and bodywork — mobile or in-shop."
+      },
+      "shoesclothes": {
+        "title": "Shoes & clothes",
+        "description": "Buy, sell, and tailor shoes and clothing — alterations, repairs, and local resellers."
+      },
+      "rental": {
+        "title": "Apartment & room rental",
+        "description": "Apartments, rooms, and shared housing for rent — short and long term, from local hosts."
+      },
+      "windowtinting": {
+        "title": "Window tinting",
+        "description": "Car and home window tinting — UV and heat reduction, privacy film, and ceramic coatings."
+      },
+      "carpool": {
+        "title": "Carpool & rides",
+        "description": "Share rides and split the cost — daily commutes, airport runs, and intercity carpooling."
       }
     },
     "viewPros": "View available pros",

@@ -9,7 +9,13 @@ export type ServiceKey =
   | 'flooring'
   | 'painting'
   | 'carwash'
-  | 'catering';
+  | 'catering'
+  | 'insurance'
+  | 'carrepair'
+  | 'shoesclothes'
+  | 'rental'
+  | 'windowtinting'
+  | 'carpool';
 
 export type ServiceCategory = {
   slug: string;
@@ -34,4 +40,10 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: 'painting', key: 'painting', accent: 'navy', image: unsplash('1574359411659-15573a27fd0c') },
   { slug: 'carwash', key: 'carwash', accent: 'forest', image: unsplash('1607860108855-64acf2078ed9') },
   { slug: 'catering', key: 'catering', accent: 'navy', image: unsplash('1555244162-803834f70033') },
+  { slug: 'insurance', key: 'insurance', accent: 'forest', image: unsplash('1450101499163-c8848c66ca85') },
+  { slug: 'car-repair', key: 'carrepair', accent: 'navy', image: unsplash('1530046339160-ce3e530c7d2f') },
+  { slug: 'shoes-clothes', key: 'shoesclothes', accent: 'forest', image: unsplash('1441986300917-64674bd600d8') },
+  { slug: 'apartment-rental', key: 'rental', accent: 'navy', image: unsplash('1502672260266-1c1ef2d93688') },
+  { slug: 'window-tinting', key: 'windowtinting', accent: 'forest', image: unsplash('1486406146926-c627a92ad1ab') },
+  { slug: 'carpool', key: 'carpool', accent: 'navy', image: unsplash('1503376780353-7e6692767b70') },
 ];

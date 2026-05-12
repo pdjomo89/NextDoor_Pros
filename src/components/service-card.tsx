@@ -15,6 +15,12 @@ import {
   PaintBucket,
   Car,
   UtensilsCrossed,
+  ShieldCheck,
+  Cog,
+  Shirt,
+  BedDouble,
+  Sun,
+  CarFront,
   type LucideIcon,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -34,6 +40,12 @@ const ICONS: Record<ServiceKey, LucideIcon> = {
   painting: PaintBucket,
   carwash: Car,
   catering: UtensilsCrossed,
+  insurance: ShieldCheck,
+  carrepair: Cog,
+  shoesclothes: Shirt,
+  rental: BedDouble,
+  windowtinting: Sun,
+  carpool: CarFront,
 };
 
 export function ServiceCard({ category }: { category: ServiceCategory }) {
