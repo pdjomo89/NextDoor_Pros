@@ -51,6 +51,10 @@
       "step3Title": "3. Réservez en toute confiance",
       "step3Body": "Comparez les avis, fixez une heure, payez en sécurité après le travail."
     },
+    "partners": {
+      "title": "Nos partenaires",
+      "subtitle": "En collaboration avec des entreprises de confiance pour mieux vous servir."
+    },
     "cityBanner": {
       "title": "Service à {city} et environs",
       "subtitle": "Les pros listés ici sont actifs dans votre secteur.",
