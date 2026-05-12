@@ -10,7 +10,17 @@ import type { Locale } from '@/i18n/routing';
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=70';
 
-const PARTNERS = ['Ticketflow', 'AfriNovaTech', 'Carys Care and Beauty'];
+type Partner = { name: string; logo?: string; url?: string };
+
+const PARTNERS: Partner[] = [
+  {
+    name: 'Ticketflow',
+    logo: '/partners/ticketflow.png',
+    url: 'https://www.ticketflow.boutique',
+  },
+  { name: 'AfriNovaTech' },
+  { name: 'Carys Care and Beauty' },
+];
 
 export async function generateMetadata({
   params,
@@ -65,17 +75,44 @@ export default async function PartnersPage({
       <section className="container py-16 md:py-20">
         <p className="mx-auto max-w-2xl text-center text-lg text-navy/70">{t('intro')}</p>
         <ul className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
-          {PARTNERS.map((name) => (
-            <li
-              key={name}
-              className="flex flex-col items-center gap-4 rounded-2xl border border-navy/10 bg-white p-8 text-center shadow-sm transition-transform hover:-translate-y-0.5"
-            >
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-forest/10 text-forest">
-                <Handshake className="h-6 w-6" aria-hidden />
-              </div>
-              <span className="text-lg font-semibold text-navy">{name}</span>
-            </li>
-          ))}
+          {PARTNERS.map((p) => {
+            const cardClass =
+              'flex h-full flex-col items-center gap-4 rounded-2xl border border-navy/10 bg-white p-8 text-center shadow-sm transition-transform hover:-translate-y-0.5';
+            const inner = (
+              <>
+                {p.logo ? (
+                  <Image
+                    src={p.logo}
+                    alt={`${p.name} logo`}
+                    width={1254}
+                    height={1254}
+                    className="h-28 w-28 rounded-2xl object-contain"
+                  />
+                ) : (
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-forest/10 text-forest">
+                    <Handshake className="h-6 w-6" aria-hidden />
+                  </div>
+                )}
+                <span className="text-lg font-semibold text-navy">{p.name}</span>
+              </>
+            );
+            return (
+              <li key={p.name}>
+                {p.url ? (
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cardClass}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <div className={cardClass}>{inner}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
