@@ -137,6 +137,10 @@
       "shipping": {
         "title": "Shipping",
         "description": "Shipping goods from Cameroon to Canada and Canada to Cameroon."
+      },
+      "groceries": {
+        "title": "Groceries",
+        "description": "Cameroonian spices and foods — barbecue spice mix, fresh ndolé, fresh eru, and more, delivered locally."
       }
     },
     "viewPros": "View available pros",

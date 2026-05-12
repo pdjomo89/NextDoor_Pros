@@ -137,6 +137,10 @@
       "shipping": {
         "title": "Expédition",
         "description": "Expédition de marchandises du Cameroun vers le Canada et du Canada vers le Cameroun."
+      },
+      "groceries": {
+        "title": "Épicerie",
+        "description": "Épices et aliments camerounais — mélange à barbecue, ndolé frais, eru frais et plus, livrés localement."
       }
     },
     "viewPros": "Voir les pros disponibles",
