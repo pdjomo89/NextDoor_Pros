@@ -1,0 +1,419 @@
+{
+  "Meta": {
+    "title": "NextDoor Pros — Trusted local services across Canada",
+    "description": "Book vetted local pros for home, beauty, outdoor, moving, seasonal, and handyman jobs in your Canadian city."
+  },
+  "Nav": {
+    "brand": "NextDoor Pros",
+    "services": "Services",
+    "jobs": "Jobs",
+    "pricing": "Pricing",
+    "about": "About",
+    "news": "News",
+    "contact": "Contact",
+    "selectCity": "Select your city",
+    "searchCity": "Search a Canadian city...",
+    "noCity": "No city found.",
+    "language": "Language",
+    "english": "English",
+    "french": "Français",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "signIn": "Sign in",
+    "becomePro": "Become a pro",
+    "dashboard": "Dashboard"
+  },
+  "Home": {
+    "hero": {
+      "eyebrow": "Trusted neighborhood pros",
+      "title": "Local services, done right — in your Canadian city.",
+      "subtitle": "Pick your city to see verified pros available in your area. Home care, beauty, moving, and more.",
+      "ctaPrimary": "Browse services",
+      "ctaSecondary": "Become a pro",
+      "imageAlt": "A professional contractor at work renovating a home"
+    },
+    "stats": {
+      "pros": "Vetted pros",
+      "cities": "Cities served",
+      "bookings": "Bookings completed",
+      "rating": "Average rating"
+    },
+    "featuredTitle": "Popular services in {city}",
+    "featuredTitleNoCity": "Popular services across Canada",
+    "featuredSubtitle": "Browse the categories our customers book most.",
+    "howItWorks": {
+      "title": "How it works",
+      "step1Title": "1. Pick your city",
+      "step1Body": "Choose your Canadian city so we can match you with pros in your area.",
+      "step2Title": "2. Choose a service",
+      "step2Body": "Browse categories or describe what you need — we'll narrow it down.",
+      "step3Title": "3. Book with confidence",
+      "step3Body": "Compare ratings, lock in a time, and pay securely after the job is done."
+    },
+    "cityBanner": {
+      "title": "Serving {city} and nearby areas",
+      "subtitle": "Pros listed here are active in your area.",
+      "change": "Change city"
+    },
+    "noCityBanner": {
+      "title": "Where do you need a pro?",
+      "subtitle": "Pick your city to see who's available near you.",
+      "cta": "Choose a city"
+    }
+  },
+  "Services": {
+    "title": "Services",
+    "subtitle": "Everything you need, from one trusted source.",
+    "categories": {
+      "home": {
+        "title": "Home services",
+        "description": "Cleaning, painting, plumbing, electrical, appliance repair."
+      },
+      "beauty": {
+        "title": "Beauty services",
+        "description": "Mobile hair, makeup, nails, lashes, and esthetics at your door."
+      },
+      "outdoor": {
+        "title": "Outdoor services",
+        "description": "Lawn care, gardening, pressure washing, deck and fence work."
+      },
+      "moving": {
+        "title": "Moving support",
+        "description": "Local movers, packing help, junk removal, and furniture assembly."
+      },
+      "seasonal": {
+        "title": "Seasonal services",
+        "description": "Snow removal, eavestrough cleaning, holiday lights, AC tune-ups."
+      },
+      "handyman": {
+        "title": "Small handyman jobs",
+        "description": "Mounting, sealing, drywall patches, fixture swaps, and quick fixes."
+      },
+      "wellness": {
+        "title": "Wellness",
+        "description": "Mobile massage, physiotherapy, personal training, and in-home wellness visits."
+      },
+      "flooring": {
+        "title": "Flooring & carpeting",
+        "description": "Hardwood, laminate, vinyl plank, and tile installation — plus carpet cleaning and repair."
+      },
+      "painting": {
+        "title": "Painting",
+        "description": "Interior and exterior painting, accent walls, trim, and full-room refreshes."
+      },
+      "carwash": {
+        "title": "Car wash & detailing",
+        "description": "Mobile hand wash, interior shampoo, waxing, and full detail at your door."
+      },
+      "catering": {
+        "title": "Catering",
+        "description": "Event catering, private chefs, drop-off platters, and party food at your door."
+      }
+    },
+    "viewPros": "View available pros",
+    "viewAll": "View all pros",
+    "comingSoon": "Coming soon to {city}",
+    "backToAll": "All services",
+    "findInCity": "Find {service} pros by city",
+    "listings": {
+      "loading": "Loading pros...",
+      "emptyInCity": "No pros listed in {city} yet.",
+      "emptyAnywhere": "No pros listed yet.",
+      "emptyHelp": "Be the first — list your business and we'll send you the next customer in your area.",
+      "call": "Call",
+      "emailAction": "Email",
+      "viewProfile": "View profile & reviews"
+    }
+  },
+  "About": {
+    "eyebrow": "Who we are",
+    "title": "About NextDoor Pros",
+    "lead": "We connect Canadians with reliable local service pros — no agency middlemen, no surprises.",
+    "ctaTitle": "Ready to get started?",
+    "ctaBody": "Find a vetted pro in your city, or list your business and start getting hired.",
+    "ctaBrowse": "Browse services",
+    "ctaPro": "Become a pro",
+    "missionTitle": "Our mission",
+    "missionBody": "Hiring help in your neighborhood shouldn't be a coin flip. We verify every pro on our platform — background, insurance, and reviews — so you book with confidence in every Canadian city we serve.",
+    "valuesTitle": "What we stand for",
+    "values": {
+      "localTitle": "Local-first",
+      "localBody": "Every pro lives and works in the city they serve.",
+      "fairTitle": "Fair pricing",
+      "fairBody": "Transparent quotes — you see the price before you book.",
+      "trustTitle": "Verified trust",
+      "trustBody": "Background checks, insurance, and real customer reviews."
+    }
+  },
+  "News": {
+    "eyebrow": "The latest",
+    "latest": "Latest",
+    "title": "News & updates",
+    "subtitle": "Product launches, new cities, and tips from our pros.",
+    "readMore": "Read more",
+    "posts": {
+      "p1": {
+        "title": "Now live in Halifax and Quebec City",
+        "date": "May 5, 2026",
+        "excerpt": "We're expanding east — book vetted pros in two more provinces this week."
+      },
+      "p2": {
+        "title": "Spring 2026: seasonal services open for booking",
+        "date": "April 18, 2026",
+        "excerpt": "Lawn care, deck refinishing, and outdoor cleanup pros are taking bookings now."
+      },
+      "p3": {
+        "title": "What to expect from a verified NextDoor Pro",
+        "date": "March 30, 2026",
+        "excerpt": "How we vet every pro on the platform — and why it matters."
+      }
+    }
+  },
+  "Contact": {
+    "eyebrow": "Get in touch",
+    "title": "Contact us",
+    "subtitle": "Questions, partnerships, or press — we're listening.",
+    "form": {
+      "name": "Your name",
+      "email": "Email",
+      "city": "City",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send message",
+      "successTitle": "Thanks — message sent.",
+      "successBody": "We'll get back to you within one business day."
+    },
+    "info": {
+      "emailLabel": "Email",
+      "emailValue": "hello@nextdoorpros.ca",
+      "hoursLabel": "Support hours",
+      "hoursValue": "Mon–Sat, 8am–8pm (local time)",
+      "hqLabel": "Headquarters",
+      "hqValue": "Toronto, ON, Canada"
+    }
+  },
+  "Pricing": {
+    "eyebrow": "Pro membership",
+    "title": "Simple pricing for local pros.",
+    "subtitle": "Get found by customers in your city and respond to job posts. Pick monthly or save with annual.",
+    "bestValue": "Best value",
+    "cadenceMonthly": "/ month",
+    "cadenceAnnual": "/ year",
+    "annualEquivalent": "≈ $13.33 / month — save $20 vs. monthly",
+    "disclaimer": "Prices in CAD. Taxes calculated at checkout. Cancel anytime.",
+    "plans": {
+      "monthly": {
+        "name": "Monthly Pro",
+        "tagline": "Month-to-month flexibility.",
+        "cta": "Start monthly",
+        "features": {
+          "listing": "Public business listing in your service city",
+          "contacts": "Unlimited customer contact requests",
+          "jobs": "Browse and respond to every job post",
+          "cancel": "Cancel anytime, no contract"
+        }
+      },
+      "annual": {
+        "name": "Annual Pro",
+        "tagline": "Best for pros who book regularly.",
+        "cta": "Start annual",
+        "features": {
+          "everything": "Everything in Monthly Pro",
+          "featured": "Featured placement on category pages",
+          "badge": "\"Verified Pro\" badge on your listing",
+          "support": "Priority email support",
+          "savings": "Save $20 vs. paying monthly"
+        }
+      }
+    }
+  },
+  "Jobs": {
+    "title": "Jobs posted near you",
+    "subtitle": "Browse what neighbours need done — or post your own. Anyone interested reaches out directly.",
+    "heroEyebrow": "Neighbourhood job board",
+    "detailHeroTitle": "Job posting",
+    "postJob": "Post a job",
+    "viewJob": "View job",
+    "loading": "Loading jobs...",
+    "filterAll": "All",
+    "categoryOther": "Other",
+    "emptyInCity": "No open jobs in {city} right now.",
+    "emptyAnywhere": "No open jobs right now.",
+    "emptyHelp": "Be the first to post one — it takes about 30 seconds.",
+    "myJobsTitle": "My job postings",
+    "myJobsSubtitle": "Manage the jobs you've posted.",
+    "myJobsEmpty": "You haven't posted a job yet.",
+    "myJobsEmptyHelp": "Post one and we'll show it to interested folks in your area.",
+    "notFound": "Job not found — it may have been removed.",
+    "backToJobs": "All jobs",
+    "postedOn": "Posted {date}",
+    "statusClosed": "Closed",
+    "statusFilled": "Filled",
+    "budget": "Budget",
+    "timing": "Timing",
+    "contactSection": "Interested? Reach out directly.",
+    "contactHelp": "Contact the poster using the buttons below.",
+    "call": "Call",
+    "emailAction": "Email",
+    "closeJob": "Close job",
+    "deleteJob": "Delete",
+    "confirmClose": "Close this job so it no longer appears in the public list?",
+    "confirmDelete": "Delete this job? This cannot be undone.",
+    "form": {
+      "title": "Post a job",
+      "subtitle": "Tell us what you need. Anyone interested will contact you directly.",
+      "jobTitle": "Job title",
+      "jobTitlePlaceholder": "e.g. Paint our kitchen and dining room",
+      "category": "Category",
+      "description": "Description",
+      "descriptionPlaceholder": "What needs doing, size of the job, any details a pro should know.",
+      "city": "City",
+      "budget": "Budget",
+      "budgetPlaceholder": "e.g. $500, hourly, open to quotes",
+      "timing": "When",
+      "timingPlaceholder": "e.g. ASAP, next week, flexible",
+      "contactSection": "How interested folks reach you",
+      "contactHelp": "At least one is required.",
+      "contactEmail": "Email",
+      "contactPhone": "Phone",
+      "postJob": "Post job",
+      "posting": "Posting...",
+      "errCityRequired": "Please pick a city.",
+      "errContactRequired": "Add at least one way for people to reach you."
+    }
+  },
+  "Reviews": {
+    "title": "Reviews",
+    "noneBody": "No reviews yet — be the first to leave one.",
+    "leaveReview": "Leave a review",
+    "yourReview": "Your review",
+    "updateReview": "Update review",
+    "submit": "Post review",
+    "submitting": "Posting...",
+    "delete": "Delete",
+    "confirmDelete": "Delete your review?",
+    "commentPlaceholder": "Share details about your experience (optional)",
+    "signInToReview": "Sign in to leave a review",
+    "ownListing": "This is your listing — you can't review it.",
+    "anon": "Customer",
+    "errRating": "Please pick a star rating."
+  },
+  "ServiceCity": {
+    "metaTitle": "{service} in {city}, {province}",
+    "metaDescription": "Find trusted, vetted {service} pros serving {city}, {province} — insured, reviewed, and ready to help. Compare local pros and book with confidence.",
+    "heroTitle": "{service} in {city}",
+    "intro": "Looking for {service} in {city}? NextDoor Pros connects {city} homeowners and renters with vetted local pros — every {service} pro on the platform is identity-checked, insured, and reviewed by real customers across {province}. Compare quotes, read genuine reviews, and book the right pro with confidence — no agency middleman, no booking fees.",
+    "backToService": "All {service} pros",
+    "faqTitle": "Frequently asked questions",
+    "q1": "How do I hire a {service} pro in {city}?",
+    "a1": "Browse the verified {service} pros serving {city} above, check their reviews and pricing, then contact them directly through NextDoor Pros — there's no agency in the middle and no booking fee.",
+    "q2": "Are {service} pros in {city} verified and insured?",
+    "a2": "Yes. Every pro listed on NextDoor Pros is identity-checked and carries insurance, and the reviews you see come from real, completed jobs in {city} and across {province}.",
+    "q3": "How much does {service} cost in {city}?",
+    "a3": "It depends on the size and scope of the job, but you'll always see a transparent quote from each {city} pro before you book — no surprises when the work is done.",
+    "q4": "Do you cover other cities in {province}?",
+    "a4": "Yes — NextDoor Pros serves {city} and many other communities across {province}. If a pro isn't available in your exact neighbourhood, we'll help you find one nearby.",
+    "proCtaTitle": "Do you provide {service} in {city}?",
+    "proCtaBody": "List your business free and get found by customers looking for {service} in {city}.",
+    "proCtaButton": "List my business",
+    "nearbyTitle": "{service} in other {province} cities",
+    "browseAll": "Browse {service} across Canada"
+  },
+  "WhatsApp": {
+    "label": "Chat on WhatsApp",
+    "prefill": "Hi NextDoor Pros — I have a question.",
+    "headerTitle": "NextDoor Pros",
+    "headerSubtitle": "We usually reply within a few hours",
+    "greeting": "👋 Hi! How can we help today?",
+    "quickHire": "Find a local pro →",
+    "quickHireMsg": "Hi NextDoor Pros — I'm looking for a local pro. Can you help?",
+    "quickJob": "Post a job →",
+    "quickJobMsg": "Hi NextDoor Pros — I'd like to post a job. How does it work?",
+    "cta": "Chat on WhatsApp",
+    "close": "Close"
+  },
+  "Auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in with a magic link — no password needed.",
+      "noAccount": "No account yet?",
+      "signUpLink": "Create one"
+    },
+    "signUp": {
+      "title": "Become a NextDoor Pro",
+      "subtitle": "Create an account to list your business and start receiving bookings.",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordHint": "At least 8 characters",
+    "signInAction": "Sign in",
+    "signUpAction": "Create account",
+    "submitting": "Working...",
+    "errInvalidCredentials": "Incorrect email or password. Try again.",
+    "signOut": "Sign out",
+    "brandHeadline": "Your neighbourhood's most trusted pros.",
+    "brand1": "Verified, insured local pros",
+    "brand2": "Transparent pricing — no surprises",
+    "brand3": "Free to browse services and post jobs"
+  },
+  "Pros": {
+    "dashboard": {
+      "title": "Your dashboard",
+      "eyebrow": "Pro account",
+      "subtitle": "Manage your listing and how customers reach you.",
+      "noListingTitle": "You don't have a listing yet",
+      "noListingBody": "Add your business so customers in your city can find you.",
+      "createListing": "Create my listing",
+      "edit": "Edit",
+      "viewPublic": "View public listing",
+      "published": "Published",
+      "draft": "Draft",
+      "publishedHelp": "Customers in your city can see your listing.",
+      "draftHelp": "Your listing is private until you publish it.",
+      "phone": "Phone",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    },
+    "profile": {
+      "servicesTitle": "Services offered"
+    },
+    "onboard": {
+      "createTitle": "List your business",
+      "editTitle": "Edit your listing",
+      "eyebrow": "Pro account",
+      "heroTitle": "Your business listing",
+      "backToDashboard": "Back to dashboard",
+      "subtitle": "A few details so customers can find and reach you.",
+      "businessName": "Business name",
+      "description": "Description",
+      "descriptionPlaceholder": "What you do, years of experience, what makes you stand out.",
+      "city": "Your service city",
+      "services": "Services you offer",
+      "contactSection": "How customers reach you",
+      "contactHelp": "Provide at least one. Customers will see and contact you directly.",
+      "phone": "Phone",
+      "email": "Email",
+      "whatsapp": "WhatsApp number",
+      "publishLabel": "Publish my listing",
+      "publishHelp": "Uncheck to keep your listing private while you edit it.",
+      "save": "Save listing",
+      "saving": "Saving...",
+      "errCityRequired": "Please pick your service city.",
+      "errServicesRequired": "Select at least one service category.",
+      "errContactRequired": "Add at least one way customers can reach you."
+    }
+  },
+  "Footer": {
+    "tagline": "Trusted local pros, in your Canadian city.",
+    "rights": "All rights reserved.",
+    "company": "Company",
+    "explore": "Explore",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies"
+  }
+}

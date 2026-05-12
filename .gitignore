@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# Convex generates these from convex/schema.ts at `convex dev` time
+convex/_generated/
