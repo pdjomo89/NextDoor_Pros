@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { SUPPORT_PHONES } from '@/lib/contact';
 
 export function SiteFooter() {
   const t = useTranslations('Footer');
@@ -23,6 +24,20 @@ export function SiteFooter() {
             </span>
           </div>
           <p className="mt-4 max-w-sm text-sm text-white/70">{t('tagline')}</p>
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/60">
+              {t('customerService')}
+            </h3>
+            <ul className="mt-2 space-y-1 text-sm">
+              {SUPPORT_PHONES.map((p) => (
+                <li key={p.href}>
+                  <a href={p.href} className="text-white/80 hover:text-forest-200">
+                    {p.display}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <div>

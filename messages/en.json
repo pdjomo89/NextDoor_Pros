@@ -236,7 +236,9 @@
       "hoursLabel": "Support hours",
       "hoursValue": "Mon–Sat, 8am–8pm (local time)",
       "hqLabel": "Headquarters",
-      "hqValue": "Toronto, ON, Canada"
+      "hqValue": "Toronto, ON, Canada",
+      "phoneLabel": "Customer service",
+      "phoneHelp": "Need information? Give us a call — we're happy to help."
     }
   },
   "Pricing": {
@@ -460,6 +462,7 @@
     "legal": "Legal",
     "privacy": "Privacy",
     "terms": "Terms",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "customerService": "Customer service"
   }
 }

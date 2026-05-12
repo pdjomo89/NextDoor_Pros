@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Mail, Clock, Building2 } from 'lucide-react';
+import { Mail, Clock, Building2, Phone } from 'lucide-react';
 import { ContactForm } from '@/components/contact-form';
 import { pageMetadata } from '@/lib/seo';
+import { SUPPORT_PHONES } from '@/lib/contact';
 import type { Locale } from '@/i18n/routing';
 
 const HERO_IMAGE =
@@ -65,6 +66,26 @@ export default async function ContactPage({
             <ContactForm locale={locale as Locale} />
           </div>
           <aside className="space-y-4 md:col-span-2">
+            <div className="flex items-start gap-4 rounded-2xl border border-navy/10 bg-white p-5 shadow-sm">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest">
+                <Phone className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-navy/50">
+                  {t('info.phoneLabel')}
+                </div>
+                <ul className="mt-1 space-y-0.5">
+                  {SUPPORT_PHONES.map((p) => (
+                    <li key={p.href}>
+                      <a href={p.href} className="font-medium text-navy hover:text-forest">
+                        {p.display}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-sm text-navy/60">{t('info.phoneHelp')}</p>
+              </div>
+            </div>
             <InfoRow icon={Mail} label={t('info.emailLabel')} value={t('info.emailValue')} />
             <InfoRow icon={Clock} label={t('info.hoursLabel')} value={t('info.hoursValue')} />
             <InfoRow icon={Building2} label={t('info.hqLabel')} value={t('info.hqValue')} />
