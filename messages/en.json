@@ -220,6 +220,12 @@
     "eyebrow": "Get in touch",
     "title": "Contact us",
     "subtitle": "Questions, partnerships, or press — we're listening.",
+    "reachTitle": "Reach us directly",
+    "reachBody": "Prefer to talk it through? Use any of the channels below — or drop us a message and we'll get back to you fast.",
+    "ctaTitle": "Need a pro — or want to become one?",
+    "ctaBody": "Browse trusted local services in your city, or list your business and start getting hired.",
+    "ctaBrowse": "Browse services",
+    "ctaPro": "Become a pro",
     "form": {
       "name": "Your name",
       "email": "Email",

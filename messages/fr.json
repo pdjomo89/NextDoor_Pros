@@ -220,6 +220,12 @@
     "eyebrow": "Écrivez-nous",
     "title": "Nous joindre",
     "subtitle": "Questions, partenariats ou presse — on vous écoute.",
+    "reachTitle": "Joignez-nous directement",
+    "reachBody": "Vous préférez en parler? Utilisez l'un des canaux ci-dessous — ou écrivez-nous et nous reviendrons vers vous rapidement.",
+    "ctaTitle": "Besoin d'un pro — ou envie d'en devenir un?",
+    "ctaBody": "Découvrez des services locaux de confiance dans votre ville, ou inscrivez votre entreprise et commencez à être embauché.",
+    "ctaBrowse": "Voir les services",
+    "ctaPro": "Devenir un pro",
     "form": {
       "name": "Votre nom",
       "email": "Courriel",
