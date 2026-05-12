@@ -51,6 +51,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/partners" className="text-white/80 hover:text-forest-200">
+                {tNav('partners')}
+              </Link>
+            </li>
+            <li>
               <Link href="/news" className="text-white/80 hover:text-forest-200">
                 {tNav('news')}
               </Link>

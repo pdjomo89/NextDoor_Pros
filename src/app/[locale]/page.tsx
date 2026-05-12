@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { ArrowRight, Handshake } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { ServiceCard } from '@/components/service-card';
@@ -8,8 +8,6 @@ import { CityBanner } from '@/components/city-banner';
 import { FeaturedTitle } from '@/components/featured-title';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import type { Locale } from '@/i18n/routing';
-
-const PARTNERS = ['Ticketflow', 'AfriNovaTech', 'Carys Care and Beauty'];
 
 export default async function HomePage({
   params,
@@ -111,26 +109,6 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Partners */}
-      <section className="container py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-balance text-3xl font-bold tracking-tight text-navy sm:text-4xl">
-            {t('partners.title')}
-          </h2>
-          <p className="mt-3 text-lg text-navy/70">{t('partners.subtitle')}</p>
-        </div>
-        <ul className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-3">
-          {PARTNERS.map((name) => (
-            <li
-              key={name}
-              className="flex items-center justify-center gap-3 rounded-2xl border border-navy/10 bg-white px-6 py-10 text-center"
-            >
-              <Handshake className="h-5 w-5 shrink-0 text-forest" aria-hidden />
-              <span className="text-lg font-semibold text-navy">{name}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

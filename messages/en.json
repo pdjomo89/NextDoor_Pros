@@ -9,6 +9,7 @@
     "jobs": "Jobs",
     "pricing": "Pricing",
     "about": "About",
+    "partners": "Partners",
     "news": "News",
     "contact": "Contact",
     "selectCity": "Select your city",
@@ -51,10 +52,6 @@
       "step3Title": "3. Book with confidence",
       "step3Body": "Compare ratings, lock in a time, and pay securely after the job is done."
     },
-    "partners": {
-      "title": "Our partners",
-      "subtitle": "Working with trusted businesses to serve you better."
-    },
     "cityBanner": {
       "title": "Serving {city} and nearby areas",
       "subtitle": "Pros listed here are active in your area.",
@@ -65,6 +62,15 @@
       "subtitle": "Pick your city to see who's available near you.",
       "cta": "Choose a city"
     }
+  },
+  "Partners": {
+    "eyebrow": "Working together",
+    "title": "Our partners",
+    "lead": "We team up with trusted businesses to bring our community more — better service, wider reach, and more value at your door.",
+    "intro": "The organisations we work alongside to serve you better.",
+    "ctaTitle": "Want to partner with us?",
+    "ctaBody": "If your business shares our mission of trusted, local service, we'd love to hear from you.",
+    "ctaButton": "Get in touch"
   },
   "Services": {
     "title": "Services",

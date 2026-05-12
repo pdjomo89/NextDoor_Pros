@@ -9,6 +9,7 @@
     "jobs": "Offres",
     "pricing": "Tarifs",
     "about": "À propos",
+    "partners": "Partenaires",
     "news": "Nouvelles",
     "contact": "Contact",
     "selectCity": "Choisir votre ville",
@@ -51,10 +52,6 @@
       "step3Title": "3. Réservez en toute confiance",
       "step3Body": "Comparez les avis, fixez une heure, payez en sécurité après le travail."
     },
-    "partners": {
-      "title": "Nos partenaires",
-      "subtitle": "En collaboration avec des entreprises de confiance pour mieux vous servir."
-    },
     "cityBanner": {
       "title": "Service à {city} et environs",
       "subtitle": "Les pros listés ici sont actifs dans votre secteur.",
@@ -65,6 +62,15 @@
       "subtitle": "Choisissez votre ville pour voir qui est disponible.",
       "cta": "Choisir une ville"
     }
+  },
+  "Partners": {
+    "eyebrow": "En collaboration",
+    "title": "Nos partenaires",
+    "lead": "Nous nous associons à des entreprises de confiance pour offrir plus à notre communauté — meilleur service, plus de portée et plus de valeur à votre porte.",
+    "intro": "Les organisations avec lesquelles nous collaborons pour mieux vous servir.",
+    "ctaTitle": "Vous souhaitez devenir partenaire?",
+    "ctaBody": "Si votre entreprise partage notre mission de service local et de confiance, écrivez-nous.",
+    "ctaButton": "Nous contacter"
   },
   "Services": {
     "title": "Services",
