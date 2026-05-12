@@ -6,6 +6,7 @@ out
 next-env.d.ts
 .DS_Store
 
-# Convex generates these from convex/schema.ts at `convex dev` time
-convex/_generated/
+# Convex codegen is committed so Vercel can build from the repo.
+# Regenerated locally by `convex dev` / `convex codegen`.
+convex/_generated/ai/
 .vercel
