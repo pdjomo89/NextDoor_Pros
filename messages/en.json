@@ -133,6 +133,10 @@
       "carpool": {
         "title": "Carpool & rides",
         "description": "Share rides and split the cost — daily commutes, airport runs, and intercity carpooling."
+      },
+      "shipping": {
+        "title": "Shipping",
+        "description": "Shipping goods from Cameroon to Canada and Canada to Cameroon."
       }
     },
     "viewPros": "View available pros",

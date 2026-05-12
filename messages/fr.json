@@ -133,6 +133,10 @@
       "carpool": {
         "title": "Covoiturage",
         "description": "Partagez des trajets et les frais — navettes quotidiennes, transferts aéroport et covoiturage interville."
+      },
+      "shipping": {
+        "title": "Expédition",
+        "description": "Expédition de marchandises du Cameroun vers le Canada et du Canada vers le Cameroun."
       }
     },
     "viewPros": "Voir les pros disponibles",
