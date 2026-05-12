@@ -63,24 +63,25 @@ export default async function ContactPage({
       </section>
 
       {/* Form + contact methods */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-navy/5 py-16 md:py-24">
-        <div className="pointer-events-none absolute -left-28 top-10 h-72 w-72 rounded-full bg-forest/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-navy/10 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-forest/10 via-white to-navy/10 py-16 md:py-24">
+        <div className="pointer-events-none absolute -left-28 top-10 h-72 w-72 rounded-full bg-forest/20 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/3 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-navy/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-navy/20 blur-3xl" />
         <div className="container relative">
           <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-5 lg:items-start">
             {/* Contact methods */}
             <div className="lg:col-span-2 lg:sticky lg:top-24">
-              <h2 className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+              <h2 className="bg-gradient-to-r from-navy via-navy to-forest bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl">
                 {t('reachTitle')}
               </h2>
               <p className="mt-3 text-navy/70">{t('reachBody')}</p>
 
               <div className="mt-7 space-y-4">
                 {/* Customer service — featured */}
-                <div className="group relative overflow-hidden rounded-2xl border border-forest/20 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                  <div className="absolute inset-y-0 left-0 w-1.5 bg-forest" />
+                <div className="group relative overflow-hidden rounded-2xl border border-forest/25 bg-gradient-to-br from-forest/10 via-white to-navy/10 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                  <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-forest to-forest-700" />
                   <div className="flex items-center gap-3">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-forest text-white">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-forest to-forest-700 text-white shadow-sm">
                       <Phone className="h-5 w-5" />
                     </span>
                     <span className="text-xs font-semibold uppercase tracking-wide text-navy/50">
@@ -123,8 +124,9 @@ export default async function ContactPage({
 
       {/* CTA */}
       <section className="container py-16 md:py-20">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-navy to-navy-600 px-6 py-12 text-center text-white sm:px-10 sm:py-14">
-          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-forest/20 blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-navy via-navy-600 to-forest-800 px-6 py-12 text-center text-white sm:px-10 sm:py-14">
+          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-forest/30 blur-3xl" />
+          <div className="absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-forest/20 blur-3xl" />
           <h2 className="relative text-balance text-2xl font-bold sm:text-3xl">{t('ctaTitle')}</h2>
           <p className="relative mx-auto mt-3 max-w-xl text-white/80">{t('ctaBody')}</p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -161,8 +163,8 @@ function InfoRow({
   href?: string;
 }) {
   return (
-    <div className="flex items-start gap-4 rounded-2xl border border-navy/10 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest">
+    <div className="flex items-start gap-4 rounded-2xl border border-navy/10 bg-white/80 p-5 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-forest/30 hover:shadow-md">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-forest/15 to-navy/10 text-forest">
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
