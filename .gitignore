@@ -8,3 +8,4 @@ next-env.d.ts
 
 # Convex generates these from convex/schema.ts at `convex dev` time
 convex/_generated/
+.vercel
