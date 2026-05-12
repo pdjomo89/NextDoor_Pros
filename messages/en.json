@@ -141,6 +141,10 @@
       "groceries": {
         "title": "Groceries",
         "description": "Cameroonian spices and foods — barbecue spice mix, fresh ndolé, fresh eru, and more, delivered locally."
+      },
+      "decoration": {
+        "title": "Decoration",
+        "description": "Sculptures, African wood carvings, decorative boards, and African picture frames to style your home."
       }
     },
     "viewPros": "View available pros",

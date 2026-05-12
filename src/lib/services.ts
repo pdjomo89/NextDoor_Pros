@@ -17,7 +17,8 @@ export type ServiceKey =
   | 'windowtinting'
   | 'carpool'
   | 'shipping'
-  | 'groceries';
+  | 'groceries'
+  | 'decoration';
 
 export type ServiceCategory = {
   slug: string;
@@ -50,4 +51,5 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: 'carpool', key: 'carpool', accent: 'navy', image: unsplash('1503376780353-7e6692767b70') },
   { slug: 'shipping', key: 'shipping', accent: 'forest', image: unsplash('1607082348824-0a96f2a4b9da') },
   { slug: 'groceries', key: 'groceries', accent: 'navy', image: unsplash('1596040033229-a9821ebd058d') },
+  { slug: 'decoration', key: 'decoration', accent: 'forest', image: unsplash('1621419203897-20b66b98d495') },
 ];

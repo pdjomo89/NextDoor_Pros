@@ -141,6 +141,10 @@
       "groceries": {
         "title": "Épicerie",
         "description": "Épices et aliments camerounais — mélange à barbecue, ndolé frais, eru frais et plus, livrés localement."
+      },
+      "decoration": {
+        "title": "Décoration",
+        "description": "Sculptures, gravures sur bois africaines, panneaux décoratifs et cadres africains pour habiller votre intérieur."
       }
     },
     "viewPros": "Voir les pros disponibles",
