@@ -47,6 +47,8 @@ export const handler = httpAction(async (ctx, request) => {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.metadata?.kind === 'job') {
           await handleJobCheckoutCompleted(ctx, session);
+        } else if (session.metadata?.kind === 'membership') {
+          await handleMembershipCheckoutCompleted(ctx, session);
         } else {
           await handleCheckoutCompleted(ctx, session);
         }
@@ -61,6 +63,16 @@ export const handler = httpAction(async (ctx, request) => {
         }
         break;
       }
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+        await handleSubscriptionChanged(ctx, event.data.object as Stripe.Subscription);
+        break;
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(ctx, event.data.object as Stripe.Subscription);
+        break;
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(ctx, event.data.object as Stripe.Invoice);
+        break;
       case 'charge.refunded':
         await handleChargeRefunded(ctx, event.data.object as Stripe.Charge);
         break;
@@ -236,5 +248,117 @@ async function handleDispute(
   await ctx.runMutation(internal.payments.patchPaymentRow, {
     id: payment._id,
     ...(newStatus ? { status: newStatus } : { status: 'paid' }), // restore on close
+  });
+}
+
+// ── Membership (Phase 3) handlers ────────────────────────────────────────
+
+async function handleMembershipCheckoutCompleted(
+  ctx: ActionCtx,
+  session: Stripe.Checkout.Session,
+) {
+  const customerId =
+    typeof session.customer === 'string' ? session.customer : session.customer?.id;
+  if (!customerId) return;
+
+  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
+    internal.membership.getContractorByCustomer,
+    { stripeCustomerId: customerId },
+  );
+  if (!contractor) return;
+
+  const subscriptionId =
+    typeof session.subscription === 'string'
+      ? session.subscription
+      : session.subscription?.id;
+  const plan = (session.metadata?.plan as string | undefined) ?? null;
+
+  await ctx.runMutation(internal.membership.patchMembership, {
+    contractorId: contractor._id,
+    status: 'active',
+    ...(plan ? { plan } : {}),
+    ...(subscriptionId ? { stripeSubscriptionId: subscriptionId } : {}),
+  });
+}
+
+async function handleSubscriptionChanged(
+  ctx: ActionCtx,
+  subscription: Stripe.Subscription,
+) {
+  const customerId =
+    typeof subscription.customer === 'string'
+      ? subscription.customer
+      : subscription.customer.id;
+
+  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
+    internal.membership.getContractorByCustomer,
+    { stripeCustomerId: customerId },
+  );
+  if (!contractor) return;
+
+  // Translate Stripe statuses to our enum.
+  // Stripe: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active'
+  //       | 'past_due' | 'canceled' | 'unpaid' | 'paused'
+  const status =
+    subscription.status === 'active' || subscription.status === 'trialing'
+      ? 'active'
+      : subscription.status === 'past_due' || subscription.status === 'unpaid'
+        ? 'past_due'
+        : subscription.status === 'canceled'
+          ? 'cancelled'
+          : 'incomplete';
+
+  // Stripe.Subscription doesn't always type current_period_end at the top level
+  // in newer API versions — fall back to reading from the first item.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sub = subscription as any;
+  const periodEnd: number | undefined =
+    typeof sub.current_period_end === 'number'
+      ? sub.current_period_end
+      : sub.items?.data?.[0]?.current_period_end;
+
+  await ctx.runMutation(internal.membership.patchMembership, {
+    contractorId: contractor._id,
+    status,
+    stripeSubscriptionId: subscription.id,
+    ...(periodEnd ? { membershipCurrentPeriodEnd: periodEnd * 1000 } : {}),
+  });
+}
+
+async function handleSubscriptionDeleted(
+  ctx: ActionCtx,
+  subscription: Stripe.Subscription,
+) {
+  const customerId =
+    typeof subscription.customer === 'string'
+      ? subscription.customer
+      : subscription.customer.id;
+
+  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
+    internal.membership.getContractorByCustomer,
+    { stripeCustomerId: customerId },
+  );
+  if (!contractor) return;
+
+  await ctx.runMutation(internal.membership.patchMembership, {
+    contractorId: contractor._id,
+    status: 'cancelled',
+  });
+}
+
+async function handleInvoicePaymentFailed(ctx: ActionCtx, invoice: Stripe.Invoice) {
+  const customerId =
+    typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
+  if (!customerId) return;
+
+  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
+    internal.membership.getContractorByCustomer,
+    { stripeCustomerId: customerId },
+  );
+  if (!contractor) return;
+
+  await ctx.runMutation(internal.membership.patchMembership, {
+    contractorId: contractor._id,
+    status: 'past_due',
   });
 }

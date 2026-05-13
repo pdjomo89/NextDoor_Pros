@@ -24,6 +24,10 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     | ContractorDoc
     | null
     | undefined;
+  const membership = useQuery(api.membership.myMembership) as
+    | { status: string }
+    | null
+    | undefined;
   const upsert = useMutation(api.contractors.upsertMine);
 
   const [businessName, setBusinessName] = React.useState('');
@@ -106,7 +110,11 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         startingAtPriceCents,
         published,
       });
-      router.push(`/${locale}/pros/dashboard`);
+      const nextPath =
+        membership?.status === 'active'
+          ? `/${locale}/pros/dashboard`
+          : `/${locale}/pros/onboard/membership`;
+      router.push(nextPath);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

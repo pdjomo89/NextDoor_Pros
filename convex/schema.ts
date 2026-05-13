@@ -38,10 +38,24 @@ export default defineSchema({
     // from the Stripe account.updated webhook.
     stripeAccountId: v.optional(v.string()),
     stripeOnboardingComplete: v.optional(v.boolean()),
+
+    // Pro membership subscription ($15/mo or $160/yr CAD).
+    // membershipStatus:
+    //   undefined / 'none'   — never subscribed
+    //   'incomplete'         — Checkout Session created, payment pending
+    //   'active'             — subscription is live
+    //   'past_due'           — payment failed, grace period
+    //   'cancelled'          — subscription ended
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    membershipPlan: v.optional(v.string()), // 'monthly' | 'annual'
+    membershipStatus: v.optional(v.string()),
+    membershipCurrentPeriodEnd: v.optional(v.number()),
   })
     .index('by_owner', ['ownerId'])
     .index('by_city_published', ['citySlug', 'published'])
-    .index('by_stripeAccount', ['stripeAccountId']),
+    .index('by_stripeAccount', ['stripeAccountId'])
+    .index('by_stripeCustomer', ['stripeCustomerId']),
 
   // Priced offerings a contractor sells (e.g. "Hair treatment $80").
   contractorServices: defineTable({

@@ -160,7 +160,7 @@ export default async function PricingPage({
                 size="lg"
                 className="w-full"
               >
-                <Link href="/auth/sign-up">{t(`plans.${plan.id}.cta`)}</Link>
+                <Link href="/pros/onboard/membership">{t(`plans.${plan.id}.cta`)}</Link>
               </Button>
             </div>
           </article>

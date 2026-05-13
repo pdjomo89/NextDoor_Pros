@@ -95,6 +95,27 @@ export default async function ProDashboardPage({
               saveError: t('payments.saveError'),
               feeNote: t('payments.feeNote'),
             },
+            membership: {
+              title: t('membership.title'),
+              intro: t('membership.intro'),
+              statusActiveTitle: t('membership.statusActiveTitle'),
+              statusActiveBody: t('membership.statusActiveBody'),
+              statusPastDueTitle: t('membership.statusPastDueTitle'),
+              statusPastDueBody: t('membership.statusPastDueBody'),
+              statusCancelledTitle: t('membership.statusCancelledTitle'),
+              statusCancelledBody: t('membership.statusCancelledBody'),
+              statusNoneTitle: t('membership.statusNoneTitle'),
+              statusNoneBody: t('membership.statusNoneBody'),
+              statusIncompleteTitle: t('membership.statusIncompleteTitle'),
+              statusIncompleteBody: t('membership.statusIncompleteBody'),
+              startBtn: t('membership.startBtn'),
+              manageBtn: t('membership.manageBtn'),
+              resubscribeBtn: t('membership.resubscribeBtn'),
+              planMonthly: t('membership.planMonthly'),
+              planAnnual: t('membership.planAnnual'),
+              renewsOn: t('membership.renewsOn'),
+              errorTitle: t('membership.errorTitle'),
+            },
           }}
         />
       </div>

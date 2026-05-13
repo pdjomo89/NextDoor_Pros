@@ -8,6 +8,10 @@ import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
 import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
 import { PaymentsSection, type PaymentsLabels } from '@/components/payments-section';
+import {
+  MembershipStatusCard,
+  type MembershipStatusLabels,
+} from '@/components/membership-status-card';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { ratingOf } from '@/lib/contractor-types';
@@ -32,6 +36,7 @@ type Labels = {
   whatsapp: string;
   photos: PhotoLabels;
   payments: PaymentsLabels;
+  membership: MembershipStatusLabels;
 };
 
 export function DashboardClient({
@@ -159,6 +164,8 @@ export function DashboardClient({
               </div>
             )}
           </article>
+
+          <MembershipStatusCard locale={locale} labels={l.membership} />
 
           <PhotoManager labels={l.photos} />
 
