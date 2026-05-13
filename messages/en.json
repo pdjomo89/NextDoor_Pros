@@ -68,6 +68,18 @@
     "title": "Our partners",
     "lead": "We team up with trusted businesses to bring our community more — better service, wider reach, and more value at your door.",
     "intro": "The organisations we work alongside to serve you better.",
+    "visitWebsite": "Visit website",
+    "entries": {
+      "ticketflow": {
+        "tagline": "Online ticketing & event boutique."
+      },
+      "afrinovatech": {
+        "tagline": "African tech innovation, built for the community."
+      },
+      "carys": {
+        "tagline": "Beauty & hair treatment, with a personal touch."
+      }
+    },
     "ctaTitle": "Want to partner with us?",
     "ctaBody": "If your business shares our mission of trusted, local service, we'd love to hear from you.",
     "ctaButton": "Get in touch"

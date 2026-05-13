@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Handshake, ArrowRight } from 'lucide-react';
+import { Handshake, ArrowRight, ExternalLink } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { pageMetadata } from '@/lib/seo';
@@ -10,16 +10,34 @@ import type { Locale } from '@/i18n/routing';
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=70';
 
-type Partner = { name: string; logo?: string; url?: string };
+type Partner = {
+  slug: string;
+  name: string;
+  logo?: string;
+  url?: string;
+  /** Tailwind gradient classes for the card's poster backdrop. */
+  gradient: string;
+};
 
 const PARTNERS: Partner[] = [
   {
+    slug: 'ticketflow',
     name: 'Ticketflow',
     logo: '/partners/ticketflow.png',
     url: 'https://www.ticketflow.boutique',
+    gradient: 'from-violet-600 via-fuchsia-600 to-rose-500',
   },
-  { name: 'AfriNovaTech' },
-  { name: 'Carys Care and Beauty', logo: '/partners/carys-care-and-beauty.jpg' },
+  {
+    slug: 'afrinovatech',
+    name: 'AfriNovaTech',
+    gradient: 'from-amber-500 via-orange-500 to-red-500',
+  },
+  {
+    slug: 'carys',
+    name: 'Carys Care and Beauty',
+    logo: '/partners/carys-care-and-beauty.jpg',
+    gradient: 'from-amber-400 via-yellow-500 to-orange-500',
+  },
 ];
 
 export async function generateMetadata({
@@ -74,30 +92,57 @@ export default async function PartnersPage({
       {/* Partner list */}
       <section className="container py-16 md:py-20">
         <p className="mx-auto max-w-2xl text-center text-lg text-navy/70">{t('intro')}</p>
-        <ul className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
+        <ul className="mx-auto mt-14 grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {PARTNERS.map((p) => {
+            const tagline = t(`entries.${p.slug}.tagline`);
+
             const cardClass =
-              'flex h-full flex-col items-center gap-4 rounded-2xl border border-navy/10 bg-white p-8 text-center shadow-sm transition-transform hover:-translate-y-0.5';
+              'group relative flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-md ring-1 ring-navy/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:ring-navy/10';
+
             const inner = (
               <>
-                {p.logo ? (
-                  <Image
-                    src={p.logo}
-                    alt={`${p.name} logo`}
-                    width={1254}
-                    height={1254}
-                    className="h-28 w-28 rounded-2xl object-contain"
-                  />
-                ) : (
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-forest/10 text-forest">
-                    <Handshake className="h-6 w-6" aria-hidden />
+                {/* Poster header: vivid gradient + frosted logo stage */}
+                <div
+                  className={`relative aspect-[5/4] overflow-hidden bg-gradient-to-br ${p.gradient}`}
+                >
+                  <div className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-white/25 blur-3xl" />
+                  <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-black/20 blur-3xl" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.25),_transparent_55%)]" />
+
+                  <div className="absolute inset-0 grid place-items-center p-5">
+                    {p.logo ? (
+                      <div className="grid aspect-square w-[88%] max-w-[280px] place-items-center overflow-hidden rounded-2xl bg-white/95 p-2 shadow-2xl ring-1 ring-white/50 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105">
+                        <Image
+                          src={p.logo}
+                          alt={`${p.name} logo`}
+                          width={1254}
+                          height={1254}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid aspect-square w-[88%] max-w-[280px] place-items-center rounded-2xl bg-white/95 shadow-2xl ring-1 ring-white/50 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105">
+                        <Handshake className="h-28 w-28 text-forest" aria-hidden />
+                      </div>
+                    )}
                   </div>
-                )}
-                <span className="text-lg font-semibold text-navy">{p.name}</span>
+                </div>
+
+                {/* Bottom content */}
+                <div className="flex flex-1 flex-col gap-2 p-6">
+                  <h3 className="text-xl font-bold text-navy">{p.name}</h3>
+                  <p className="text-sm leading-relaxed text-navy/70">{tagline}</p>
+                  {p.url && (
+                    <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-forest">
+                      {t('visitWebsite')}
+                      <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  )}
+                </div>
               </>
             );
             return (
-              <li key={p.name}>
+              <li key={p.slug}>
                 {p.url ? (
                   <a
                     href={p.url}

@@ -68,6 +68,18 @@
     "title": "Nos partenaires",
     "lead": "Nous nous associons à des entreprises de confiance pour offrir plus à notre communauté — meilleur service, plus de portée et plus de valeur à votre porte.",
     "intro": "Les organisations avec lesquelles nous collaborons pour mieux vous servir.",
+    "visitWebsite": "Visiter le site",
+    "entries": {
+      "ticketflow": {
+        "tagline": "Billetterie en ligne et boutique d'événements."
+      },
+      "afrinovatech": {
+        "tagline": "L'innovation tech africaine, au service de la communauté."
+      },
+      "carys": {
+        "tagline": "Soins beauté et coiffure, avec une touche personnelle."
+      }
+    },
     "ctaTitle": "Vous souhaitez devenir partenaire?",
     "ctaBody": "Si votre entreprise partage notre mission de service local et de confiance, écrivez-nous.",
     "ctaButton": "Nous contacter"
