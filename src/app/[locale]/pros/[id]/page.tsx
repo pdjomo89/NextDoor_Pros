@@ -7,6 +7,7 @@ import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/star-rating';
 import { ReviewSection } from '@/components/review-section';
+import { BookingSection } from '@/components/booking-section';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
 import { getCityBySlug, getProvinceByCode } from '@/data/canadian-cities';
@@ -71,6 +72,7 @@ export default async function ContractorProfilePage({
   const t = await getTranslations('Services');
   const tp = await getTranslations('Pros.profile');
   const tCat = await getTranslations('Services.categories');
+  const tBook = await getTranslations('Pros.booking');
 
   const city = getCityBySlug(contractor.citySlug);
   const province = getProvinceByCode(city?.province ?? '');
@@ -160,6 +162,19 @@ export default async function ContractorProfilePage({
           </div>
         )}
 
+        {contractor.startingAtPriceCents !== undefined && (
+          <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-forest/10 px-3 py-1.5 text-sm font-semibold text-forest">
+            {t('listings.startingAt')}{' '}
+            <span className="text-base">
+              {new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
+                style: 'currency',
+                currency: 'CAD',
+                maximumFractionDigits: 0,
+              }).format(contractor.startingAtPriceCents / 100)}
+            </span>
+          </p>
+        )}
+
         <p className="mt-5 whitespace-pre-line text-navy/85">{contractor.description}</p>
 
         {serviceNames.length > 0 && (
@@ -198,6 +213,30 @@ export default async function ContractorProfilePage({
             </ul>
           </div>
         )}
+
+        <BookingSection
+          contractorId={contractor._id as never}
+          contractorAcceptsPayments={contractor.stripeOnboardingComplete === true}
+          locale={locale as Locale}
+          labels={{
+            sectionTitle: tBook('sectionTitle'),
+            sectionIntro: tBook('sectionIntro'),
+            bookButton: tBook('bookButton'),
+            modalTitle: tBook('modalTitle'),
+            emailLabel: tBook('emailLabel'),
+            nameLabel: tBook('nameLabel'),
+            nameOptional: tBook('nameOptional'),
+            noteLabel: tBook('noteLabel'),
+            noteOptional: tBook('noteOptional'),
+            notePlaceholder: tBook('notePlaceholder'),
+            paySecurely: tBook('paySecurely'),
+            redirecting: tBook('redirecting'),
+            cancel: tBook('cancel'),
+            errorTitle: tBook('errorTitle'),
+            feeDisclosure: tBook('feeDisclosure'),
+            empty: tBook('empty'),
+          }}
+        />
 
         <div className="mt-6 flex flex-wrap gap-2 border-t border-navy/10 pt-5">
           {contractor.phone && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Phone,
   Mail,
@@ -32,8 +32,17 @@ function initials(name: string) {
 export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
   const t = useTranslations('Services.listings');
   const tCat = useTranslations('Services.categories');
+  const locale = useLocale();
   const city = getCityBySlug(contractor.citySlug);
   const { count, average } = ratingOf(contractor);
+  const startingAt =
+    contractor.startingAtPriceCents !== undefined
+      ? new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
+          style: 'currency',
+          currency: 'CAD',
+          maximumFractionDigits: 0,
+        }).format(contractor.startingAtPriceCents / 100)
+      : null;
 
   const photoUrls = contractor.photoUrls ?? [];
   const hero = photoUrls[0];
@@ -77,6 +86,12 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
             </span>
           )}
         </div>
+
+        {startingAt && (
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-navy shadow-sm backdrop-blur">
+            {t('startingAt')} <span className="text-forest">{startingAt}</span>
+          </span>
+        )}
 
       </Link>
 

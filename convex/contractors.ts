@@ -116,6 +116,7 @@ export const upsertMine = mutation({
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
+    startingAtPriceCents: v.optional(v.number()),
     published: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -130,6 +131,14 @@ export const upsertMine = mutation({
     }
     if (!args.phone && !args.email && !args.whatsapp) {
       throw new Error('Add at least one contact method.');
+    }
+    if (
+      args.startingAtPriceCents !== undefined &&
+      (!Number.isInteger(args.startingAtPriceCents) ||
+        args.startingAtPriceCents < 0 ||
+        args.startingAtPriceCents > 5_000_000)
+    ) {
+      throw new Error('Starting price must be between 0 and 50,000 CAD.');
     }
 
     const existing = await ctx.db

@@ -32,6 +32,7 @@ export function OnboardForm({ locale }: { locale: Locale }) {
   const [phone, setPhone] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [whatsapp, setWhatsapp] = React.useState('');
+  const [startingAt, setStartingAt] = React.useState('');
   const [published, setPublished] = React.useState(false);
 
   const [hydrated, setHydrated] = React.useState(false);
@@ -48,6 +49,11 @@ export function OnboardForm({ locale }: { locale: Locale }) {
       setPhone(existing.phone ?? '');
       setEmail(existing.email ?? '');
       setWhatsapp(existing.whatsapp ?? '');
+      setStartingAt(
+        existing.startingAtPriceCents !== undefined
+          ? (existing.startingAtPriceCents / 100).toFixed(2)
+          : '',
+      );
       setPublished(existing.published);
       if (existing.citySlug && !city) setCity(existing.citySlug);
     }
@@ -76,6 +82,16 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     if (services.length === 0) return setError(t('errServicesRequired'));
     if (!phone && !email && !whatsapp) return setError(t('errContactRequired'));
 
+    let startingAtPriceCents: number | undefined;
+    const startingAtTrimmed = startingAt.trim().replace(',', '.');
+    if (startingAtTrimmed) {
+      const cents = Math.round(Number.parseFloat(startingAtTrimmed) * 100);
+      if (!Number.isFinite(cents) || cents < 0 || cents > 5_000_000) {
+        return setError(t('errStartingAtInvalid'));
+      }
+      startingAtPriceCents = cents;
+    }
+
     setSubmitting(true);
     try {
       await upsert({
@@ -87,6 +103,7 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
         whatsapp: whatsapp.trim() || undefined,
+        startingAtPriceCents,
         published,
       });
       router.push(`/${locale}/pros/dashboard`);
@@ -193,6 +210,26 @@ export function OnboardForm({ locale }: { locale: Locale }) {
             </Field>
           </div>
         </fieldset>
+
+        <Field label={t('startingAt')}>
+          <div className="relative max-w-xs">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
+              $
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              max="50000"
+              value={startingAt}
+              onChange={(e) => setStartingAt(e.target.value)}
+              placeholder="50.00"
+              className="form-input pl-7"
+            />
+          </div>
+          <p className="mt-1 text-xs text-navy/60">{t('startingAtHelp')}</p>
+        </Field>
 
         <label className="flex items-center gap-3 rounded-xl border border-navy/10 p-4">
           <input

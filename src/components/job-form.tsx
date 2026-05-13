@@ -3,8 +3,8 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMutation } from 'convex/react';
-import { Send } from 'lucide-react';
+import { useAction, useMutation } from 'convex/react';
+import { CreditCard, Loader2, Send, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { useCity } from '@/components/city-picker-context';
@@ -20,14 +20,17 @@ export function JobForm({ locale }: { locale: Locale }) {
   const router = useRouter();
   const { city } = useCity();
   const create = useMutation(api.jobs.create);
+  const createPaidCheckout = useAction(api.jobs.createPaidCheckout);
 
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [category, setCategory] = React.useState<JobCategory>('home');
-  const [budget, setBudget] = React.useState('');
   const [timing, setTiming] = React.useState('');
   const [contactEmail, setContactEmail] = React.useState('');
   const [contactPhone, setContactPhone] = React.useState('');
+
+  const [prePay, setPrePay] = React.useState(false);
+  const [budget, setBudget] = React.useState('');
 
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -40,22 +43,50 @@ export function JobForm({ locale }: { locale: Locale }) {
 
     setSubmitting(true);
     try {
-      const id = await create({
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        citySlug: city.slug,
-        province: city.province,
-        budget: budget.trim() || undefined,
-        timing: timing.trim() || undefined,
-        contactEmail: contactEmail.trim() || undefined,
-        contactPhone: contactPhone.trim() || undefined,
-      });
-      router.push(`/${locale}/jobs/${id}`);
-      router.refresh();
+      if (prePay) {
+        // Budget must be a real number; redirect to Stripe Checkout on success.
+        const cents = Math.round(
+          Number.parseFloat(budget.replace(',', '.')) * 100,
+        );
+        if (!Number.isFinite(cents) || cents < 500) {
+          throw new Error(t('errBudgetTooLow'));
+        }
+        if (cents > 5_000_000) {
+          throw new Error(t('errBudgetTooHigh'));
+        }
+        if (!contactEmail) {
+          throw new Error(t('errEmailRequiredForPaid'));
+        }
+        const { url } = await createPaidCheckout({
+          title: title.trim(),
+          description: description.trim(),
+          category,
+          citySlug: city.slug,
+          province: city.province,
+          budgetCents: cents,
+          timing: timing.trim() || undefined,
+          customerEmail: contactEmail.trim(),
+          contactPhone: contactPhone.trim() || undefined,
+          locale,
+        });
+        window.location.href = url;
+      } else {
+        const id = await create({
+          title: title.trim(),
+          description: description.trim(),
+          category,
+          citySlug: city.slug,
+          province: city.province,
+          budget: budget.trim() || undefined,
+          timing: timing.trim() || undefined,
+          contactEmail: contactEmail.trim() || undefined,
+          contactPhone: contactPhone.trim() || undefined,
+        });
+        router.push(`/${locale}/jobs/${id}`);
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally {
       setSubmitting(false);
     }
   }
@@ -107,35 +138,76 @@ export function JobForm({ locale }: { locale: Locale }) {
           <CityPicker locale={locale} variant="large" />
         </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t('budget')}>
+        {/* Pre-pay toggle */}
+        <fieldset className="space-y-3 rounded-xl border border-forest/30 bg-forest/[0.04] p-4">
+          <label className="flex cursor-pointer items-start gap-3">
             <input
-              type="text"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              placeholder={t('budgetPlaceholder')}
-              className="form-input"
+              type="checkbox"
+              checked={prePay}
+              onChange={(e) => setPrePay(e.target.checked)}
+              className="mt-1 h-4 w-4 accent-forest"
             />
-          </Field>
-          <Field label={t('timing')}>
-            <input
-              type="text"
-              value={timing}
-              onChange={(e) => setTiming(e.target.value)}
-              placeholder={t('timingPlaceholder')}
-              className="form-input"
-            />
-          </Field>
-        </div>
+            <span>
+              <span className="block font-semibold text-navy">{t('prePayLabel')}</span>
+              <span className="mt-0.5 block text-sm text-navy/70">{t('prePayHelp')}</span>
+            </span>
+          </label>
+
+          {prePay ? (
+            <Field label={t('budgetCad')} required>
+              <div className="relative max-w-xs">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
+                  $
+                </span>
+                <input
+                  required
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="5"
+                  max="50000"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  placeholder="150.00"
+                  className="form-input pl-7"
+                />
+              </div>
+              <p className="mt-1 text-xs text-navy/60">{t('budgetCadHelp')}</p>
+            </Field>
+          ) : (
+            <Field label={t('budget')}>
+              <input
+                type="text"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                placeholder={t('budgetPlaceholder')}
+                className="form-input"
+              />
+            </Field>
+          )}
+        </fieldset>
+
+        <Field label={t('timing')}>
+          <input
+            type="text"
+            value={timing}
+            onChange={(e) => setTiming(e.target.value)}
+            placeholder={t('timingPlaceholder')}
+            className="form-input"
+          />
+        </Field>
 
         <fieldset className="space-y-3 rounded-xl border border-navy/10 p-4">
           <legend className="px-2 text-sm font-semibold text-navy">
             {t('contactSection')}
           </legend>
-          <p className="text-xs text-navy/60">{t('contactHelp')}</p>
+          <p className="text-xs text-navy/60">
+            {prePay ? t('contactHelpPaid') : t('contactHelp')}
+          </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label={t('contactEmail')}>
+            <Field label={t('contactEmail')} required={prePay}>
               <input
+                required={prePay}
                 type="email"
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
@@ -168,9 +240,28 @@ export function JobForm({ locale }: { locale: Locale }) {
           disabled={submitting}
           className="w-full sm:w-auto"
         >
-          <Send className="h-4 w-4" />
-          {submitting ? t('posting') : t('postJob')}
+          {submitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : prePay ? (
+            <CreditCard className="h-4 w-4" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+          {submitting
+            ? prePay
+              ? t('redirecting')
+              : t('posting')
+            : prePay
+              ? t('continueToPayment')
+              : t('postJob')}
         </Button>
+
+        {prePay && (
+          <p className="flex items-center gap-1.5 text-xs text-navy/55">
+            <ShieldCheck className="h-3.5 w-3.5 text-forest" />
+            {t('feeDisclosure')}
+          </p>
+        )}
 
         <style jsx>{`
           :global(.form-input) {

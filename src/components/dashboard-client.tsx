@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
 import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
+import { PaymentsSection, type PaymentsLabels } from '@/components/payments-section';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { ratingOf } from '@/lib/contractor-types';
@@ -30,6 +31,7 @@ type Labels = {
   email: string;
   whatsapp: string;
   photos: PhotoLabels;
+  payments: PaymentsLabels;
 };
 
 export function DashboardClient({
@@ -159,6 +161,8 @@ export function DashboardClient({
           </article>
 
           <PhotoManager labels={l.photos} />
+
+          <PaymentsSection locale={locale} labels={l.payments} />
         </div>
       )}
     </div>

@@ -16,6 +16,8 @@ export type ContractorDoc = {
   phone?: string;
   email?: string;
   whatsapp?: string;
+  /** "Starting at $X" — marketing display only; in CAD cents. */
+  startingAtPriceCents?: number;
   /** File-storage ids of uploaded photos (present on `getMine`). */
   photos?: string[];
   /** Resolved photo URLs (present on `getPublic`). */
@@ -23,6 +25,9 @@ export type ContractorDoc = {
   published: boolean;
   ratingCount?: number;
   ratingSum?: number;
+  /** Stripe Connect — set once the pro has finished onboarding. */
+  stripeAccountId?: string;
+  stripeOnboardingComplete?: boolean;
 };
 
 /** Average star rating (0 if no reviews) and review count for a contractor. */
