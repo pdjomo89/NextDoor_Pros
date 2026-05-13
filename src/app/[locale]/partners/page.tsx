@@ -19,7 +19,7 @@ const PARTNERS: Partner[] = [
     url: 'https://www.ticketflow.boutique',
   },
   { name: 'AfriNovaTech' },
-  { name: 'Carys Care and Beauty' },
+  { name: 'Carys Care and Beauty', logo: '/partners/carys-care-and-beauty.jpg' },
 ];
 
 export async function generateMetadata({
