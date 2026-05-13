@@ -169,7 +169,11 @@
       "emptyHelp": "Soyez le premier — inscrivez votre entreprise et recevez le prochain client de votre secteur.",
       "call": "Appeler",
       "emailAction": "Courriel",
-      "viewProfile": "Voir le profil et les avis"
+      "viewProfile": "Voir le profil et les avis",
+      "topRated": "Très bien noté",
+      "newBadge": "Nouveau",
+      "photosCount": "{count, plural, one {# photo} other {# photos}}",
+      "noPhotoYet": "Photos à venir"
     }
   },
   "About": {

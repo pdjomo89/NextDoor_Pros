@@ -169,7 +169,11 @@
       "emptyHelp": "Be the first — list your business and we'll send you the next customer in your area.",
       "call": "Call",
       "emailAction": "Email",
-      "viewProfile": "View profile & reviews"
+      "viewProfile": "View profile & reviews",
+      "topRated": "Top rated",
+      "newBadge": "New",
+      "photosCount": "{count, plural, one {# photo} other {# photos}}",
+      "noPhotoYet": "Photos coming soon"
     }
   },
   "About": {

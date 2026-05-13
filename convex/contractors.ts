@@ -87,9 +87,21 @@ export const listByService = query({
         .filter((q) => q.eq(q.field('published'), true))
         .collect();
     }
-    return rows
+    const matched = rows
       .filter((c) => c.services.includes(serviceKey))
       .sort((a, b) => b._creationTime - a._creationTime);
+
+    // Resolve up to 4 photo URLs per listing so cards can show a hero + strip.
+    const withPhotos = [];
+    for (const c of matched) {
+      const urls: string[] = [];
+      for (const fileId of (c.photos ?? []).slice(0, 4)) {
+        const url = await ctx.storage.getUrl(fileId);
+        if (url) urls.push(url);
+      }
+      withPhotos.push({ ...c, photoUrls: urls });
+    }
+    return withPhotos;
   },
 });
 
