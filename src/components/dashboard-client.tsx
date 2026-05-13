@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
+import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { ratingOf } from '@/lib/contractor-types';
@@ -28,6 +29,7 @@ type Labels = {
   phone: string;
   email: string;
   whatsapp: string;
+  photos: PhotoLabels;
 };
 
 export function DashboardClient({
@@ -155,6 +157,8 @@ export function DashboardClient({
               </div>
             )}
           </article>
+
+          <PhotoManager labels={l.photos} />
         </div>
       )}
     </div>

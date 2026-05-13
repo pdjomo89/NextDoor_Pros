@@ -34,13 +34,19 @@ export const viewer = query({
 
 /**
  * Public: a single published contractor by id (or null if missing/unpublished).
+ * Includes `photoUrls` (resolved from the stored file ids).
  */
 export const getPublic = query({
   args: { id: v.id('contractors') },
   handler: async (ctx, { id }) => {
     const doc = await ctx.db.get(id);
     if (!doc || !doc.published) return null;
-    return doc;
+    const photoUrls: string[] = [];
+    for (const fileId of doc.photos ?? []) {
+      const url = await ctx.storage.getUrl(fileId);
+      if (url) photoUrls.push(url);
+    }
+    return { ...doc, photoUrls };
   },
 });
 
@@ -130,8 +136,77 @@ export const upsertMine = mutation({
   },
 });
 
+const MAX_PHOTOS = 8;
+
+/** The signed-in user's listing photos, resolved to URLs (with their storage ids). */
+export const myPhotos = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    const out: { storageId: string; url: string }[] = [];
+    if (!userId) return out;
+    const doc = await ctx.db
+      .query('contractors')
+      .withIndex('by_owner', (q) => q.eq('ownerId', userId))
+      .unique();
+    for (const id of doc?.photos ?? []) {
+      const url = await ctx.storage.getUrl(id);
+      if (url) out.push({ storageId: id, url });
+    }
+    return out;
+  },
+});
+
+/** Get a short-lived URL the client can POST a file to. */
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('Not signed in');
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+/** Attach freshly-uploaded file ids to the signed-in user's listing. */
+export const addPhotos = mutation({
+  args: { storageIds: v.array(v.id('_storage')) },
+  handler: async (ctx, { storageIds }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('Not signed in');
+    const doc = await ctx.db
+      .query('contractors')
+      .withIndex('by_owner', (q) => q.eq('ownerId', userId))
+      .unique();
+    if (!doc) throw new Error('Create your listing first.');
+    const combined = [...(doc.photos ?? []), ...storageIds];
+    const next = combined.slice(0, MAX_PHOTOS);
+    // Any uploads beyond the cap are orphaned — delete the blobs so they don't linger.
+    for (const id of combined.slice(MAX_PHOTOS)) await ctx.storage.delete(id);
+    await ctx.db.patch(doc._id, { photos: next });
+    return next.length;
+  },
+});
+
+/** Remove one photo from the signed-in user's listing and delete the blob. */
+export const removePhoto = mutation({
+  args: { storageId: v.id('_storage') },
+  handler: async (ctx, { storageId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('Not signed in');
+    const doc = await ctx.db
+      .query('contractors')
+      .withIndex('by_owner', (q) => q.eq('ownerId', userId))
+      .unique();
+    if (!doc || !(doc.photos ?? []).includes(storageId)) return;
+    await ctx.db.patch(doc._id, {
+      photos: (doc.photos ?? []).filter((id) => id !== storageId),
+    });
+    await ctx.storage.delete(storageId);
+  },
+});
+
 /**
- * Delete the signed-in user's listing.
+ * Delete the signed-in user's listing (and its uploaded photos).
  */
 export const deleteMine = mutation({
   args: {},
@@ -143,6 +218,9 @@ export const deleteMine = mutation({
       .query('contractors')
       .withIndex('by_owner', (q) => q.eq('ownerId', userId))
       .unique();
-    if (existing) await ctx.db.delete(existing._id);
+    if (existing) {
+      for (const id of existing.photos ?? []) await ctx.storage.delete(id);
+      await ctx.db.delete(existing._id);
+    }
   },
 });

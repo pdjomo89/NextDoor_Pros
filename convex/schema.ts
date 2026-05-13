@@ -19,6 +19,9 @@ export default defineSchema({
     email: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
 
+    // Product / work photos uploaded by the pro (Convex file-storage ids).
+    photos: v.optional(v.array(v.id('_storage'))),
+
     published: v.boolean(),
 
     // Denormalised review aggregates (kept in sync by convex/reviews.ts).

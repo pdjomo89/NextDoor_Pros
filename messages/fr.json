@@ -429,10 +429,21 @@
       "draftHelp": "Votre inscription reste privée tant que vous ne la publiez pas.",
       "phone": "Téléphone",
       "email": "Courriel",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "photos": {
+        "title": "Photos de produits",
+        "help": "Montrez votre travail aux clients — jusqu'à 8 photos.",
+        "upload": "Téléverser des photos",
+        "uploading": "Téléversement…",
+        "remove": "Retirer la photo",
+        "empty": "Aucune photo pour l'instant — téléversez-en pour montrer votre travail.",
+        "max": "Vous avez atteint le maximum de 8 photos.",
+        "failed": "Échec du téléversement — veuillez réessayer."
+      }
     },
     "profile": {
-      "servicesTitle": "Services offerts"
+      "servicesTitle": "Services offerts",
+      "photosTitle": "Photos"
     },
     "onboard": {
       "createTitle": "Inscrire votre entreprise",

@@ -49,6 +49,16 @@ export default async function ProDashboardPage({
             phone: t('phone'),
             email: t('email'),
             whatsapp: t('whatsapp'),
+            photos: {
+              title: t('photos.title'),
+              help: t('photos.help'),
+              upload: t('photos.upload'),
+              uploading: t('photos.uploading'),
+              remove: t('photos.remove'),
+              empty: t('photos.empty'),
+              max: t('photos.max'),
+              failed: t('photos.failed'),
+            },
           }}
         />
       </div>

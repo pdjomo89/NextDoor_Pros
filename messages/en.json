@@ -429,10 +429,21 @@
       "draftHelp": "Your listing is private until you publish it.",
       "phone": "Phone",
       "email": "Email",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "photos": {
+        "title": "Product photos",
+        "help": "Show customers your work — add up to 8 photos.",
+        "upload": "Upload photos",
+        "uploading": "Uploading…",
+        "remove": "Remove photo",
+        "empty": "No photos yet — upload some to show off your work.",
+        "max": "You've reached the maximum of 8 photos.",
+        "failed": "Couldn't upload that — please try again."
+      }
     },
     "profile": {
-      "servicesTitle": "Services offered"
+      "servicesTitle": "Services offered",
+      "photosTitle": "Photos"
     },
     "onboard": {
       "createTitle": "List your business",

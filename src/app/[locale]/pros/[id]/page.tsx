@@ -180,6 +180,25 @@ export default async function ContractorProfilePage({
           </div>
         )}
 
+        {contractor.photoUrls && contractor.photoUrls.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-navy/50">
+              {tp('photosTitle')}
+            </h2>
+            <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {contractor.photoUrls.map((url) => (
+                <li
+                  key={url}
+                  className="aspect-square overflow-hidden rounded-xl border border-navy/10 bg-navy/5"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="mt-6 flex flex-wrap gap-2 border-t border-navy/10 pt-5">
           {contractor.phone && (
             <Button asChild variant="primary" size="sm">

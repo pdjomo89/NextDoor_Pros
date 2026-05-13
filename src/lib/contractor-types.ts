@@ -16,6 +16,10 @@ export type ContractorDoc = {
   phone?: string;
   email?: string;
   whatsapp?: string;
+  /** File-storage ids of uploaded photos (present on `getMine`). */
+  photos?: string[];
+  /** Resolved photo URLs (present on `getPublic`). */
+  photoUrls?: string[];
   published: boolean;
   ratingCount?: number;
   ratingSum?: number;
