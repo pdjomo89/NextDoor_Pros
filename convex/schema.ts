@@ -40,6 +40,19 @@ export default defineSchema({
     .index('by_contractor', ['contractorId'])
     .index('by_contractor_author', ['contractorId', 'authorId']),
 
+  contactMessages: defineTable({
+    name: v.string(),
+    email: v.string(),
+    citySlug: v.optional(v.string()),
+    subject: v.string(),
+    message: v.string(),
+    locale: v.optional(v.string()),
+
+    // 'queued' | 'sent' | 'failed' | 'skipped' (no email integration configured)
+    status: v.string(),
+    errorMessage: v.optional(v.string()),
+  }).index('by_status', ['status']),
+
   jobs: defineTable({
     posterId: v.id('users'),
 

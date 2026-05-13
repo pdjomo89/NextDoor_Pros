@@ -235,8 +235,11 @@
       "subject": "Sujet",
       "message": "Message",
       "send": "Envoyer le message",
+      "sending": "Envoi en cours...",
       "successTitle": "Merci — message envoyé.",
-      "successBody": "Nous reviendrons vers vous d'ici un jour ouvrable."
+      "successBody": "Nous reviendrons vers vous d'ici un jour ouvrable.",
+      "errorTitle": "Échec de l'envoi du message",
+      "errorBody": "Une erreur est survenue. Réessayez ou écrivez-nous à hello@nextdoorpros.ca."
     },
     "info": {
       "emailLabel": "Courriel",

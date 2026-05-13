@@ -2,21 +2,59 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Send } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { CheckCircle2, Loader2, Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { useCity } from '@/components/city-picker-context';
+import { getConvexEnv } from '@/lib/convex-env';
+import { api } from '../../convex/_generated/api';
 import type { Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 
 export function ContactForm({ locale }: { locale: Locale }) {
   const t = useTranslations('Contact.form');
   const { city } = useCity();
-  const [submitted, setSubmitted] = React.useState(false);
+  const convexConfigured = getConvexEnv().configured;
+  const submit = useMutation(api.contactMessages.submit);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const [submitted, setSubmitted] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    if (sending) return;
+
+    const formData = new FormData(e.currentTarget);
+    const name = String(formData.get('name') ?? '');
+    const email = String(formData.get('email') ?? '');
+    const subject = String(formData.get('subject') ?? '');
+    const message = String(formData.get('message') ?? '');
+    const honeypot = String(formData.get('website') ?? '');
+
+    setError(null);
+    setSending(true);
+    try {
+      if (!convexConfigured) {
+        throw new Error('Backend not configured');
+      }
+      await submit({
+        name,
+        email,
+        subject,
+        message,
+        citySlug: city?.slug,
+        locale,
+        honeypot,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setError(t('errorBody'));
+    } finally {
+      setSending(false);
+    }
   }
 
   if (submitted) {
@@ -40,6 +78,8 @@ export function ContactForm({ locale }: { locale: Locale }) {
             required
             type="text"
             name="name"
+            autoComplete="name"
+            disabled={sending}
             className="form-input"
           />
         </Field>
@@ -48,6 +88,8 @@ export function ContactForm({ locale }: { locale: Locale }) {
             required
             type="email"
             name="email"
+            autoComplete="email"
+            disabled={sending}
             className="form-input"
           />
         </Field>
@@ -69,6 +111,7 @@ export function ContactForm({ locale }: { locale: Locale }) {
           required
           type="text"
           name="subject"
+          disabled={sending}
           className="form-input"
         />
       </Field>
@@ -78,13 +121,42 @@ export function ContactForm({ locale }: { locale: Locale }) {
           required
           name="message"
           rows={5}
+          maxLength={5000}
+          disabled={sending}
           className="form-input resize-y"
         />
       </Field>
 
-      <Button type="submit" variant="secondary" size="lg" className="w-full sm:w-auto">
-        <Send className="h-4 w-4" />
-        {t('send')}
+      {/* Honeypot — hidden from humans, irresistible to bots. */}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label>
+          Website
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div>
+            <p className="font-medium">{t('errorTitle')}</p>
+            <p className="mt-0.5 text-red-700/80">{error}</p>
+          </div>
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        variant="secondary"
+        size="lg"
+        disabled={sending}
+        className="w-full sm:w-auto"
+      >
+        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        {sending ? t('sending') : t('send')}
       </Button>
 
       <style jsx>{`
@@ -102,6 +174,10 @@ export function ContactForm({ locale }: { locale: Locale }) {
         :global(.form-input:focus) {
           border-color: #1f8a3b;
           box-shadow: 0 0 0 3px rgba(31, 138, 59, 0.15);
+        }
+        :global(.form-input:disabled) {
+          background: hsl(210 17% 97%);
+          cursor: not-allowed;
         }
       `}</style>
     </form>

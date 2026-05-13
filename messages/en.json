@@ -235,8 +235,11 @@
       "subject": "Subject",
       "message": "Message",
       "send": "Send message",
+      "sending": "Sending...",
       "successTitle": "Thanks — message sent.",
-      "successBody": "We'll get back to you within one business day."
+      "successBody": "We'll get back to you within one business day.",
+      "errorTitle": "Couldn't send your message",
+      "errorBody": "Something went wrong. Please try again, or reach us at hello@nextdoorpros.ca."
     },
     "info": {
       "emailLabel": "Email",
