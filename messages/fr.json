@@ -171,9 +171,7 @@
       "emailAction": "Courriel",
       "viewProfile": "Voir le profil et les avis",
       "topRated": "Très bien noté",
-      "newBadge": "Nouveau",
-      "photosCount": "{count, plural, one {# photo} other {# photos}}",
-      "noPhotoYet": "Photos à venir"
+      "newBadge": "Nouveau"
     }
   },
   "About": {

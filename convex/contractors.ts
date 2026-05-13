@@ -91,15 +91,12 @@ export const listByService = query({
       .filter((c) => c.services.includes(serviceKey))
       .sort((a, b) => b._creationTime - a._creationTime);
 
-    // Resolve up to 4 photo URLs per listing so cards can show a hero + strip.
+    // Resolve only the hero photo for the card — the rest live on the profile.
     const withPhotos = [];
     for (const c of matched) {
-      const urls: string[] = [];
-      for (const fileId of (c.photos ?? []).slice(0, 4)) {
-        const url = await ctx.storage.getUrl(fileId);
-        if (url) urls.push(url);
-      }
-      withPhotos.push({ ...c, photoUrls: urls });
+      const heroId = c.photos?.[0];
+      const heroUrl = heroId ? await ctx.storage.getUrl(heroId) : null;
+      withPhotos.push({ ...c, photoUrls: heroUrl ? [heroUrl] : [] });
     }
     return withPhotos;
   },

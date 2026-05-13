@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Award,
   Sparkles,
-  Camera,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,6 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
 
   const photoUrls = contractor.photoUrls ?? [];
   const hero = photoUrls[0];
-  const thumbs = photoUrls.slice(1, 4);
   const isTopRated = count >= 3 && average >= 4.5;
   const isNew = Date.now() - contractor._creationTime < THIRTY_DAYS_MS;
   const profileHref = `/pros/${contractor._id}`;
@@ -80,12 +78,6 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
           )}
         </div>
 
-        {photoUrls.length > 1 && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur">
-            <Camera className="h-3.5 w-3.5" />
-            {t('photosCount', { count: photoUrls.length })}
-          </span>
-        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
@@ -108,28 +100,11 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
           )}
         </header>
 
-        <p className="mt-3 line-clamp-2 text-sm text-navy/80">{contractor.description}</p>
+        <p className="mt-3 line-clamp-4 text-base leading-relaxed text-navy/90">
+          {contractor.description}
+        </p>
 
-        {thumbs.length > 0 && (
-          <Link
-            href={profileHref}
-            className="mt-3 grid grid-cols-3 gap-1.5"
-            aria-label={t('viewProfile')}
-          >
-            {thumbs.map((url, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                src={url}
-                alt=""
-                className="aspect-square w-full rounded-md object-cover ring-1 ring-navy/10 transition-opacity group-hover:opacity-90"
-                loading="lazy"
-              />
-            ))}
-          </Link>
-        )}
-
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {contractor.services.slice(0, 4).map((key) => {
             const cat = SERVICE_CATEGORIES.find((c) => c.key === key);
             if (!cat) return null;

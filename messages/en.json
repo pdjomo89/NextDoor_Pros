@@ -171,9 +171,7 @@
       "emailAction": "Email",
       "viewProfile": "View profile & reviews",
       "topRated": "Top rated",
-      "newBadge": "New",
-      "photosCount": "{count, plural, one {# photo} other {# photos}}",
-      "noPhotoYet": "Photos coming soon"
+      "newBadge": "New"
     }
   },
   "About": {
