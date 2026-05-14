@@ -24,6 +24,7 @@ import {
   Ship,
   ShoppingBasket,
   Frame,
+  Laptop,
   type LucideIcon,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -52,6 +53,7 @@ const ICONS: Record<ServiceKey, LucideIcon> = {
   shipping: Ship,
   groceries: ShoppingBasket,
   decoration: Frame,
+  tech: Laptop,
 };
 
 export function ServiceCard({ category }: { category: ServiceCategory }) {

@@ -167,6 +167,10 @@
       "decoration": {
         "title": "Art decoration",
         "description": "Sculptures, African wood carvings, decorative boards, and African picture frames to style your home."
+      },
+      "tech": {
+        "title": "Tech & software",
+        "description": "Custom web and mobile apps, websites, IT support, cloud setup, and software solutions from local developers."
       }
     },
     "viewPros": "View available pros",

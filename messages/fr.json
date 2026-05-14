@@ -167,6 +167,10 @@
       "decoration": {
         "title": "Décoration artistique",
         "description": "Sculptures, gravures sur bois africaines, panneaux décoratifs et cadres africains pour habiller votre intérieur."
+      },
+      "tech": {
+        "title": "Tech et logiciels",
+        "description": "Applications web et mobiles sur mesure, sites Internet, soutien informatique, configuration infonuagique et solutions logicielles par des développeurs locaux."
       }
     },
     "viewPros": "Voir les pros disponibles",

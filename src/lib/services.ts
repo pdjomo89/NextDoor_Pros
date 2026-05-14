@@ -18,7 +18,8 @@ export type ServiceKey =
   | 'carpool'
   | 'shipping'
   | 'groceries'
-  | 'decoration';
+  | 'decoration'
+  | 'tech';
 
 export type ServiceCategory = {
   slug: string;
@@ -52,4 +53,5 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: 'shipping', key: 'shipping', accent: 'forest', image: unsplash('1607082348824-0a96f2a4b9da') },
   { slug: 'groceries', key: 'groceries', accent: 'navy', image: unsplash('1596040033229-a9821ebd058d') },
   { slug: 'decoration', key: 'decoration', accent: 'forest', image: unsplash('1621419203897-20b66b98d495') },
+  { slug: 'tech', key: 'tech', accent: 'navy', image: unsplash('1517694712202-14dd9538aa97') },
 ];
