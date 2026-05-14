@@ -10,11 +10,23 @@ import {
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
 
-/** Monthly: $15 CAD. Annual: $160 CAD (≈ $13.33/mo). */
-export const MEMBERSHIP_PRICES = {
-  monthly: { unit_amount: 1500, interval: 'month' as const, name: 'NextDoor Pros — Monthly Pro' },
-  annual: { unit_amount: 16000, interval: 'year' as const, name: 'NextDoor Pros — Annual Pro' },
-};
+/**
+ * Resolve the Stripe Price ID for a membership plan.
+ *
+ * Price IDs live in Stripe (Products catalog) so the Customer Portal can list
+ * them and pros can switch plans there. Configure both in Convex env vars:
+ *   STRIPE_PRICE_MEMBERSHIP_MONTHLY  ($15 CAD / month)
+ *   STRIPE_PRICE_MEMBERSHIP_ANNUAL   ($160 CAD / year)
+ */
+function membershipPriceId(plan: 'monthly' | 'annual'): string {
+  const envKey =
+    plan === 'monthly'
+      ? 'STRIPE_PRICE_MEMBERSHIP_MONTHLY'
+      : 'STRIPE_PRICE_MEMBERSHIP_ANNUAL';
+  const id = process.env[envKey];
+  if (!id) throw new Error(`${envKey} is not set on this Convex deployment.`);
+  return id;
+}
 
 function stripeClient(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -143,22 +155,10 @@ export const startMembershipCheckout = action({
       });
     }
 
-    const price = MEMBERSHIP_PRICES[plan];
-
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
-      line_items: [
-        {
-          price_data: {
-            currency: 'cad',
-            unit_amount: price.unit_amount,
-            recurring: { interval: price.interval },
-            product_data: { name: price.name },
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: membershipPriceId(plan), quantity: 1 }],
       success_url: `${siteUrl()}/${locale}/pros/dashboard?membership=active`,
       cancel_url: `${siteUrl()}/${locale}/pros/onboard/membership?cancelled=1`,
       metadata: {
