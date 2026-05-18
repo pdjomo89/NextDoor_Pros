@@ -118,7 +118,9 @@ function ContactProModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-navy/40 px-4 backdrop-blur-sm"
+      // No `backdrop-blur` here: backdrop-filter re-rasterizes on every
+      // keystroke (the form repaints), which makes the overlay flicker.
+      className="fixed inset-0 z-50 grid place-items-center bg-navy/50 px-4"
       onClick={() => {
         if (!busy) onClose();
       }}
