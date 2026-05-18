@@ -685,7 +685,7 @@
   },
   "Messages": {
     "title": "Messages",
-    "subtitle": "Your conversations with customers.",
+    "subtitle": "Your conversations.",
     "metaDescription": "Your NextDoor Pros conversations.",
     "guestTitle": "Your conversation",
     "guestSubtitle": "Chat with the pro — no account needed. Keep this page's link to come back.",
@@ -723,6 +723,9 @@
     "unavailable": "Messaging is not available right now.",
     "saveLinkBody": "Save this private link to return to the conversation.",
     "copyLink": "Copy link",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "guestNoneTitle": "No conversations on this device",
+    "guestNoneBody": "When you message a pro, it's saved here on this device so you can come back to it anytime.",
+    "proInboxHint": "Are you a pro?"
   }
 }

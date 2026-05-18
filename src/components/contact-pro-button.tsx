@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { getConvexEnv } from '@/lib/convex-env';
+import { rememberGuestThread } from '@/lib/guest-threads';
 import { api } from '../../convex/_generated/api';
 import type { ButtonProps } from '@/components/ui/button';
 
@@ -105,6 +106,8 @@ function ContactProModal({
         body: body.trim(),
         locale,
       });
+      // Save to this device so the customer can return without the email.
+      rememberGuestThread(guestToken);
       router.push(`/messages/guest?t=${guestToken}`);
     } catch (err) {
       const code = err instanceof Error ? err.message : String(err);

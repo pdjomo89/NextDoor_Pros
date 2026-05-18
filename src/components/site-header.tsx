@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { LanguageToggle } from '@/components/language-toggle';
 import { getConvexEnv } from '@/lib/convex-env';
+import { readGuestThreads } from '@/lib/guest-threads';
 import { api } from '../../convex/_generated/api';
 import type { Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -59,6 +60,37 @@ const NAV_ITEMS = [
   { href: '/news', key: 'news' },
   { href: '/contact', key: 'contact' },
 ] as const;
+
+/** Messages link for signed-out visitors who have guest conversations saved
+ *  on this device. Renders nothing otherwise. */
+function GuestInboxLink({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
+  const t = useTranslations('Nav');
+  const [hasThreads, setHasThreads] = React.useState(false);
+  React.useEffect(() => {
+    setHasThreads(readGuestThreads().length > 0);
+  }, []);
+  if (!hasThreads) return null;
+
+  return (
+    <Link
+      href="/messages"
+      onClick={onNavigate}
+      className={cn(
+        'inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-navy/80 transition-colors hover:bg-navy/5 hover:text-navy',
+        className,
+      )}
+    >
+      <MessageSquare className="h-4 w-4" />
+      {t('messages')}
+    </Link>
+  );
+}
 
 export function SiteHeader({
   locale,
@@ -121,6 +153,7 @@ export function SiteHeader({
             </>
           ) : (
             <>
+              <GuestInboxLink />
               <Button asChild variant="ghost" size="sm">
                 <Link href="/auth/sign-in">
                   <LogIn className="h-4 w-4" />
@@ -188,6 +221,10 @@ export function SiteHeader({
                 </>
               ) : (
                 <>
+                  <GuestInboxLink
+                    className="flex-1 border border-navy/15"
+                    onNavigate={() => setMobileOpen(false)}
+                  />
                   <Button asChild variant="outline" size="sm" className="flex-1">
                     <Link href="/auth/sign-in" onClick={() => setMobileOpen(false)}>
                       {t('signIn')}

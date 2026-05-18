@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Check, Copy, Link2, Loader2, MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getConvexEnv } from '@/lib/convex-env';
+import { rememberGuestThread } from '@/lib/guest-threads';
 import { api } from '../../convex/_generated/api';
 import { cn } from '@/lib/utils';
 
@@ -74,6 +75,11 @@ export function GuestConversationClient({ token }: { token: string }) {
   React.useEffect(() => {
     if (token && thread) markRead({ token }).catch(() => {});
   }, [token, thread, msgCount, markRead]);
+
+  // Persist a valid thread to this device so it shows in "your conversations".
+  React.useEffect(() => {
+    if (token && thread) rememberGuestThread(token);
+  }, [token, thread]);
 
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' });

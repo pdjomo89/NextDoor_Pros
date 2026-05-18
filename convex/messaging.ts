@@ -242,6 +242,40 @@ export const getGuestConversation = query({
   },
 });
 
+/**
+ * Summaries for a batch of guest tokens — powers the customer's "your
+ * conversations on this device" list. Invalid tokens are silently skipped.
+ */
+export const getGuestConversations = query({
+  args: { tokens: v.array(v.string()) },
+  handler: async (ctx, { tokens }) => {
+    const out: Array<{
+      token: string;
+      contractorName: string;
+      lastMessagePreview: string;
+      lastMessageAt: number;
+      unread: number;
+    }> = [];
+    for (const token of tokens.slice(0, 30)) {
+      const convo = await ctx.db
+        .query('conversations')
+        .withIndex('by_guestToken', (q) => q.eq('guestToken', token))
+        .first();
+      if (!convo) continue;
+      const contractor = await ctx.db.get(convo.contractorId);
+      out.push({
+        token,
+        contractorName: contractor?.businessName ?? 'Pro',
+        lastMessagePreview: convo.lastMessagePreview,
+        lastMessageAt: convo.lastMessageAt,
+        unread: convo.customerUnread,
+      });
+    }
+    out.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
+    return out;
+  },
+});
+
 /** Guest clears their unread badge. */
 export const markGuestRead = mutation({
   args: { token: v.string() },

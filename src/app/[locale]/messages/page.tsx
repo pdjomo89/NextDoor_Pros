@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { MessageSquare } from 'lucide-react';
-import { Link } from '@/i18n/routing';
-import { Button } from '@/components/ui/button';
 import { MessagesClient } from '@/components/messages-client';
+import { GuestThreadsList } from '@/components/guest-threads-list';
 import { getViewer } from '@/lib/contractors';
 import { pageMetadata } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
@@ -49,16 +47,9 @@ export default async function MessagesPage({
         {viewer ? (
           <MessagesClient initialConversationId={c ?? null} />
         ) : (
-          <div className="rounded-2xl border border-navy/10 bg-navy/5 px-6 py-12 text-center">
-            <MessageSquare className="mx-auto h-9 w-9 text-navy/30" />
-            <p className="mt-3 font-semibold text-navy">{t('signInTitle')}</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-navy/60">
-              {t('signInBody')}
-            </p>
-            <Button asChild variant="secondary" size="sm" className="mt-4">
-              <Link href="/auth/sign-in">{t('signInCta')}</Link>
-            </Button>
-          </div>
+          // Not signed in — show the visitor their own guest conversations
+          // (recovered from this device). Pros can sign in from here too.
+          <GuestThreadsList />
         )}
       </div>
     </div>

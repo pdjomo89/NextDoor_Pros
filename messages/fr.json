@@ -685,7 +685,7 @@
   },
   "Messages": {
     "title": "Messages",
-    "subtitle": "Vos conversations avec les clients.",
+    "subtitle": "Vos conversations.",
     "metaDescription": "Vos conversations NextDoor Pros.",
     "guestTitle": "Votre conversation",
     "guestSubtitle": "Discutez avec le pro — aucun compte requis. Conservez le lien de cette page pour revenir.",
@@ -723,6 +723,9 @@
     "unavailable": "La messagerie n'est pas disponible pour le moment.",
     "saveLinkBody": "Enregistrez ce lien privé pour revenir à la conversation.",
     "copyLink": "Copier le lien",
-    "copied": "Copié !"
+    "copied": "Copié !",
+    "guestNoneTitle": "Aucune conversation sur cet appareil",
+    "guestNoneBody": "Lorsque vous écrivez à un pro, la conversation est enregistrée sur cet appareil pour que vous puissiez y revenir à tout moment.",
+    "proInboxHint": "Vous êtes un pro ?"
   }
 }
