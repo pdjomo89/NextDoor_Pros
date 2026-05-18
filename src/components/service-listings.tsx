@@ -1,23 +1,27 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuery } from 'convex/react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { useCity } from '@/components/city-picker-context';
+import { CityPicker } from '@/components/city-picker';
 import { ContractorCard } from '@/components/contractor-card';
 import { getConvexEnv } from '@/lib/convex-env';
 import { api } from '../../convex/_generated/api';
+import type { Locale } from '@/i18n/routing';
 import type { ServiceKey } from '@/lib/services';
 import type { ContractorDoc } from '@/lib/contractor-types';
 
 export function ServiceListings({ serviceKey }: { serviceKey: ServiceKey }) {
   const t = useTranslations('Services.listings');
+  const locale = useLocale() as Locale;
   const { city } = useCity();
 
+  // A city is required: don't fetch (or show) listings until one is chosen.
   const contractors = useQuery(
     api.contractors.listByService,
-    getConvexEnv().configured
-      ? { serviceKey, citySlug: city?.slug }
+    getConvexEnv().configured && city
+      ? { serviceKey, citySlug: city.slug }
       : 'skip',
   );
 
@@ -28,6 +32,20 @@ export function ServiceListings({ serviceKey }: { serviceKey: ServiceKey }) {
         <p className="mt-1">
           See <code>CONVEX_SETUP.md</code> to enable contractor listings.
         </p>
+      </div>
+    );
+  }
+
+  // No city picked yet — prompt the visitor to choose one.
+  if (!city) {
+    return (
+      <div className="rounded-xl border border-navy/10 bg-navy/5 p-8 text-center">
+        <MapPin className="mx-auto h-8 w-8 text-forest" />
+        <p className="mt-3 text-lg font-semibold text-navy">{t('pickCityTitle')}</p>
+        <p className="mt-1 text-sm text-navy/70">{t('pickCityBody')}</p>
+        <div className="mt-4 flex justify-center">
+          <CityPicker locale={locale} variant="large" className="md:w-80" />
+        </div>
       </div>
     );
   }
@@ -46,7 +64,7 @@ export function ServiceListings({ serviceKey }: { serviceKey: ServiceKey }) {
     return (
       <div className="rounded-xl border border-navy/10 bg-navy/5 p-8 text-center">
         <p className="text-lg font-semibold text-navy">
-          {city ? t('emptyInCity', { city: city.name }) : t('emptyAnywhere')}
+          {t('emptyInCity', { city: city.name })}
         </p>
         <p className="mt-2 text-sm text-navy/70">{t('emptyHelp')}</p>
       </div>

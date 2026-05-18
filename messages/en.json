@@ -189,7 +189,9 @@
       "viewProfile": "View profile & reviews",
       "topRated": "Top rated",
       "newBadge": "New",
-      "startingAt": "Starting at"
+      "startingAt": "Starting at",
+      "pickCityTitle": "Choose your city",
+      "pickCityBody": "Select a city to see available pros near you."
     }
   },
   "About": {

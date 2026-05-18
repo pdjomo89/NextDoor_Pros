@@ -189,7 +189,9 @@
       "viewProfile": "Voir le profil et les avis",
       "topRated": "Très bien noté",
       "newBadge": "Nouveau",
-      "startingAt": "À partir de"
+      "startingAt": "À partir de",
+      "pickCityTitle": "Choisissez votre ville",
+      "pickCityBody": "Sélectionnez une ville pour voir les pros disponibles près de chez vous."
     }
   },
   "About": {
