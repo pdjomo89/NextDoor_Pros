@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { useMutation, useQuery } from 'convex/react';
 import { AlertTriangle, Loader2, MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -116,7 +117,10 @@ function ContactProModal({
     }
   }
 
-  return (
+  // Portal to <body>: the button can sit inside a contractor card whose
+  // `transform` (hover lift) would otherwise trap this `fixed` overlay and
+  // its `overflow-hidden` would clip it.
+  return createPortal(
     <div
       // No `backdrop-blur` here: backdrop-filter re-rasterizes on every
       // keystroke (the form repaints), which makes the overlay flicker.
@@ -231,6 +235,7 @@ function ContactProModal({
           }
         `}</style>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
