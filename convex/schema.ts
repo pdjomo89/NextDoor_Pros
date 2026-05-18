@@ -175,16 +175,27 @@ export default defineSchema({
 
   // ─── Platform-mediated messaging ───────────────────────────────────────
   //
-  // Customers and pros only ever communicate through in-app threads —
-  // phone/email/WhatsApp are never exposed, and message bodies are run
-  // through a contact-info redactor before they are stored. One
-  // `conversations` row per (customer, contractor) pair.
+  // Customers contact pros without an account: they submit an email + a
+  // first message, and a secret `guestToken` authorizes them to view and
+  // reply to that one thread via a private link (emailed to them). Pros
+  // are signed-in users and use their in-app inbox. Neither side ever sees
+  // the other's phone/email — message bodies are run through a contact-info
+  // redactor before storage.
   conversations: defineTable({
-    customerId: v.id('users'),
     contractorId: v.id('contractors'),
     // Denormalised contractor.ownerId so the pro's inbox is a single
     // indexed lookup with no contractor join.
     contractorOwnerId: v.id('users'),
+
+    // Guest customer — identified by email; `guestToken` is the secret that
+    // grants access to the thread. Used server-side only (never returned to
+    // the pro). All three are optional so pre-guest-era rows still validate.
+    customerEmail: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    guestToken: v.optional(v.string()),
+    // Legacy: retained (optional, unused) for backward compatibility.
+    customerId: v.optional(v.id('users')),
+
     // Optional context the thread was started from.
     jobId: v.optional(v.id('jobs')),
 
@@ -192,20 +203,21 @@ export default defineSchema({
     lastMessagePreview: v.string(),
     lastSenderRole: v.string(), // 'customer' | 'contractor'
 
-    // Per-side unread counters, kept in sync by sendMessage / markRead.
+    // Per-side unread counters, kept in sync by send/markRead.
     customerUnread: v.number(),
     contractorUnread: v.number(),
 
     status: v.string(), // 'active' | 'archived'
   })
-    .index('by_customer', ['customerId', 'lastMessageAt'])
     .index('by_contractorOwner', ['contractorOwnerId', 'lastMessageAt'])
-    .index('by_pair', ['customerId', 'contractorId']),
+    .index('by_guestToken', ['guestToken'])
+    .index('by_contractor_email', ['contractorId', 'customerEmail']),
 
   messages: defineTable({
     conversationId: v.id('conversations'),
-    senderId: v.id('users'),
     senderRole: v.string(), // 'customer' | 'contractor'
+    // Set for pro (signed-in) messages; absent for guest-customer messages.
+    senderId: v.optional(v.id('users')),
     // Already-redacted text — never store raw contact info.
     body: v.string(),
     // True when the redactor stripped something from the original text.

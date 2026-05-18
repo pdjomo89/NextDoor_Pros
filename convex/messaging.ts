@@ -2,8 +2,26 @@ import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { internalAction, mutation, query } from './_generated/server';
 import { internal } from './_generated/api';
+import type { Id } from './_generated/dataModel';
 
 const MAX_BODY_LEN = 2000;
+const MAX_NAME_LEN = 80;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function siteUrl(): string {
+  return (
+    process.env.SITE_URL?.replace(/\/$/, '') ??
+    'https://nextdoor-pros.vercel.app'
+  );
+}
+
+/** A long, unguessable secret used as the guest's private-link key. */
+function newGuestToken(): string {
+  return (
+    crypto.randomUUID().replace(/-/g, '') +
+    crypto.randomUUID().replace(/-/g, '')
+  );
+}
 
 /**
  * Strip phone numbers, emails and links out of message text so customers and
@@ -38,63 +56,221 @@ export function redactContactInfo(input: string): { text: string; flagged: boole
   return { text, flagged };
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// Guest customer side — no account required.
+// ──────────────────────────────────────────────────────────────────────────
+
 /**
- * Customer opens (or re-opens) a thread with a pro. Idempotent — re-uses the
- * existing conversation for the (customer, contractor) pair.
+ * A guest customer contacts a pro: email + a first message. Returns a secret
+ * `guestToken` that authorizes access to the thread via a private link.
+ * Re-uses an existing thread when the same email contacts the same pro.
  */
-export const startConversation = mutation({
+export const startGuestConversation = mutation({
   args: {
     contractorId: v.id('contractors'),
-    jobId: v.optional(v.id('jobs')),
+    email: v.string(),
+    name: v.optional(v.string()),
+    body: v.string(),
+    locale: v.optional(v.string()),
   },
-  handler: async (ctx, { contractorId, jobId }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('UNAUTHENTICATED');
-
+  handler: async (ctx, { contractorId, email, name, body, locale }) => {
     const contractor = await ctx.db.get(contractorId);
     if (!contractor) throw new Error('NOT_FOUND');
-    if (contractor.ownerId === userId) throw new Error('CANNOT_MESSAGE_SELF');
 
-    const existing = await ctx.db
+    const cleanEmail = email.trim().toLowerCase().slice(0, 320);
+    if (!EMAIL_RE.test(cleanEmail)) throw new Error('INVALID_EMAIL');
+
+    const cleanName = name?.trim().slice(0, MAX_NAME_LEN) || undefined;
+    const trimmed = body.trim().slice(0, MAX_BODY_LEN);
+    if (!trimmed) throw new Error('EMPTY');
+    const { text, flagged } = redactContactInfo(trimmed);
+
+    const loc = locale === 'fr' ? 'fr' : 'en';
+    const now = Date.now();
+
+    // Re-use a prior thread between this email and this pro.
+    let convo = await ctx.db
       .query('conversations')
-      .withIndex('by_pair', (q) =>
-        q.eq('customerId', userId).eq('contractorId', contractorId),
+      .withIndex('by_contractor_email', (q) =>
+        q.eq('contractorId', contractorId).eq('customerEmail', cleanEmail),
       )
-      .unique();
-    if (existing) return existing._id;
+      .first();
 
-    return await ctx.db.insert('conversations', {
-      customerId: userId,
-      contractorId,
-      contractorOwnerId: contractor.ownerId,
-      jobId,
-      lastMessageAt: Date.now(),
-      lastMessagePreview: '',
-      lastSenderRole: 'customer',
-      customerUnread: 0,
-      contractorUnread: 0,
-      status: 'active',
+    let guestToken: string;
+    let conversationId: Id<'conversations'>;
+    let isNew = false;
+
+    if (convo && convo.guestToken) {
+      guestToken = convo.guestToken;
+      conversationId = convo._id;
+    } else {
+      isNew = true;
+      guestToken = newGuestToken();
+      conversationId = await ctx.db.insert('conversations', {
+        contractorId,
+        contractorOwnerId: contractor.ownerId,
+        customerEmail: cleanEmail,
+        customerName: cleanName,
+        guestToken,
+        lastMessageAt: now,
+        lastMessagePreview: '',
+        lastSenderRole: 'customer',
+        customerUnread: 0,
+        contractorUnread: 0,
+        status: 'active',
+      });
+      convo = await ctx.db.get(conversationId);
+    }
+
+    const contractorWasUnread = convo?.contractorUnread ?? 0;
+
+    await ctx.db.insert('messages', {
+      conversationId,
+      senderRole: 'customer',
+      body: text,
+      flagged,
     });
+
+    await ctx.db.patch(conversationId, {
+      lastMessageAt: now,
+      lastMessagePreview: text.slice(0, 140),
+      lastSenderRole: 'customer',
+      contractorUnread: contractorWasUnread + 1,
+      ...(cleanName && !convo?.customerName ? { customerName: cleanName } : {}),
+    });
+
+    // Notify the pro (only on the first message of an unread streak).
+    if (contractorWasUnread === 0) {
+      const pro = await ctx.db.get(contractor.ownerId);
+      const proEmail = (pro as { email?: string } | null)?.email;
+      if (proEmail) {
+        await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+          toEmail: proEmail,
+          link: `${siteUrl()}/en/messages`,
+          intro: 'You have a new message from a customer on NextDoor Pros.',
+        });
+      }
+    }
+
+    // On a brand-new thread, email the customer their private link.
+    if (isNew) {
+      await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+        toEmail: cleanEmail,
+        link: `${siteUrl()}/${loc}/messages/guest?t=${guestToken}`,
+        intro:
+          'Thanks for your message — the pro has been notified. Use the link below any time to see their reply and continue the conversation.',
+      });
+    }
+
+    return { guestToken, conversationId };
   },
 });
 
-/** Post a message into a conversation. The body is redacted before storage. */
-export const sendMessage = mutation({
-  args: {
-    conversationId: v.id('conversations'),
-    body: v.string(),
+/** Guest sends a follow-up message, authorized by their secret token. */
+export const sendGuestMessage = mutation({
+  args: { token: v.string(), body: v.string() },
+  handler: async (ctx, { token, body }) => {
+    const convo = await ctx.db
+      .query('conversations')
+      .withIndex('by_guestToken', (q) => q.eq('guestToken', token))
+      .first();
+    if (!convo) throw new Error('NOT_FOUND');
+
+    const trimmed = body.trim().slice(0, MAX_BODY_LEN);
+    if (!trimmed) throw new Error('EMPTY');
+    const { text, flagged } = redactContactInfo(trimmed);
+
+    await ctx.db.insert('messages', {
+      conversationId: convo._id,
+      senderRole: 'customer',
+      body: text,
+      flagged,
+    });
+    await ctx.db.patch(convo._id, {
+      lastMessageAt: Date.now(),
+      lastMessagePreview: text.slice(0, 140),
+      lastSenderRole: 'customer',
+      contractorUnread: convo.contractorUnread + 1,
+    });
+
+    if (convo.contractorUnread === 0) {
+      const pro = await ctx.db.get(convo.contractorOwnerId);
+      const proEmail = (pro as { email?: string } | null)?.email;
+      if (proEmail) {
+        await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+          toEmail: proEmail,
+          link: `${siteUrl()}/en/messages`,
+          intro: 'You have a new message from a customer on NextDoor Pros.',
+        });
+      }
+    }
+    return { flagged };
   },
+});
+
+/** Guest reads their thread via the private token. Returns null if invalid. */
+export const getGuestConversation = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const convo = await ctx.db
+      .query('conversations')
+      .withIndex('by_guestToken', (q) => q.eq('guestToken', token))
+      .first();
+    if (!convo) return null;
+
+    const contractor = await ctx.db.get(convo.contractorId);
+    const rows = await ctx.db
+      .query('messages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', convo._id))
+      .order('desc')
+      .take(200);
+    rows.reverse();
+
+    return {
+      contractorName: contractor?.businessName ?? 'Pro',
+      customerName: convo.customerName ?? null,
+      unread: convo.customerUnread,
+      messages: rows.map((m) => ({
+        _id: m._id,
+        _creationTime: m._creationTime,
+        senderRole: m.senderRole,
+        body: m.body,
+        flagged: m.flagged,
+        mine: m.senderRole === 'customer',
+      })),
+    };
+  },
+});
+
+/** Guest clears their unread badge. */
+export const markGuestRead = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const convo = await ctx.db
+      .query('conversations')
+      .withIndex('by_guestToken', (q) => q.eq('guestToken', token))
+      .first();
+    if (convo && convo.customerUnread !== 0) {
+      await ctx.db.patch(convo._id, { customerUnread: 0 });
+    }
+    return null;
+  },
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// Pro side — signed-in users only.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Pro replies in their thread. Customer is notified via their private link. */
+export const sendMessage = mutation({
+  args: { conversationId: v.id('conversations'), body: v.string() },
   handler: async (ctx, { conversationId, body }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error('UNAUTHENTICATED');
 
     const convo = await ctx.db.get(conversationId);
     if (!convo) throw new Error('NOT_FOUND');
-
-    const isCustomer = convo.customerId === userId;
-    const isContractor = convo.contractorOwnerId === userId;
-    if (!isCustomer && !isContractor) throw new Error('FORBIDDEN');
-    const senderRole = isCustomer ? 'customer' : 'contractor';
+    if (convo.contractorOwnerId !== userId) throw new Error('FORBIDDEN');
 
     const trimmed = body.trim().slice(0, MAX_BODY_LEN);
     if (!trimmed) throw new Error('EMPTY');
@@ -103,44 +279,30 @@ export const sendMessage = mutation({
     await ctx.db.insert('messages', {
       conversationId,
       senderId: userId,
-      senderRole,
+      senderRole: 'contractor',
       body: text,
       flagged,
     });
-
-    // The recipient's unread count *before* this message — used to decide
-    // whether to fire an email (only on the first message of a streak).
-    const recipientWasUnread = isCustomer
-      ? convo.contractorUnread
-      : convo.customerUnread;
-
     await ctx.db.patch(conversationId, {
       lastMessageAt: Date.now(),
       lastMessagePreview: text.slice(0, 140),
-      lastSenderRole: senderRole,
-      customerUnread: isCustomer ? convo.customerUnread : convo.customerUnread + 1,
-      contractorUnread: isCustomer
-        ? convo.contractorUnread + 1
-        : convo.contractorUnread,
+      lastSenderRole: 'contractor',
+      customerUnread: convo.customerUnread + 1,
     });
 
-    if (recipientWasUnread === 0) {
-      const recipientUserId = isCustomer
-        ? convo.contractorOwnerId
-        : convo.customerId;
-      const recipient = await ctx.db.get(recipientUserId);
-      const email = (recipient as { email?: string } | null)?.email;
-      if (email) {
-        await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
-          toEmail: email,
-        });
-      }
+    // Email the customer their private link on the first reply of a streak.
+    if (convo.customerUnread === 0 && convo.customerEmail && convo.guestToken) {
+      await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+        toEmail: convo.customerEmail,
+        link: `${siteUrl()}/en/messages/guest?t=${convo.guestToken}`,
+        intro: 'The pro replied to your message on NextDoor Pros.',
+      });
     }
     return { flagged };
   },
 });
 
-/** Mark a conversation read for the calling side. */
+/** Pro clears the unread badge on one of their threads. */
 export const markRead = mutation({
   args: { conversationId: v.id('conversations') },
   handler: async (ctx, { conversationId }) => {
@@ -149,78 +311,40 @@ export const markRead = mutation({
 
     const convo = await ctx.db.get(conversationId);
     if (!convo) return null;
-
-    if (convo.customerId === userId && convo.customerUnread !== 0) {
-      await ctx.db.patch(conversationId, { customerUnread: 0 });
-    } else if (
-      convo.contractorOwnerId === userId &&
-      convo.contractorUnread !== 0
-    ) {
+    if (convo.contractorOwnerId === userId && convo.contractorUnread !== 0) {
       await ctx.db.patch(conversationId, { contractorUnread: 0 });
     }
     return null;
   },
 });
 
-/** Every conversation the signed-in user is part of, newest activity first. */
+/** The signed-in pro's inbox, newest activity first. */
 export const listMyConversations = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const asCustomer = await ctx.db
-      .query('conversations')
-      .withIndex('by_customer', (q) => q.eq('customerId', userId))
-      .order('desc')
-      .take(100);
-    const asContractor = await ctx.db
+    const rows = await ctx.db
       .query('conversations')
       .withIndex('by_contractorOwner', (q) => q.eq('contractorOwnerId', userId))
       .order('desc')
       .take(100);
 
-    const out: Array<{
-      _id: string;
-      contractorId: string;
-      role: 'customer' | 'contractor';
-      otherName: string;
-      lastMessageAt: number;
-      lastMessagePreview: string;
-      unread: number;
-    }> = [];
-
-    for (const c of [...asCustomer, ...asContractor]) {
-      const role: 'customer' | 'contractor' =
-        c.customerId === userId ? 'customer' : 'contractor';
-
-      let otherName = 'NextDoor Pros user';
-      if (role === 'customer') {
-        const contractor = await ctx.db.get(c.contractorId);
-        otherName = contractor?.businessName ?? 'Pro';
-      } else {
-        const customer = await ctx.db.get(c.customerId);
-        const name = (customer as { name?: string } | null)?.name ?? null;
-        const email = (customer as { email?: string } | null)?.email ?? null;
-        otherName = name ?? (email ? email.split('@')[0] : 'Customer');
-      }
-
-      out.push({
-        _id: c._id,
-        contractorId: c.contractorId,
-        role,
-        otherName,
-        lastMessageAt: c.lastMessageAt,
-        lastMessagePreview: c.lastMessagePreview,
-        unread: role === 'customer' ? c.customerUnread : c.contractorUnread,
-      });
-    }
-    out.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
-    return out;
+    return rows.map((c) => ({
+      _id: c._id,
+      contractorId: c.contractorId,
+      role: 'contractor' as const,
+      // The customer's email is never exposed to the pro.
+      otherName: c.customerName ?? 'Customer',
+      lastMessageAt: c.lastMessageAt,
+      lastMessagePreview: c.lastMessagePreview,
+      unread: c.contractorUnread,
+    }));
   },
 });
 
-/** Messages in one conversation (oldest first). Returns null if not allowed. */
+/** Messages in one of the pro's threads. Returns null if not theirs. */
 export const listMessages = query({
   args: { conversationId: v.id('conversations') },
   handler: async (ctx, { conversationId }) => {
@@ -228,10 +352,7 @@ export const listMessages = query({
     if (!userId) return null;
 
     const convo = await ctx.db.get(conversationId);
-    if (!convo) return null;
-    if (convo.customerId !== userId && convo.contractorOwnerId !== userId) {
-      return null;
-    }
+    if (!convo || convo.contractorOwnerId !== userId) return null;
 
     const rows = await ctx.db
       .query('messages')
@@ -241,60 +362,48 @@ export const listMessages = query({
     rows.reverse();
 
     return {
-      myRole: convo.customerId === userId ? 'customer' : 'contractor',
+      myRole: 'contractor' as const,
       messages: rows.map((m) => ({
         _id: m._id,
         _creationTime: m._creationTime,
         senderRole: m.senderRole,
         body: m.body,
         flagged: m.flagged,
-        mine: m.senderId === userId,
+        mine: m.senderRole === 'contractor',
       })),
     };
   },
 });
 
-/** Total unread messages across all of the signed-in user's conversations. */
+/** Total unread messages across the signed-in pro's threads. */
 export const unreadCount = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return 0;
 
-    const asCustomer = await ctx.db
-      .query('conversations')
-      .withIndex('by_customer', (q) => q.eq('customerId', userId))
-      .take(100);
-    const asContractor = await ctx.db
+    const rows = await ctx.db
       .query('conversations')
       .withIndex('by_contractorOwner', (q) => q.eq('contractorOwnerId', userId))
       .take(100);
-
-    let n = 0;
-    for (const c of asCustomer) n += c.customerUnread;
-    for (const c of asContractor) n += c.contractorUnread;
-    return n;
+    return rows.reduce((n, c) => n + c.contractorUnread, 0);
   },
 });
 
 /**
  * Best-effort "you have a new message" email via Resend. Deliberately omits
- * the message body — the recipient must log in to read it, which keeps the
- * conversation on-platform. No-ops when RESEND_API_KEY is unset.
+ * the message body — the recipient must open the link to read it, which keeps
+ * the conversation on-platform. No-ops when RESEND_API_KEY is unset.
  */
 export const notifyByEmail = internalAction({
-  args: { toEmail: v.string() },
-  handler: async (_ctx, { toEmail }) => {
+  args: { toEmail: v.string(), link: v.string(), intro: v.string() },
+  handler: async (_ctx, { toEmail, link, intro }) => {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return;
 
     const from =
       process.env.CONTACT_FROM_EMAIL ??
       'NextDoor Pros <onboarding@resend.dev>';
-    const site =
-      process.env.SITE_URL?.replace(/\/$/, '') ??
-      'https://nextdoor-pros.vercel.app';
-
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -305,18 +414,18 @@ export const notifyByEmail = internalAction({
         body: JSON.stringify({
           from,
           to: [toEmail],
-          subject: 'You have a new message on NextDoor Pros',
+          subject: 'New message on NextDoor Pros',
           text: [
-            'You have a new message on NextDoor Pros.',
+            intro,
             '',
-            `Log in to read and reply: ${site}/en/messages`,
+            `Open the conversation: ${link}`,
             '',
-            'For your safety, please keep all conversations and payments on the platform.',
+            'For your safety, please keep all conversations and payments on NextDoor Pros.',
           ].join('\n'),
         }),
       });
     } catch {
-      // Best-effort — a failed notification must not break sendMessage.
+      // Best-effort — a failed notification must not break the message send.
     }
   },
 });
