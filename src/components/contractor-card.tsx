@@ -1,27 +1,15 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import {
-  Phone,
-  Mail,
-  MessageCircle,
-  MapPin,
-  ArrowRight,
-  Award,
-  Sparkles,
-} from 'lucide-react';
+import { MapPin, ArrowRight, Award, Sparkles } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { Button } from '@/components/ui/button';
+import { ContactProButton } from '@/components/contact-pro-button';
 import { StarRating } from '@/components/star-rating';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-
-function digits(n: string) {
-  return n.replace(/[^\d]/g, '');
-}
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -140,36 +128,12 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
         </div>
 
         <div className="mt-auto flex flex-col gap-3 pt-5">
-          <div className="flex flex-wrap gap-2">
-            {contractor.phone && (
-              <Button asChild variant="primary" size="sm">
-                <a href={`tel:${digits(contractor.phone)}`}>
-                  <Phone className="h-4 w-4" />
-                  {t('call')}
-                </a>
-              </Button>
-            )}
-            {contractor.email && (
-              <Button asChild variant="outline" size="sm">
-                <a href={`mailto:${contractor.email}`}>
-                  <Mail className="h-4 w-4" />
-                  {t('emailAction')}
-                </a>
-              </Button>
-            )}
-            {contractor.whatsapp && (
-              <Button asChild variant="secondary" size="sm">
-                <a
-                  href={`https://wa.me/${digits(contractor.whatsapp)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </a>
-              </Button>
-            )}
-          </div>
+          <ContactProButton
+            contractorId={contractor._id}
+            ownerId={contractor.ownerId}
+            variant="primary"
+            size="sm"
+          />
 
           <Link
             href={profileHref}

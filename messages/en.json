@@ -23,7 +23,8 @@
     "closeMenu": "Close menu",
     "signIn": "Sign in",
     "becomePro": "Become a pro",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "messages": "Messages"
   },
   "Home": {
     "hero": {
@@ -578,7 +579,8 @@
     },
     "profile": {
       "servicesTitle": "Services offered",
-      "photosTitle": "Photos"
+      "photosTitle": "Photos",
+      "contactPrivacyNote": "You'll connect through secure in-app messaging — no phone number or email is shared."
     },
     "booking": {
       "sectionTitle": "Book a service",
@@ -680,5 +682,29 @@
     "terms": "Terms",
     "cookies": "Cookies",
     "customerService": "Customer service"
+  },
+  "Messages": {
+    "title": "Messages",
+    "subtitle": "Chat with pros and customers — securely, inside NextDoor Pros.",
+    "metaDescription": "Your NextDoor Pros conversations.",
+    "contactButton": "Message",
+    "opening": "Opening…",
+    "inboxTitle": "Conversations",
+    "empty": "No conversations yet",
+    "emptyHint": "Open a pro's profile and tap Message to start one.",
+    "noMessagesYet": "No messages yet",
+    "selectPrompt": "Select a conversation to start chatting.",
+    "threadEmpty": "Say hello — send the first message.",
+    "back": "Back",
+    "composerPlaceholder": "Write a message…",
+    "send": "Send",
+    "redactionNotice": "Phone numbers, emails and links are removed automatically. Keep deals on NextDoor Pros.",
+    "flaggedNote": "contact info hidden",
+    "roleAsCustomer": "You're the customer",
+    "roleAsPro": "You're the pro",
+    "signInTitle": "Sign in to view your messages",
+    "signInBody": "Conversations with pros and customers live in your NextDoor Pros account.",
+    "signInCta": "Sign in",
+    "unavailable": "Messaging is not available right now."
   }
 }

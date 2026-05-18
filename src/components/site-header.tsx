@@ -3,13 +3,52 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { Menu, X, LogIn, Briefcase } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { Menu, X, LogIn, Briefcase, MessageSquare } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { LanguageToggle } from '@/components/language-toggle';
+import { getConvexEnv } from '@/lib/convex-env';
+import { api } from '../../convex/_generated/api';
 import type { Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
+
+/** Messages link with a live unread-count badge. Rendered only when signed in. */
+function InboxLink({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
+  const t = useTranslations('Nav');
+  const configured = getConvexEnv().configured;
+  const count = useQuery(
+    api.messaging.unreadCount,
+    configured ? {} : 'skip',
+  ) as number | undefined;
+  const badge = count && count > 0 ? (count > 9 ? '9+' : String(count)) : null;
+
+  return (
+    <Link
+      href="/messages"
+      onClick={onNavigate}
+      className={cn(
+        'relative inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-navy/80 transition-colors hover:bg-navy/5 hover:text-navy',
+        className,
+      )}
+    >
+      <MessageSquare className="h-4 w-4" />
+      {t('messages')}
+      {badge && (
+        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-forest px-1 text-[10px] font-bold text-white">
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 const NAV_ITEMS = [
   { href: '/services', key: 'services' },
@@ -71,12 +110,15 @@ export function SiteHeader({
           <CityPicker locale={locale} />
           <LanguageToggle />
           {signedIn ? (
-            <Button asChild variant="primary" size="sm">
-              <Link href="/pros/dashboard">
-                <Briefcase className="h-4 w-4" />
-                {t('dashboard')}
-              </Link>
-            </Button>
+            <>
+              <InboxLink />
+              <Button asChild variant="primary" size="sm">
+                <Link href="/pros/dashboard">
+                  <Briefcase className="h-4 w-4" />
+                  {t('dashboard')}
+                </Link>
+              </Button>
+            </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
@@ -132,12 +174,18 @@ export function SiteHeader({
             </div>
             <div className="flex flex-wrap gap-2">
               {signedIn ? (
-                <Button asChild variant="primary" size="sm" className="flex-1">
-                  <Link href="/pros/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Briefcase className="h-4 w-4" />
-                    {t('dashboard')}
-                  </Link>
-                </Button>
+                <>
+                  <InboxLink
+                    className="flex-1 border border-navy/15"
+                    onNavigate={() => setMobileOpen(false)}
+                  />
+                  <Button asChild variant="primary" size="sm" className="flex-1">
+                    <Link href="/pros/dashboard" onClick={() => setMobileOpen(false)}>
+                      <Briefcase className="h-4 w-4" />
+                      {t('dashboard')}
+                    </Link>
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button asChild variant="outline" size="sm" className="flex-1">

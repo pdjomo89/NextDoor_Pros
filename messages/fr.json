@@ -23,7 +23,8 @@
     "closeMenu": "Fermer le menu",
     "signIn": "Se connecter",
     "becomePro": "Devenir un pro",
-    "dashboard": "Tableau de bord"
+    "dashboard": "Tableau de bord",
+    "messages": "Messages"
   },
   "Home": {
     "hero": {
@@ -578,7 +579,8 @@
     },
     "profile": {
       "servicesTitle": "Services offerts",
-      "photosTitle": "Photos"
+      "photosTitle": "Photos",
+      "contactPrivacyNote": "Vous communiquerez via la messagerie sécurisée intégrée — aucun numéro ni courriel n'est partagé."
     },
     "booking": {
       "sectionTitle": "Réserver un service",
@@ -680,5 +682,29 @@
     "terms": "Conditions",
     "cookies": "Témoins",
     "customerService": "Service à la clientèle"
+  },
+  "Messages": {
+    "title": "Messages",
+    "subtitle": "Discutez avec les pros et les clients — en toute sécurité, dans NextDoor Pros.",
+    "metaDescription": "Vos conversations NextDoor Pros.",
+    "contactButton": "Message",
+    "opening": "Ouverture…",
+    "inboxTitle": "Conversations",
+    "empty": "Aucune conversation pour l'instant",
+    "emptyHint": "Ouvrez le profil d'un pro et touchez Message pour commencer.",
+    "noMessagesYet": "Aucun message",
+    "selectPrompt": "Sélectionnez une conversation pour commencer à discuter.",
+    "threadEmpty": "Dites bonjour — envoyez le premier message.",
+    "back": "Retour",
+    "composerPlaceholder": "Écrivez un message…",
+    "send": "Envoyer",
+    "redactionNotice": "Les numéros de téléphone, courriels et liens sont retirés automatiquement. Gardez vos ententes sur NextDoor Pros.",
+    "flaggedNote": "coordonnées masquées",
+    "roleAsCustomer": "Vous êtes le client",
+    "roleAsPro": "Vous êtes le pro",
+    "signInTitle": "Connectez-vous pour voir vos messages",
+    "signInBody": "Les conversations avec les pros et les clients sont liées à votre compte NextDoor Pros.",
+    "signInCta": "Se connecter",
+    "unavailable": "La messagerie n'est pas disponible pour le moment."
   }
 }

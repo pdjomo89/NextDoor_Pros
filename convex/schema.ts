@@ -173,6 +173,45 @@ export default defineSchema({
     .index('by_session', ['stripeCheckoutSessionId'])
     .index('by_paymentIntent', ['stripePaymentIntentId']),
 
+  // ─── Platform-mediated messaging ───────────────────────────────────────
+  //
+  // Customers and pros only ever communicate through in-app threads —
+  // phone/email/WhatsApp are never exposed, and message bodies are run
+  // through a contact-info redactor before they are stored. One
+  // `conversations` row per (customer, contractor) pair.
+  conversations: defineTable({
+    customerId: v.id('users'),
+    contractorId: v.id('contractors'),
+    // Denormalised contractor.ownerId so the pro's inbox is a single
+    // indexed lookup with no contractor join.
+    contractorOwnerId: v.id('users'),
+    // Optional context the thread was started from.
+    jobId: v.optional(v.id('jobs')),
+
+    lastMessageAt: v.number(),
+    lastMessagePreview: v.string(),
+    lastSenderRole: v.string(), // 'customer' | 'contractor'
+
+    // Per-side unread counters, kept in sync by sendMessage / markRead.
+    customerUnread: v.number(),
+    contractorUnread: v.number(),
+
+    status: v.string(), // 'active' | 'archived'
+  })
+    .index('by_customer', ['customerId', 'lastMessageAt'])
+    .index('by_contractorOwner', ['contractorOwnerId', 'lastMessageAt'])
+    .index('by_pair', ['customerId', 'contractorId']),
+
+  messages: defineTable({
+    conversationId: v.id('conversations'),
+    senderId: v.id('users'),
+    senderRole: v.string(), // 'customer' | 'contractor'
+    // Already-redacted text — never store raw contact info.
+    body: v.string(),
+    // True when the redactor stripped something from the original text.
+    flagged: v.boolean(),
+  }).index('by_conversation', ['conversationId']),
+
   // A pro's application to a paid job.
   jobApplications: defineTable({
     jobId: v.id('jobs'),

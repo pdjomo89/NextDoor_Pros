@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { fetchQuery } from 'convex/nextjs';
-import { ArrowLeft, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { ArrowLeft, MapPin } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/star-rating';
 import { ReviewSection } from '@/components/review-section';
+import { ContactProButton } from '@/components/contact-pro-button';
 import { BookingSection } from '@/components/booking-section';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
@@ -17,10 +18,6 @@ import type { ReviewDoc } from '@/lib/review-types';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
 import { api } from '../../../../../convex/_generated/api';
-
-function digits(n: string) {
-  return n.replace(/[^\d]/g, '');
-}
 
 async function getContractor(id: string): Promise<ContractorDoc | null> {
   if (!getConvexEnv().configured) return null;
@@ -238,35 +235,14 @@ export default async function ContractorProfilePage({
           }}
         />
 
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-navy/10 pt-5">
-          {contractor.phone && (
-            <Button asChild variant="primary" size="sm">
-              <a href={`tel:${digits(contractor.phone)}`}>
-                <Phone className="h-4 w-4" />
-                {t('listings.call')}
-              </a>
-            </Button>
-          )}
-          {contractor.email && (
-            <Button asChild variant="outline" size="sm">
-              <a href={`mailto:${contractor.email}`}>
-                <Mail className="h-4 w-4" />
-                {t('listings.emailAction')}
-              </a>
-            </Button>
-          )}
-          {contractor.whatsapp && (
-            <Button asChild variant="secondary" size="sm">
-              <a
-                href={`https://wa.me/${digits(contractor.whatsapp)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MessageCircle className="h-4 w-4" />
-                WhatsApp
-              </a>
-            </Button>
-          )}
+        <div className="mt-6 border-t border-navy/10 pt-5">
+          <ContactProButton
+            contractorId={contractor._id}
+            ownerId={contractor.ownerId}
+            variant="primary"
+            size="sm"
+          />
+          <p className="mt-2 text-xs text-navy/50">{tp('contactPrivacyNote')}</p>
         </div>
       </article>
 

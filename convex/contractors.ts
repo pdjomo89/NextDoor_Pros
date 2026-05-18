@@ -35,6 +35,10 @@ export const viewer = query({
 /**
  * Public: a single published contractor by id (or null if missing/unpublished).
  * Includes `photoUrls` (resolved from the stored file ids).
+ *
+ * Contact fields (`phone` / `email` / `whatsapp`) are deliberately stripped —
+ * customers reach pros only through platform-mediated messaging. They stay in
+ * the DB for ops/Stripe and are still readable by the owner via `getMine`.
  */
 export const getPublic = query({
   args: { id: v.id('contractors') },
@@ -46,7 +50,11 @@ export const getPublic = query({
       const url = await ctx.storage.getUrl(fileId);
       if (url) photoUrls.push(url);
     }
-    return { ...doc, photoUrls };
+    const { phone, email, whatsapp, ...pub } = doc;
+    void phone;
+    void email;
+    void whatsapp;
+    return { ...pub, photoUrls };
   },
 });
 
@@ -92,11 +100,16 @@ export const listByService = query({
       .sort((a, b) => b._creationTime - a._creationTime);
 
     // Resolve only the hero photo for the card — the rest live on the profile.
+    // Contact fields are stripped here too (see `getPublic`).
     const withPhotos = [];
     for (const c of matched) {
       const heroId = c.photos?.[0];
       const heroUrl = heroId ? await ctx.storage.getUrl(heroId) : null;
-      withPhotos.push({ ...c, photoUrls: heroUrl ? [heroUrl] : [] });
+      const { phone, email, whatsapp, ...pub } = c;
+      void phone;
+      void email;
+      void whatsapp;
+      withPhotos.push({ ...pub, photoUrls: heroUrl ? [heroUrl] : [] });
     }
     return withPhotos;
   },
