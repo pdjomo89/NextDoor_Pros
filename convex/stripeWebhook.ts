@@ -89,6 +89,12 @@ export const handler = httpAction(async (ctx, request) => {
     }
   } catch (err) {
     console.error(`stripe webhook ${event.type} handler failed`, err);
+    // Release the idempotency claim so the 500 below makes Stripe retry the
+    // event — without this, the retry would be skipped as "already processed"
+    // and the event would be lost permanently.
+    await ctx.runMutation(internal.payments.unrecordStripeEvent, {
+      eventId: event.id,
+    });
     return new Response('Handler error', { status: 500 });
   }
 

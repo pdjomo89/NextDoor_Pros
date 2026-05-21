@@ -529,9 +529,13 @@ export const getContractorByStripeAccount = internalQuery({
 });
 
 /**
- * Atomically check + record a Stripe event for idempotency.
+ * Atomically claim a Stripe event for idempotency.
  * Returns `true` if this is the first time we see this event id, `false` if
- * we've already processed it (and the caller should skip).
+ * it's already claimed (and the caller should skip).
+ *
+ * The claim is provisional: if the webhook handler throws, the caller must
+ * release it via `unrecordStripeEvent` so Stripe's retry can re-process the
+ * event. Otherwise a transient handler failure would drop the event forever.
  */
 export const recordStripeEvent = internalMutation({
   args: { eventId: v.string(), type: v.string() },
@@ -543,6 +547,23 @@ export const recordStripeEvent = internalMutation({
     if (existing) return false;
     await ctx.db.insert('stripeEvents', { eventId, type });
     return true;
+  },
+});
+
+/**
+ * Release an idempotency claim made by `recordStripeEvent`. Called when a
+ * webhook handler fails, so the 5xx response we return prompts Stripe to
+ * retry — and that retry sees the event as fresh again instead of being
+ * skipped as "already processed".
+ */
+export const unrecordStripeEvent = internalMutation({
+  args: { eventId: v.string() },
+  handler: async (ctx, { eventId }) => {
+    const existing = await ctx.db
+      .query('stripeEvents')
+      .withIndex('by_eventId', (q) => q.eq('eventId', eventId))
+      .unique();
+    if (existing) await ctx.db.delete(existing._id);
   },
 });
 
