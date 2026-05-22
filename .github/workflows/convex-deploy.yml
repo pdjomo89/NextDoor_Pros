@@ -1,0 +1,29 @@
+name: Deploy Convex to production
+
+# Deploys the Convex backend (convex/) to the production deployment.
+# Runs on every push to main, and can be triggered manually from the
+# Actions tab. Requires a CONVEX_DEPLOY_KEY repository secret — a
+# production deploy key generated in the Convex dashboard.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy Convex functions
+        run: npx convex deploy -y
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
