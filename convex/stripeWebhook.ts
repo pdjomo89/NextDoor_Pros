@@ -11,20 +11,34 @@ function stripeClient(): Stripe {
 
 export const handler = httpAction(async (ctx, request) => {
   const signature = request.headers.get('stripe-signature');
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const rawBody = await request.text();
 
-  if (!signature || !secret || secret === 'whsec_placeholder') {
+  // This URL is registered as two Stripe webhook endpoints: one for
+  // platform-account events (checkout, subscriptions, charges) and one for
+  // Connect events on connected accounts (account.updated). Each endpoint has
+  // its own signing secret, so we try each until one verifies.
+  const secrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_CONNECT,
+  ].filter((s): s is string => Boolean(s) && s !== 'whsec_placeholder');
+
+  if (!signature || secrets.length === 0) {
     return new Response('Webhook not configured', { status: 400 });
   }
 
   const stripe = stripeClient();
-  let event: Stripe.Event;
-  try {
-    // Async variant uses Web Crypto API — required in the Convex V8 runtime.
-    event = await stripe.webhooks.constructEventAsync(rawBody, signature, secret);
-  } catch (err) {
-    console.error('stripe webhook signature verification failed', err);
+  let event: Stripe.Event | undefined;
+  for (const secret of secrets) {
+    try {
+      // Async variant uses Web Crypto API — required in the Convex V8 runtime.
+      event = await stripe.webhooks.constructEventAsync(rawBody, signature, secret);
+      break;
+    } catch {
+      // Signature didn't match this secret — try the next one.
+    }
+  }
+  if (!event) {
+    console.error('stripe webhook signature verification failed for all secrets');
     return new Response('Invalid signature', { status: 400 });
   }
 
