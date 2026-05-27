@@ -105,7 +105,7 @@ async function ensureExpressAccount(
   const stripe = stripeClient();
   const account = await stripe.accounts.create({
     type: 'express',
-    country: 'CA',
+    country: 'US',
     email: contractor.email,
     business_type: 'individual',
     capabilities: {
