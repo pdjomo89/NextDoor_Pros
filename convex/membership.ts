@@ -146,7 +146,7 @@ export const startMembershipCheckout = action({
       const customer = await stripe.customers.create({
         email: contractor.email,
         name: contractor.businessName,
-        metadata: { contractorId: contractor._id },
+        metadata: { platform: 'nextdoor_pros', contractorId: contractor._id },
       });
       customerId = customer.id;
       await ctx.runMutation(internal.membership.setStripeCustomer, {
@@ -162,12 +162,14 @@ export const startMembershipCheckout = action({
       success_url: `${siteUrl()}/${locale}/pros/dashboard?membership=active`,
       cancel_url: `${siteUrl()}/${locale}/pros/onboard/membership?cancelled=1`,
       metadata: {
+        platform: 'nextdoor_pros',
         kind: 'membership',
         contractorId: contractor._id,
         plan,
       },
       subscription_data: {
         metadata: {
+          platform: 'nextdoor_pros',
           kind: 'membership',
           contractorId: contractor._id,
           plan,

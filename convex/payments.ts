@@ -118,6 +118,7 @@ async function ensureExpressAccount(
       url: `${siteUrl()}/en/pros/${contractor._id}`,
     },
     metadata: {
+      platform: 'nextdoor_pros',
       contractorId: contractor._id,
     },
   });
@@ -386,6 +387,7 @@ export const createCheckoutSession = action({
         application_fee_amount: applicationFeeCents,
         transfer_data: { destination: contractor.stripeAccountId },
         metadata: {
+          platform: 'nextdoor_pros',
           contractorId: contractor._id,
           contractorServiceId: service._id,
         },
@@ -393,6 +395,7 @@ export const createCheckoutSession = action({
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
+        platform: 'nextdoor_pros',
         contractorId: contractor._id,
         contractorServiceId: service._id,
         customerName: customerName?.slice(0, 200) ?? '',

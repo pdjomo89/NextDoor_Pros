@@ -246,11 +246,11 @@ export const createPaidCheckout = action({
         },
       ],
       success_url: `${siteUrl()}/${args.locale}/jobs/${jobId}?paid=1`,
-      cancel_url: `${siteUrl()}/${args.locale}/jobs/post?cancelled=1&jobId=${jobId}`,
+      cancel_url: `${siteUrl()}/${args.locale}/jobs/new?cancelled=1`,
       // Distinguish job sessions from service-booking sessions in the webhook.
-      metadata: { kind: 'job', jobId },
+      metadata: { platform: 'nextdoor_pros', kind: 'job', jobId },
       payment_intent_data: {
-        metadata: { kind: 'job', jobId },
+        metadata: { platform: 'nextdoor_pros', kind: 'job', jobId },
       },
     });
 
@@ -405,7 +405,7 @@ export const markJobComplete = action({
       destination: contractor.stripeAccountId,
       source_transaction: job.stripeChargeId,
       transfer_group: `job_${job._id}`,
-      metadata: { jobId: job._id, contractorId: contractor._id },
+      metadata: { platform: 'nextdoor_pros', jobId: job._id, contractorId: contractor._id },
     });
 
     await ctx.runMutation(internal.jobs.markJobReleased, {
