@@ -92,25 +92,27 @@ export default async function PartnersPage({
             const tagline = t(`entries.${p.slug}.tagline`);
 
             const cardClass =
-              'group flex h-full flex-col rounded-2xl border border-navy/10 bg-white p-8 transition-colors duration-200 hover:border-navy/20';
+              'group flex h-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white transition-colors duration-200 hover:border-navy/20';
 
             const inner = (
               <>
-                <div className="flex h-32 items-center justify-center">
+                <div className="relative aspect-[5/4] w-full">
                   {p.logo ? (
                     <Image
                       src={p.logo}
                       alt={`${p.name} logo`}
-                      width={1254}
-                      height={1254}
-                      className="max-h-full max-w-[80%] object-contain"
+                      fill
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                      className="object-contain"
                     />
                   ) : (
-                    <Handshake className="h-14 w-14 text-navy/30" aria-hidden />
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Handshake className="h-20 w-20 text-navy/30" aria-hidden />
+                    </div>
                   )}
                 </div>
 
-                <div className="mt-6 flex flex-1 flex-col">
+                <div className="flex flex-1 flex-col p-6">
                   <h3 className="text-lg font-semibold text-navy">{p.name}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-navy/65">{tagline}</p>
                   {p.url && (
