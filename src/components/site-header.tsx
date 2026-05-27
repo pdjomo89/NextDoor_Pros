@@ -106,17 +106,20 @@ export function SiteHeader({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-navy/10 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
       <div className="container flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center" aria-label={t('brand')}>
-          <Image
-            src="/logo.png"
-            alt={t('brand')}
-            width={1254}
-            height={1254}
-            priority
-            className="h-12 w-12 sm:h-14 sm:w-14"
-          />
-          <span className="sr-only">{t('brand')}</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center" aria-label={t('brand')}>
+            <Image
+              src="/logo.png"
+              alt={t('brand')}
+              width={1254}
+              height={1254}
+              priority
+              className="h-12 w-12 sm:h-14 sm:w-14"
+            />
+            <span className="sr-only">{t('brand')}</span>
+          </Link>
+          <LanguageToggle />
+        </div>
 
         <nav className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => {
@@ -140,7 +143,6 @@ export function SiteHeader({
 
         <div className="hidden items-center gap-2 md:flex">
           <CityPicker locale={locale} />
-          <LanguageToggle />
           {signedIn ? (
             <>
               <InboxLink />
@@ -203,7 +205,6 @@ export function SiteHeader({
             </nav>
             <div className="flex flex-wrap items-center gap-2">
               <CityPicker locale={locale} />
-              <LanguageToggle />
             </div>
             <div className="flex flex-wrap gap-2">
               {signedIn ? (
