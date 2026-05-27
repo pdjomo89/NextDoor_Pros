@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "NextDoor Pros — Services locaux de confiance partout au Canada",
-    "description": "Réservez des pros locaux vérifiés pour la maison, la beauté, l'extérieur, le déménagement, les services saisonniers et les petits travaux dans votre ville canadienne."
+    "description": "Réservez des pros locaux vérifiés pour la maison, la beauté, l'extérieur, le déménagement, les services saisonniers et les petits travaux dans votre ville."
   },
   "Nav": {
     "brand": "NextDoor Pros",
@@ -13,7 +13,7 @@
     "news": "Nouvelles",
     "contact": "Contact",
     "selectCity": "Choisir votre ville",
-    "searchCity": "Rechercher une ville canadienne...",
+    "searchCity": "Rechercher une ville...",
     "noCity": "Aucune ville trouvée.",
     "language": "Langue",
     "english": "English",
@@ -47,7 +47,7 @@
     "howItWorks": {
       "title": "Comment ça marche",
       "step1Title": "1. Choisissez votre ville",
-      "step1Body": "Sélectionnez votre ville canadienne pour trouver les pros près de chez vous.",
+      "step1Body": "Sélectionnez votre ville pour trouver les pros près de chez vous.",
       "step2Title": "2. Choisissez un service",
       "step2Body": "Parcourez les catégories ou décrivez votre besoin — on fait le tri.",
       "step3Title": "3. Réservez en toute confiance",
@@ -197,13 +197,13 @@
   "About": {
     "eyebrow": "Qui nous sommes",
     "title": "À propos de NextDoor Pros",
-    "lead": "Nous mettons en contact les Canadiens et les pros locaux fiables — sans intermédiaire, sans surprise.",
+    "lead": "Nous mettons en contact les voisins et les pros locaux fiables — sans intermédiaire, sans surprise.",
     "ctaTitle": "Prêt à commencer ?",
     "ctaBody": "Trouvez un pro vérifié dans votre ville, ou inscrivez votre entreprise et commencez à être embauché.",
     "ctaBrowse": "Voir les services",
     "ctaPro": "Devenir un pro",
     "missionTitle": "Notre mission",
-    "missionBody": "Trouver de l'aide près de chez soi ne devrait pas être un coup de dés. Nous vérifions chaque pro — antécédents, assurance et avis — pour que vous réserviez en toute confiance dans chaque ville canadienne que nous desservons.",
+    "missionBody": "Trouver de l'aide près de chez soi ne devrait pas être un coup de dés. Nous vérifions chaque pro — antécédents, assurance et avis — pour que vous réserviez en toute confiance dans chaque ville que nous desservons.",
     "valuesTitle": "Nos valeurs",
     "values": {
       "localTitle": "Local d'abord",

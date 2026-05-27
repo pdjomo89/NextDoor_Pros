@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "NextDoor Pros — Trusted local services across Canada",
-    "description": "Book vetted local pros for home, beauty, outdoor, moving, seasonal, and handyman jobs in your Canadian city."
+    "description": "Book vetted local pros for home, beauty, outdoor, moving, seasonal, and handyman jobs in your city."
   },
   "Nav": {
     "brand": "NextDoor Pros",
@@ -13,7 +13,7 @@
     "news": "News",
     "contact": "Contact",
     "selectCity": "Select your city",
-    "searchCity": "Search a Canadian city...",
+    "searchCity": "Search a city...",
     "noCity": "No city found.",
     "language": "Language",
     "english": "English",
@@ -47,7 +47,7 @@
     "howItWorks": {
       "title": "How it works",
       "step1Title": "1. Pick your city",
-      "step1Body": "Choose your Canadian city so we can match you with pros in your area.",
+      "step1Body": "Choose your city so we can match you with pros in your area.",
       "step2Title": "2. Choose a service",
       "step2Body": "Browse categories or describe what you need — we'll narrow it down.",
       "step3Title": "3. Book with confidence",
@@ -197,13 +197,13 @@
   "About": {
     "eyebrow": "Who we are",
     "title": "About NextDoor Pros",
-    "lead": "We connect Canadians with reliable local service pros — no agency middlemen, no surprises.",
+    "lead": "We connect neighbors with reliable local service pros — no agency middlemen, no surprises.",
     "ctaTitle": "Ready to get started?",
     "ctaBody": "Find a vetted pro in your city, or list your business and start getting hired.",
     "ctaBrowse": "Browse services",
     "ctaPro": "Become a pro",
     "missionTitle": "Our mission",
-    "missionBody": "Hiring help in your neighborhood shouldn't be a coin flip. We verify every pro on our platform — background, insurance, and reviews — so you book with confidence in every Canadian city we serve.",
+    "missionBody": "Hiring help in your neighborhood shouldn't be a coin flip. We verify every pro on our platform — background, insurance, and reviews — so you book with confidence in every city we serve.",
     "valuesTitle": "What we stand for",
     "values": {
       "localTitle": "Local-first",
