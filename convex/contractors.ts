@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
+import { hasActiveMembership } from './membership';
 
 /**
  * Return the signed-in user's contractor listing (or null).
@@ -144,6 +145,10 @@ export const upsertMine = mutation({
     }
     if (!args.phone && !args.email && !args.whatsapp) {
       throw new Error('Add at least one contact method.');
+    }
+    // Publishing a listing requires an active subscription; drafts are free.
+    if (args.published && !(await hasActiveMembership(ctx, userId))) {
+      throw new Error('SUBSCRIPTION_REQUIRED');
     }
     if (
       args.startingAtPriceCents !== undefined &&

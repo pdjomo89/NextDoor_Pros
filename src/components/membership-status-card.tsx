@@ -46,7 +46,6 @@ export function MembershipStatusCard({
 }) {
   const membership = useQuery(api.membership.myMembership) as
     | {
-        hasContractor: true;
         status: string;
         plan: string | null;
         currentPeriodEnd: number | null;
@@ -165,7 +164,7 @@ export function MembershipStatusCard({
         <div className="flex flex-wrap gap-2">
           {(status === 'none' || status === 'cancelled') && (
             <Button asChild variant="secondary" size="sm">
-              <Link href="/pros/onboard/membership">
+              <Link href="/membership">
                 <Sparkles className="h-4 w-4" />
                 {status === 'cancelled' ? l.resubscribeBtn : l.startBtn}
               </Link>
@@ -179,7 +178,7 @@ export function MembershipStatusCard({
           )}
           {status === 'incomplete' && (
             <Button asChild variant="secondary" size="sm">
-              <Link href="/pros/onboard/membership">{l.startBtn}</Link>
+              <Link href="/membership">{l.startBtn}</Link>
             </Button>
           )}
         </div>

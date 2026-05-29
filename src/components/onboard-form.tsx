@@ -98,6 +98,9 @@ export function OnboardForm({ locale }: { locale: Locale }) {
 
     setSubmitting(true);
     try {
+      // Publishing requires an active subscription. Without one we save the
+      // listing as a draft and send the pro to subscribe.
+      const canPublish = membership?.status === 'active';
       await upsert({
         businessName: businessName.trim(),
         description: description.trim(),
@@ -108,12 +111,11 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         email: email.trim() || undefined,
         whatsapp: whatsapp.trim() || undefined,
         startingAtPriceCents,
-        published,
+        published: published && canPublish,
       });
-      const nextPath =
-        membership?.status === 'active'
-          ? `/${locale}/pros/dashboard`
-          : `/${locale}/pros/onboard/membership`;
+      const nextPath = canPublish
+        ? `/${locale}/pros/dashboard`
+        : `/${locale}/pros/onboard/membership`;
       router.push(nextPath);
       router.refresh();
     } catch (err) {

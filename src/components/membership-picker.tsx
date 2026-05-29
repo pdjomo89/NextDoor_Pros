@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAction, useQuery } from 'convex/react';
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
   Loader2,
   Sparkles,
@@ -35,9 +34,9 @@ export type MembershipLabels = {
   alreadyActiveTitle: string;
   alreadyActiveBody: string;
   goToDashboard: string;
-  noListingTitle: string;
-  noListingBody: string;
-  createListing: string;
+  noListingTitle?: string;
+  noListingBody?: string;
+  createListing?: string;
   cancelledNotice: string;
   errorTitle: string;
 };
@@ -45,14 +44,16 @@ export type MembershipLabels = {
 export function MembershipPicker({
   locale,
   cancelled,
+  returnTo = '/pros/dashboard',
   labels: l,
 }: {
   locale: Locale;
   cancelled: boolean;
+  returnTo?: string;
   labels: MembershipLabels;
 }) {
   const membership = useQuery(api.membership.myMembership) as
-    | { hasContractor: true; status: string; plan: string | null }
+    | { status: string; plan: string | null; currentPeriodEnd: number | null }
     | null
     | undefined;
   const startCheckout = useAction(api.membership.startMembershipCheckout);
@@ -62,16 +63,16 @@ export function MembershipPicker({
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (membership && membership !== null && membership.status === 'active') {
-      router.replace(`/${locale}/pros/dashboard`);
+    if (membership && membership.status === 'active') {
+      router.replace(`/${locale}${returnTo}`);
     }
-  }, [membership, router, locale]);
+  }, [membership, router, locale, returnTo]);
 
   async function onPick(plan: 'monthly' | 'annual') {
     setError(null);
     setBusy(plan);
     try {
-      const { url } = await startCheckout({ plan, locale });
+      const { url } = await startCheckout({ plan, locale, returnTo });
       window.location.href = url;
     } catch (err) {
       console.error(err);
@@ -80,25 +81,10 @@ export function MembershipPicker({
     }
   }
 
-  if (membership === undefined) {
+  if (!membership) {
     return (
       <div className="flex items-center justify-center py-16 text-navy/60">
         <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
-  }
-
-  if (membership === null) {
-    return (
-      <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
-        <h2 className="text-xl font-semibold text-navy">{l.noListingTitle}</h2>
-        <p className="mt-2 text-navy/70">{l.noListingBody}</p>
-        <Button asChild variant="secondary" size="lg" className="mt-5">
-          <Link href="/pros/onboard">
-            {l.createListing}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
       </div>
     );
   }
@@ -110,7 +96,7 @@ export function MembershipPicker({
         <h2 className="mt-3 text-xl font-semibold text-navy">{l.alreadyActiveTitle}</h2>
         <p className="mt-2 text-navy/70">{l.alreadyActiveBody}</p>
         <Button asChild variant="secondary" size="lg" className="mt-5">
-          <Link href="/pros/dashboard">{l.goToDashboard}</Link>
+          <Link href={returnTo}>{l.goToDashboard}</Link>
         </Button>
       </div>
     );

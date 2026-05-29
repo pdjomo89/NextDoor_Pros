@@ -5,6 +5,21 @@ import { authTables } from '@convex-dev/auth/server';
 export default defineSchema({
   ...authTables,
 
+  // Platform subscription, keyed by user. A single active subscription grants
+  // both publishing a pro listing and posting jobs ($15/mo or $160/yr CAD).
+  // See convex/membership.ts.
+  memberships: defineTable({
+    userId: v.id('users'),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    plan: v.optional(v.string()), // 'monthly' | 'annual'
+    // 'none' | 'incomplete' | 'active' | 'past_due' | 'cancelled'
+    status: v.string(),
+    currentPeriodEnd: v.optional(v.number()),
+  })
+    .index('by_user', ['userId'])
+    .index('by_stripeCustomer', ['stripeCustomerId']),
+
   contractors: defineTable({
     ownerId: v.id('users'),
 
@@ -38,24 +53,10 @@ export default defineSchema({
     // from the Stripe account.updated webhook.
     stripeAccountId: v.optional(v.string()),
     stripeOnboardingComplete: v.optional(v.boolean()),
-
-    // Pro membership subscription ($15/mo or $160/yr CAD).
-    // membershipStatus:
-    //   undefined / 'none'   — never subscribed
-    //   'incomplete'         — Checkout Session created, payment pending
-    //   'active'             — subscription is live
-    //   'past_due'           — payment failed, grace period
-    //   'cancelled'          — subscription ended
-    stripeCustomerId: v.optional(v.string()),
-    stripeSubscriptionId: v.optional(v.string()),
-    membershipPlan: v.optional(v.string()), // 'monthly' | 'annual'
-    membershipStatus: v.optional(v.string()),
-    membershipCurrentPeriodEnd: v.optional(v.number()),
   })
     .index('by_owner', ['ownerId'])
     .index('by_city_published', ['citySlug', 'published'])
-    .index('by_stripeAccount', ['stripeAccountId'])
-    .index('by_stripeCustomer', ['stripeCustomerId']),
+    .index('by_stripeAccount', ['stripeAccountId']),
 
   // Priced offerings a contractor sells (e.g. "Hair treatment $80").
   contractorServices: defineTable({
@@ -140,38 +141,9 @@ export default defineSchema({
 
     // 'open' | 'closed' | 'filled'
     status: v.string(),
-
-    // ─── Payment fields (only set on paid jobs — i.e. budget attached) ───
-    //
-    // Lifecycle:
-    //   undefined / 'none'   — free post (legacy or no budget attached)
-    //   'pending'            — Checkout Session created, waiting for payment
-    //   'funded'             — Customer paid; funds in platform balance
-    //   'released'           — Customer marked complete; funds transferred to pro
-    //   'refunded'           — Customer cancelled; funds returned
-    //   'failed'             — Checkout failed (timeout, decline, etc.)
-    paymentStatus: v.optional(v.string()),
-
-    budgetCents: v.optional(v.number()),
-    currency: v.optional(v.string()),
-    applicationFeeCents: v.optional(v.number()),
-
-    customerEmail: v.optional(v.string()),
-    customerName: v.optional(v.string()),
-
-    stripeCheckoutSessionId: v.optional(v.string()),
-    stripePaymentIntentId: v.optional(v.string()),
-    stripeChargeId: v.optional(v.string()),
-    stripeTransferId: v.optional(v.string()),
-    stripeRefundId: v.optional(v.string()),
-
-    selectedContractorId: v.optional(v.id('contractors')),
-    completedAt: v.optional(v.number()),
   })
     .index('by_poster', ['posterId'])
-    .index('by_status', ['status'])
-    .index('by_session', ['stripeCheckoutSessionId'])
-    .index('by_paymentIntent', ['stripePaymentIntentId']),
+    .index('by_status', ['status']),
 
   // ─── Platform-mediated messaging ───────────────────────────────────────
   //
@@ -224,16 +196,4 @@ export default defineSchema({
     flagged: v.boolean(),
   }).index('by_conversation', ['conversationId']),
 
-  // A pro's application to a paid job.
-  jobApplications: defineTable({
-    jobId: v.id('jobs'),
-    contractorId: v.id('contractors'),
-    posterId: v.id('users'), // denormalised so we can authz "is this my job?" without an extra lookup
-    message: v.optional(v.string()),
-    // 'pending' | 'accepted' | 'rejected' | 'withdrawn'
-    status: v.string(),
-  })
-    .index('by_job', ['jobId'])
-    .index('by_contractor', ['contractorId'])
-    .index('by_job_contractor', ['jobId', 'contractorId']),
 });

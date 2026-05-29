@@ -59,9 +59,7 @@ export const handler = httpAction(async (ctx, request) => {
       case 'checkout.session.completed':
       case 'checkout.session.async_payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.metadata?.kind === 'job') {
-          await handleJobCheckoutCompleted(ctx, session);
-        } else if (session.metadata?.kind === 'membership') {
+        if (session.metadata?.kind === 'membership') {
           await handleMembershipCheckoutCompleted(ctx, session);
         } else {
           await handleCheckoutCompleted(ctx, session);
@@ -70,11 +68,7 @@ export const handler = httpAction(async (ctx, request) => {
       }
       case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.metadata?.kind === 'job') {
-          await handleJobCheckoutFailed(ctx, session);
-        } else {
-          await handleCheckoutFailed(ctx, session);
-        }
+        await handleCheckoutFailed(ctx, session);
         break;
       }
       case 'customer.subscription.created':
@@ -177,54 +171,6 @@ async function handleCheckoutFailed(
   });
 }
 
-// ── Job (Phase 2) handlers ───────────────────────────────────────────────
-
-async function handleJobCheckoutCompleted(
-  ctx: ActionCtx,
-  session: Stripe.Checkout.Session,
-) {
-  const job: Doc<'jobs'> | null = await ctx.runQuery(internal.jobs.getJobBySession, {
-    sessionId: session.id,
-  });
-  if (!job) return;
-
-  const paymentIntentId =
-    typeof session.payment_intent === 'string'
-      ? session.payment_intent
-      : session.payment_intent?.id;
-
-  // We need the charge id later to do `transfers.create(... source_transaction)`.
-  // Fetch the PaymentIntent to grab the latest_charge.
-  let chargeId: string | undefined;
-  if (paymentIntentId && process.env.STRIPE_SECRET_KEY) {
-    try {
-      const stripe = stripeClient();
-      const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-      const latest = pi.latest_charge;
-      chargeId = typeof latest === 'string' ? latest : latest?.id;
-    } catch (err) {
-      console.error('paymentIntents.retrieve failed', err);
-    }
-  }
-
-  await ctx.runMutation(internal.jobs.markJobFunded, {
-    jobId: job._id,
-    stripePaymentIntentId: paymentIntentId,
-    stripeChargeId: chargeId,
-  });
-}
-
-async function handleJobCheckoutFailed(
-  ctx: ActionCtx,
-  session: Stripe.Checkout.Session,
-) {
-  const job: Doc<'jobs'> | null = await ctx.runQuery(internal.jobs.getJobBySession, {
-    sessionId: session.id,
-  });
-  if (!job) return;
-  await ctx.runMutation(internal.jobs.setJobPaymentFailed, { jobId: job._id });
-}
-
 async function handleChargeRefunded(
   ctx: ActionCtx,
   charge: Stripe.Charge,
@@ -281,11 +227,11 @@ async function handleMembershipCheckoutCompleted(
     typeof session.customer === 'string' ? session.customer : session.customer?.id;
   if (!customerId) return;
 
-  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
-    internal.membership.getContractorByCustomer,
+  const membership: Doc<'memberships'> | null = await ctx.runQuery(
+    internal.membership.getMembershipByCustomer,
     { stripeCustomerId: customerId },
   );
-  if (!contractor) return;
+  if (!membership) return;
 
   const subscriptionId =
     typeof session.subscription === 'string'
@@ -293,8 +239,8 @@ async function handleMembershipCheckoutCompleted(
       : session.subscription?.id;
   const plan = (session.metadata?.plan as string | undefined) ?? null;
 
-  await ctx.runMutation(internal.membership.patchMembership, {
-    contractorId: contractor._id,
+  await ctx.runMutation(internal.membership.upsertMembership, {
+    userId: membership.userId,
     status: 'active',
     ...(plan ? { plan } : {}),
     ...(subscriptionId ? { stripeSubscriptionId: subscriptionId } : {}),
@@ -310,11 +256,11 @@ async function handleSubscriptionChanged(
       ? subscription.customer
       : subscription.customer.id;
 
-  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
-    internal.membership.getContractorByCustomer,
+  const membership: Doc<'memberships'> | null = await ctx.runQuery(
+    internal.membership.getMembershipByCustomer,
     { stripeCustomerId: customerId },
   );
-  if (!contractor) return;
+  if (!membership) return;
 
   // Translate Stripe statuses to our enum.
   // Stripe: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active'
@@ -337,11 +283,11 @@ async function handleSubscriptionChanged(
       ? sub.current_period_end
       : sub.items?.data?.[0]?.current_period_end;
 
-  await ctx.runMutation(internal.membership.patchMembership, {
-    contractorId: contractor._id,
+  await ctx.runMutation(internal.membership.upsertMembership, {
+    userId: membership.userId,
     status,
     stripeSubscriptionId: subscription.id,
-    ...(periodEnd ? { membershipCurrentPeriodEnd: periodEnd * 1000 } : {}),
+    ...(periodEnd ? { currentPeriodEnd: periodEnd * 1000 } : {}),
   });
 }
 
@@ -354,14 +300,14 @@ async function handleSubscriptionDeleted(
       ? subscription.customer
       : subscription.customer.id;
 
-  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
-    internal.membership.getContractorByCustomer,
+  const membership: Doc<'memberships'> | null = await ctx.runQuery(
+    internal.membership.getMembershipByCustomer,
     { stripeCustomerId: customerId },
   );
-  if (!contractor) return;
+  if (!membership) return;
 
-  await ctx.runMutation(internal.membership.patchMembership, {
-    contractorId: contractor._id,
+  await ctx.runMutation(internal.membership.upsertMembership, {
+    userId: membership.userId,
     status: 'cancelled',
   });
 }
@@ -371,14 +317,14 @@ async function handleInvoicePaymentFailed(ctx: ActionCtx, invoice: Stripe.Invoic
     typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
   if (!customerId) return;
 
-  const contractor: Doc<'contractors'> | null = await ctx.runQuery(
-    internal.membership.getContractorByCustomer,
+  const membership: Doc<'memberships'> | null = await ctx.runQuery(
+    internal.membership.getMembershipByCustomer,
     { stripeCustomerId: customerId },
   );
-  if (!contractor) return;
+  if (!membership) return;
 
-  await ctx.runMutation(internal.membership.patchMembership, {
-    contractorId: contractor._id,
+  await ctx.runMutation(internal.membership.upsertMembership, {
+    userId: membership.userId,
     status: 'past_due',
   });
 }
