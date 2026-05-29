@@ -145,14 +145,6 @@ export function DashboardClient({
               })}
             </div>
 
-            <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-              {contractor.phone && <Detail label={l.phone} value={contractor.phone} />}
-              {contractor.email && <Detail label={l.email} value={contractor.email} />}
-              {contractor.whatsapp && (
-                <Detail label={l.whatsapp} value={contractor.whatsapp} />
-              )}
-            </dl>
-
             {contractor.published && (
               <div className="mt-6">
                 <Button asChild variant="ghost" size="sm">
@@ -176,13 +168,3 @@ export function DashboardClient({
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-navy/10 px-3 py-2">
-      <dt className="text-xs font-semibold uppercase tracking-wide text-navy/50">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-navy">{value}</dd>
-    </div>
-  );
-}

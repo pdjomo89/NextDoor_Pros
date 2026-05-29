@@ -105,8 +105,6 @@ export default async function ContractorProfilePage({
           containedInPlace: { '@type': 'AdministrativeArea', name: provinceName },
         }
       : provinceName,
-    ...(contractor.email ? { email: contractor.email } : {}),
-    ...(contractor.phone ? { telephone: contractor.phone } : {}),
   };
   if (ratingCount > 0) {
     bizLd.aggregateRating = {
