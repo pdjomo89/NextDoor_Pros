@@ -11,7 +11,7 @@ import { api } from '../../convex/_generated/api';
 import { cn } from '@/lib/utils';
 
 type GuestThread = {
-  contractorName: string;
+  otherName: string;
   customerName: string | null;
   unread: number;
   messages: Array<{
@@ -119,7 +119,7 @@ export function GuestConversationClient({ token }: { token: string }) {
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-navy">
-            {t('threadWith', { name: thread.contractorName })}
+            {t('threadWith', { name: thread.otherName })}
           </p>
           <p className="text-[11px] text-navy/50">{t('guestLinkNotice')}</p>
         </div>

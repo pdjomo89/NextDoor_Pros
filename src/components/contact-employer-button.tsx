@@ -11,35 +11,34 @@ import { api } from '../../convex/_generated/api';
 import type { ButtonProps } from '@/components/ui/button';
 
 /**
- * The single entry point for contacting a pro. Opens a guest inquiry modal —
- * no account or sign-in needed. Customers never see a phone number or email;
- * the pro replies in-app and the customer gets a private link by email.
- * Hidden on the pro's own listing.
+ * Contact a job's poster (employer) through platform messaging — no account
+ * needed, no phone/email shared. Mirrors ContactProButton but routes to the
+ * job thread. Hidden on the poster's own job.
  */
-export function ContactProButton({
-  contractorId,
-  ownerId,
+export function ContactEmployerButton({
+  jobId,
+  posterId,
   variant = 'primary',
   size = 'sm',
   className,
 }: {
-  contractorId: string;
-  ownerId: string;
+  jobId: string;
+  posterId: string;
   variant?: ButtonProps['variant'];
   size?: ButtonProps['size'];
   className?: string;
 }) {
-  const t = useTranslations('Messages');
+  const t = useTranslations('Jobs');
   const configured = getConvexEnv().configured;
   const viewer = useQuery(api.contractors.viewer, configured ? {} : 'skip') as
     | { _id: string }
     | null
     | undefined;
-  const startGuest = useMutation(api.messaging.startGuestConversation);
+  const startJob = useMutation(api.messaging.startJobConversation);
   const [open, setOpen] = React.useState(false);
 
-  // Don't offer "message yourself" on your own listing.
-  if (viewer && viewer._id === ownerId) return null;
+  // Don't offer "message yourself" on your own posting.
+  if (viewer && viewer._id === posterId) return null;
 
   return (
     <>
@@ -51,14 +50,14 @@ export function ContactProButton({
         disabled={!configured}
       >
         <MessageSquare className="h-4 w-4" />
-        {t('contactButton')}
+        {t('messageEmployer')}
       </Button>
       {open && (
         <GuestMessageModal
-          title={t('modalTitle')}
-          intro={t('modalIntro')}
+          title={t('messageModalTitle')}
+          intro={t('messageModalIntro')}
           submit={({ email, name, body, locale }) =>
-            startGuest({ contractorId: contractorId as never, email, name, body, locale })
+            startJob({ jobId: jobId as never, email, name, body, locale })
           }
           onClose={() => setOpen(false)}
         />

@@ -32,8 +32,6 @@ export function JobForm({ locale }: { locale: Locale }) {
   const [category, setCategory] = React.useState<JobCategory>('home');
   const [timing, setTiming] = React.useState('');
   const [budget, setBudget] = React.useState('');
-  const [contactEmail, setContactEmail] = React.useState('');
-  const [contactPhone, setContactPhone] = React.useState('');
 
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -42,7 +40,6 @@ export function JobForm({ locale }: { locale: Locale }) {
     e.preventDefault();
     setError(null);
     if (!city) return setError(t('errCityRequired'));
-    if (!contactEmail && !contactPhone) return setError(t('errContactRequired'));
 
     setSubmitting(true);
     try {
@@ -54,8 +51,6 @@ export function JobForm({ locale }: { locale: Locale }) {
         province: city.province,
         budget: budget.trim() || undefined,
         timing: timing.trim() || undefined,
-        contactEmail: contactEmail.trim() || undefined,
-        contactPhone: contactPhone.trim() || undefined,
       });
       router.push(`/${locale}/jobs/${id}`);
       router.refresh();
@@ -156,32 +151,9 @@ export function JobForm({ locale }: { locale: Locale }) {
         />
       </Field>
 
-      <fieldset className="space-y-3 rounded-xl border border-navy/10 p-4">
-        <legend className="px-2 text-sm font-semibold text-navy">
-          {t('contactSection')}
-        </legend>
-        <p className="text-xs text-navy/60">{t('contactHelp')}</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label={t('contactEmail')}>
-            <input
-              type="email"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="form-input"
-            />
-          </Field>
-          <Field label={t('contactPhone')}>
-            <input
-              type="tel"
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
-              placeholder="+1 416 555 1234"
-              className="form-input"
-            />
-          </Field>
-        </div>
-      </fieldset>
+      <div className="rounded-xl border border-forest/30 bg-forest/[0.04] p-4 text-sm text-navy/70">
+        {t('contactPrivacyNote')}
+      </div>
 
       {error && (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

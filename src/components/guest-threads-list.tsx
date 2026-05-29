@@ -11,7 +11,7 @@ import { api } from '../../convex/_generated/api';
 
 type Summary = {
   token: string;
-  contractorName: string;
+  otherName: string;
   lastMessagePreview: string;
   lastMessageAt: number;
   unread: number;
@@ -75,7 +75,7 @@ export function GuestThreadsList() {
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-semibold text-navy">
-                      {s.contractorName}
+                      {s.otherName}
                     </span>
                     <span className="shrink-0 text-[11px] text-navy/45">
                       {formatStamp(s.lastMessageAt)}

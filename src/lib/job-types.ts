@@ -13,7 +13,5 @@ export type JobDoc = {
   province: string;
   budget?: string;
   timing?: string;
-  contactEmail?: string;
-  contactPhone?: string;
   status: 'open' | 'closed' | 'filled';
 };

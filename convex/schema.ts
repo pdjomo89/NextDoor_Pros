@@ -154,9 +154,11 @@ export default defineSchema({
   // the other's phone/email — message bodies are run through a contact-info
   // redactor before storage.
   conversations: defineTable({
-    contractorId: v.id('contractors'),
-    // Denormalised contractor.ownerId so the pro's inbox is a single
-    // indexed lookup with no contractor join.
+    // Set for contractor (service) threads; absent for job threads, which are
+    // keyed on the job poster (a plain user) via `jobId` + `contractorOwnerId`.
+    contractorId: v.optional(v.id('contractors')),
+    // The recipient user who owns this inbox — a contractor's owner for service
+    // threads, or the job poster for job threads. Drives the pro/poster inbox.
     contractorOwnerId: v.id('users'),
 
     // Guest customer — identified by email; `guestToken` is the secret that
@@ -183,7 +185,8 @@ export default defineSchema({
   })
     .index('by_contractorOwner', ['contractorOwnerId', 'lastMessageAt'])
     .index('by_guestToken', ['guestToken'])
-    .index('by_contractor_email', ['contractorId', 'customerEmail']),
+    .index('by_contractor_email', ['contractorId', 'customerEmail'])
+    .index('by_job_email', ['jobId', 'customerEmail']),
 
   messages: defineTable({
     conversationId: v.id('conversations'),

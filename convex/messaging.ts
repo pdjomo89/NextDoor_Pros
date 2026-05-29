@@ -167,6 +167,113 @@ export const startGuestConversation = mutation({
 });
 
 /**
+ * A guest candidate messages a job's poster: email + a first message. Mirrors
+ * `startGuestConversation` but keys the thread on the job and its poster (a
+ * plain user), not a contractor. Returns a secret `guestToken` for the link.
+ */
+export const startJobConversation = mutation({
+  args: {
+    jobId: v.id('jobs'),
+    email: v.string(),
+    name: v.optional(v.string()),
+    body: v.string(),
+    locale: v.optional(v.string()),
+  },
+  handler: async (ctx, { jobId, email, name, body, locale }) => {
+    const job = await ctx.db.get(jobId);
+    if (!job) throw new Error('NOT_FOUND');
+    if (job.status !== 'open') throw new Error('NOT_OPEN');
+
+    const cleanEmail = email.trim().toLowerCase().slice(0, 320);
+    if (!EMAIL_RE.test(cleanEmail)) throw new Error('INVALID_EMAIL');
+
+    const cleanName = name?.trim().slice(0, MAX_NAME_LEN) || undefined;
+    const trimmed = body.trim().slice(0, MAX_BODY_LEN);
+    if (!trimmed) throw new Error('EMPTY');
+    const { text, flagged } = redactContactInfo(trimmed);
+
+    const loc = locale === 'fr' ? 'fr' : 'en';
+    const now = Date.now();
+
+    // Re-use a prior thread between this email and this job.
+    let convo = await ctx.db
+      .query('conversations')
+      .withIndex('by_job_email', (q) =>
+        q.eq('jobId', jobId).eq('customerEmail', cleanEmail),
+      )
+      .first();
+
+    let guestToken: string;
+    let conversationId: Id<'conversations'>;
+    let isNew = false;
+
+    if (convo && convo.guestToken) {
+      guestToken = convo.guestToken;
+      conversationId = convo._id;
+    } else {
+      isNew = true;
+      guestToken = newGuestToken();
+      conversationId = await ctx.db.insert('conversations', {
+        contractorOwnerId: job.posterId,
+        jobId,
+        customerEmail: cleanEmail,
+        customerName: cleanName,
+        guestToken,
+        lastMessageAt: now,
+        lastMessagePreview: '',
+        lastSenderRole: 'customer',
+        customerUnread: 0,
+        contractorUnread: 0,
+        status: 'active',
+      });
+      convo = await ctx.db.get(conversationId);
+    }
+
+    const contractorWasUnread = convo?.contractorUnread ?? 0;
+
+    await ctx.db.insert('messages', {
+      conversationId,
+      senderRole: 'customer',
+      body: text,
+      flagged,
+    });
+
+    await ctx.db.patch(conversationId, {
+      lastMessageAt: now,
+      lastMessagePreview: text.slice(0, 140),
+      lastSenderRole: 'customer',
+      contractorUnread: contractorWasUnread + 1,
+      ...(cleanName && !convo?.customerName ? { customerName: cleanName } : {}),
+    });
+
+    // Notify the poster (only on the first message of an unread streak).
+    if (contractorWasUnread === 0) {
+      const poster = await ctx.db.get(job.posterId);
+      const posterEmail = (poster as { email?: string } | null)?.email;
+      if (posterEmail) {
+        await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+          toEmail: posterEmail,
+          link: `${siteUrl()}/en/messages`,
+          intro: 'You have a new message about your job posting on NextDoor Pros.',
+        });
+      }
+    }
+
+    // On a brand-new thread, email the candidate their private link.
+    if (isNew) {
+      await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+        toEmail: cleanEmail,
+        link: `${siteUrl()}/${loc}/messages/guest?t=${guestToken}`,
+        intro:
+          'Thanks for your message — the poster has been notified. Use the link below any time to see their reply and continue the conversation.',
+      });
+    }
+
+    return { guestToken, conversationId };
+  },
+});
+
+/**
  * Create (or reuse) an on-platform conversation for a paid service so the pro
  * and customer can coordinate without exchanging phone/email. Seeds a first
  * (redacted) customer message and returns the guest's private-link token.
@@ -290,7 +397,11 @@ export const getGuestConversation = query({
       .first();
     if (!convo) return null;
 
-    const contractor = await ctx.db.get(convo.contractorId);
+    const otherName = convo.jobId
+      ? (await ctx.db.get(convo.jobId))?.title ?? 'Job'
+      : convo.contractorId
+        ? (await ctx.db.get(convo.contractorId))?.businessName ?? 'Pro'
+        : 'Pro';
     const rows = await ctx.db
       .query('messages')
       .withIndex('by_conversation', (q) => q.eq('conversationId', convo._id))
@@ -299,7 +410,7 @@ export const getGuestConversation = query({
     rows.reverse();
 
     return {
-      contractorName: contractor?.businessName ?? 'Pro',
+      otherName,
       customerName: convo.customerName ?? null,
       unread: convo.customerUnread,
       messages: rows.map((m) => ({
@@ -323,7 +434,7 @@ export const getGuestConversations = query({
   handler: async (ctx, { tokens }) => {
     const out: Array<{
       token: string;
-      contractorName: string;
+      otherName: string;
       lastMessagePreview: string;
       lastMessageAt: number;
       unread: number;
@@ -334,10 +445,14 @@ export const getGuestConversations = query({
         .withIndex('by_guestToken', (q) => q.eq('guestToken', token))
         .first();
       if (!convo) continue;
-      const contractor = await ctx.db.get(convo.contractorId);
+      const otherName = convo.jobId
+        ? (await ctx.db.get(convo.jobId))?.title ?? 'Job'
+        : convo.contractorId
+          ? (await ctx.db.get(convo.contractorId))?.businessName ?? 'Pro'
+          : 'Pro';
       out.push({
         token,
-        contractorName: contractor?.businessName ?? 'Pro',
+        otherName,
         lastMessagePreview: convo.lastMessagePreview,
         lastMessageAt: convo.lastMessageAt,
         unread: convo.customerUnread,
@@ -437,16 +552,19 @@ export const listMyConversations = query({
       .order('desc')
       .take(100);
 
-    return rows.map((c) => ({
-      _id: c._id,
-      contractorId: c.contractorId,
-      role: 'contractor' as const,
-      // The customer's email is never exposed to the pro.
-      otherName: c.customerName ?? 'Customer',
-      lastMessageAt: c.lastMessageAt,
-      lastMessagePreview: c.lastMessagePreview,
-      unread: c.contractorUnread,
-    }));
+    return await Promise.all(
+      rows.map(async (c) => ({
+        _id: c._id,
+        role: 'contractor' as const,
+        // The customer's email is never exposed to the pro.
+        otherName: c.customerName ?? 'Customer',
+        // For job threads, the role/title being hired for (inbox context).
+        jobTitle: c.jobId ? (await ctx.db.get(c.jobId))?.title ?? null : null,
+        lastMessageAt: c.lastMessageAt,
+        lastMessagePreview: c.lastMessagePreview,
+        unread: c.contractorUnread,
+      })),
+    );
   },
 });
 

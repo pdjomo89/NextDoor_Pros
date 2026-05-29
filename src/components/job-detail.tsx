@@ -10,23 +10,18 @@ import {
   Clock,
   DollarSign,
   Loader2,
-  Mail,
   MapPin,
-  Phone,
   Trash2,
   XCircle,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
+import { ContactEmployerButton } from '@/components/contact-employer-button';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { JobDoc } from '@/lib/job-types';
 import type { Locale } from '@/i18n/routing';
-
-function digits(n: string) {
-  return n.replace(/[^\d]/g, '');
-}
 
 export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
   const t = useTranslations('Jobs');
@@ -155,28 +150,13 @@ export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
         </div>
       )}
 
-      {/* Contact block — open jobs */}
-      {job.status === 'open' && (job.contactPhone || job.contactEmail) && (
+      {/* Contact — open jobs only, on-platform messaging (not the poster) */}
+      {job.status === 'open' && !isOwner && (
         <div className="mt-8 rounded-xl border border-navy/10 bg-navy/5 p-5">
           <h2 className="font-semibold text-navy">{t('contactSection')}</h2>
           <p className="mt-1 text-sm text-navy/70">{t('contactHelp')}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {job.contactPhone && (
-              <Button asChild variant="primary" size="sm">
-                <a href={`tel:${digits(job.contactPhone)}`}>
-                  <Phone className="h-4 w-4" />
-                  {t('call')}
-                </a>
-              </Button>
-            )}
-            {job.contactEmail && (
-              <Button asChild variant="secondary" size="sm">
-                <a href={`mailto:${job.contactEmail}?subject=${encodeURIComponent(job.title)}`}>
-                  <Mail className="h-4 w-4" />
-                  {t('emailAction')}
-                </a>
-              </Button>
-            )}
+          <div className="mt-4">
+            <ContactEmployerButton jobId={job._id} posterId={job.posterId} />
           </div>
         </div>
       )}

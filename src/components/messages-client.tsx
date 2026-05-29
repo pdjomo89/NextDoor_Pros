@@ -11,9 +11,9 @@ import { cn } from '@/lib/utils';
 
 type Conversation = {
   _id: string;
-  contractorId: string;
   role: 'customer' | 'contractor';
   otherName: string;
+  jobTitle?: string | null;
   lastMessageAt: number;
   lastMessagePreview: string;
   unread: number;

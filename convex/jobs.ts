@@ -62,8 +62,6 @@ export const create = mutation({
     province: v.string(),
     budget: v.optional(v.string()),
     timing: v.optional(v.string()),
-    contactEmail: v.optional(v.string()),
-    contactPhone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -72,9 +70,6 @@ export const create = mutation({
 
     if (args.title.trim() === '' || args.description.trim() === '') {
       throw new Error('Title and description are required.');
-    }
-    if (!args.contactEmail && !args.contactPhone) {
-      throw new Error('Add at least one way for interested folks to reach you.');
     }
 
     return await ctx.db.insert('jobs', {
