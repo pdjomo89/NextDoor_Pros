@@ -33,9 +33,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
   const [businessName, setBusinessName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [services, setServices] = React.useState<ServiceKey[]>([]);
-  const [phone, setPhone] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [whatsapp, setWhatsapp] = React.useState('');
   const [startingAt, setStartingAt] = React.useState('');
   const [published, setPublished] = React.useState(false);
 
@@ -50,9 +47,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
       setBusinessName(existing.businessName);
       setDescription(existing.description);
       setServices(existing.services as ServiceKey[]);
-      setPhone(existing.phone ?? '');
-      setEmail(existing.email ?? '');
-      setWhatsapp(existing.whatsapp ?? '');
       setStartingAt(
         existing.startingAtPriceCents !== undefined
           ? (existing.startingAtPriceCents / 100).toFixed(2)
@@ -84,7 +78,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
 
     if (!city) return setError(t('errCityRequired'));
     if (services.length === 0) return setError(t('errServicesRequired'));
-    if (!phone && !email && !whatsapp) return setError(t('errContactRequired'));
 
     let startingAtPriceCents: number | undefined;
     const startingAtTrimmed = startingAt.trim().replace(',', '.');
@@ -107,9 +100,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         services,
         citySlug: city.slug,
         province: city.province,
-        phone: phone.trim() || undefined,
-        email: email.trim() || undefined,
-        whatsapp: whatsapp.trim() || undefined,
         startingAtPriceCents,
         published: published && canPublish,
       });
@@ -185,41 +175,9 @@ export function OnboardForm({ locale }: { locale: Locale }) {
           </div>
         </Field>
 
-        <fieldset className="space-y-3 rounded-xl border border-navy/10 p-4">
-          <legend className="px-2 text-sm font-semibold text-navy">
-            {t('contactSection')}
-          </legend>
-          <p className="text-xs text-navy/60">{t('contactHelp')}</p>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Field label={t('phone')}>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 416 555 1234"
-                className="form-input"
-              />
-            </Field>
-            <Field label={t('email')}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@business.ca"
-                className="form-input"
-              />
-            </Field>
-            <Field label={t('whatsapp')}>
-              <input
-                type="tel"
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="+14165551234"
-                className="form-input"
-              />
-            </Field>
-          </div>
-        </fieldset>
+        <div className="rounded-xl border border-forest/30 bg-forest/[0.04] p-4 text-sm text-navy/70">
+          {t('contactPrivacyNote')}
+        </div>
 
         <Field label={t('startingAt')}>
           <div className="relative max-w-xs">

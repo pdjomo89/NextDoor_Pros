@@ -49,6 +49,14 @@ export const getMyContractor = internalQuery({
   },
 });
 
+export const getUserEmail = internalQuery({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const u = await ctx.db.get(userId);
+    return u?.email ?? null;
+  },
+});
+
 export const setStripeAccount = internalMutation({
   args: {
     contractorId: v.id('contractors'),
@@ -99,6 +107,7 @@ export const myStripeStatus = query({
 async function ensureExpressAccount(
   ctx: ActionCtx,
   contractor: Doc<'contractors'>,
+  ownerEmail: string | undefined,
 ): Promise<string> {
   if (contractor.stripeAccountId) return contractor.stripeAccountId;
 
@@ -106,7 +115,7 @@ async function ensureExpressAccount(
   const account = await stripe.accounts.create({
     type: 'express',
     country: 'CA',
-    email: contractor.email,
+    email: ownerEmail,
     business_type: 'individual',
     capabilities: {
       card_payments: { requested: true },
@@ -150,7 +159,11 @@ export const startOnboarding = action({
       throw new Error('NO_CONTRACTOR_PROFILE');
     }
 
-    const accountId = await ensureExpressAccount(ctx, contractor);
+    const ownerEmail =
+      (await ctx.runQuery(internal.payments.getUserEmail, {
+        userId: contractor.ownerId,
+      })) ?? undefined;
+    const accountId = await ensureExpressAccount(ctx, contractor, ownerEmail);
 
     const stripe = stripeClient();
     const link = await stripe.accountLinks.create({
@@ -584,10 +597,11 @@ export const sendPaymentConfirmation = internalAction({
       payment: Doc<'payments'>;
       contractor: Doc<'contractors'> | null;
       service: Doc<'contractorServices'> | null;
+      ownerEmail: string | null;
     } | null = await ctx.runQuery(internal.payments.getPaymentForEmail, { paymentId });
     if (!data?.payment || !data.contractor) return;
 
-    const { payment, contractor, service } = data;
+    const { payment, contractor, service, ownerEmail } = data;
     const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
     const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@nextdoorpros.ca';
 
@@ -640,13 +654,13 @@ export const sendPaymentConfirmation = internalAction({
 
     await send(
       payment.customerEmail,
-      contractor.email ?? null,
+      null,
       `[NextDoor Pros] Payment confirmation — ${contractor.businessName}`,
       customerLines.join('\n'),
     );
-    if (contractor.email) {
+    if (ownerEmail) {
       await send(
-        contractor.email,
+        ownerEmail,
         payment.customerEmail,
         `[NextDoor Pros] You got paid $${amount} CAD`,
         proLines.join('\n'),
@@ -668,9 +682,10 @@ export const getPaymentForEmail = internalQuery({
     const payment = await ctx.db.get(paymentId);
     if (!payment) return null;
     const contractor = await ctx.db.get(payment.contractorId);
+    const owner = contractor ? await ctx.db.get(contractor.ownerId) : null;
     const service = payment.contractorServiceId
       ? await ctx.db.get(payment.contractorServiceId)
       : null;
-    return { payment, contractor, service };
+    return { payment, contractor, service, ownerEmail: owner?.email ?? null };
   },
 });

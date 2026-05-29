@@ -648,6 +648,7 @@
       "services": "Services you offer",
       "contactSection": "How customers reach you",
       "contactHelp": "Provide at least one. Customers will see and contact you directly.",
+      "contactPrivacyNote": "No phone or email needed here — customers reach you through NextDoor Pros messaging, so your personal contact details stay private.",
       "phone": "Phone",
       "email": "Email",
       "whatsapp": "WhatsApp number",
