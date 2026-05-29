@@ -66,24 +66,55 @@
   },
   "Partners": {
     "eyebrow": "Working together",
-    "title": "Our partners",
-    "lead": "We team up with trusted businesses to bring our community more — better service, wider reach, and more value at your door.",
-    "intro": "The organisations we work alongside to serve you better.",
+    "title": "Better service. Wider reach. Stronger community.",
+    "lead": "We team up with trusted businesses to bring more value to your neighbourhood — local services, shared visibility, and a community that grows together.",
     "visitWebsite": "Visit website",
+    "whyTitle": "Why partner with us",
+    "whyLead": "Four reasons businesses choose to grow with NextDoor Pros.",
+    "benefits": {
+      "reachTitle": "Trusted local reach",
+      "reachBody": "Get in front of households actively looking for reliable services in their city.",
+      "networkTitle": "Quality network",
+      "networkBody": "Stand alongside vetted pros and trusted brands across the country.",
+      "featuredTitle": "Featured placement",
+      "featuredBody": "Your business showcased to our growing community of members and customers.",
+      "comarketingTitle": "Co-marketing",
+      "comarketingBody": "Joint campaigns, cross-promotions, and shared visibility on our channels."
+    },
+    "featuredTitle": "Featured partners",
+    "featuredLead": "The businesses we're proud to work alongside.",
     "entries": {
       "ticketflow": {
-        "tagline": "Online ticketing & event boutique."
+        "tagline": "Online ticketing & event boutique.",
+        "story": "Simple, beautiful ticketing for local event organisers — focus on the experience, we'll handle the logistics."
       },
       "afrinovatech": {
-        "tagline": "African tech innovation, built for the community."
+        "tagline": "African tech innovation, built for the community.",
+        "story": "Tools and platforms that connect the diaspora to opportunity, from commerce to cultural events."
       },
       "carys": {
-        "tagline": "Beauty & hair treatment, with a personal touch."
+        "tagline": "Beauty & hair treatment, with a personal touch.",
+        "story": "Personalised beauty care for diverse hair textures — quality treatments with a warm, attentive approach."
       }
     },
-    "ctaTitle": "Want to partner with us?",
-    "ctaBody": "If your business shares our mission of trusted, local service, we'd love to hear from you.",
-    "ctaButton": "Get in touch"
+    "form": {
+      "title": "Become a partner",
+      "intro": "If your business shares our mission of trusted, local service, let's talk.",
+      "nameLabel": "Your name",
+      "namePlaceholder": "Jane Smith",
+      "businessLabel": "Business name",
+      "businessPlaceholder": "Acme Co.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@business.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Tell us about your business and how we might work together.",
+      "submit": "Send inquiry",
+      "submitting": "Sending…",
+      "successTitle": "Inquiry sent",
+      "successBody": "Thanks — we'll be in touch shortly.",
+      "errorTitle": "Couldn't send your inquiry",
+      "errorBody": "Please try again, or email us directly at hello@nextdoorpros.ca."
+    }
   },
   "Services": {
     "title": "Services",

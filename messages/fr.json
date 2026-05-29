@@ -66,24 +66,55 @@
   },
   "Partners": {
     "eyebrow": "En collaboration",
-    "title": "Nos partenaires",
-    "lead": "Nous nous associons à des entreprises de confiance pour offrir plus à notre communauté — meilleur service, plus de portée et plus de valeur à votre porte.",
-    "intro": "Les organisations avec lesquelles nous collaborons pour mieux vous servir.",
+    "title": "Un meilleur service. Une portée élargie. Une communauté plus forte.",
+    "lead": "Nous nous associons à des entreprises de confiance pour apporter plus de valeur à votre quartier — services locaux, visibilité partagée et une communauté qui grandit ensemble.",
     "visitWebsite": "Visiter le site",
+    "whyTitle": "Pourquoi devenir partenaire",
+    "whyLead": "Quatre raisons pour lesquelles des entreprises choisissent de grandir avec NextDoor Pros.",
+    "benefits": {
+      "reachTitle": "Portée locale fiable",
+      "reachBody": "Soyez vu par des ménages qui cherchent activement des services fiables dans leur ville.",
+      "networkTitle": "Réseau de qualité",
+      "networkBody": "Tenez-vous aux côtés de pros vérifiés et de marques de confiance à travers le pays.",
+      "featuredTitle": "Présence en vedette",
+      "featuredBody": "Votre entreprise mise en avant auprès de notre communauté grandissante de membres et de clients.",
+      "comarketingTitle": "Co-marketing",
+      "comarketingBody": "Campagnes conjointes, promotions croisées et visibilité partagée sur nos canaux."
+    },
+    "featuredTitle": "Partenaires en vedette",
+    "featuredLead": "Les entreprises avec qui nous sommes fiers de collaborer.",
     "entries": {
       "ticketflow": {
-        "tagline": "Billetterie en ligne et boutique d'événements."
+        "tagline": "Billetterie en ligne et boutique d'événements.",
+        "story": "Une billetterie simple et élégante pour les organisateurs d'événements locaux — concentrez-vous sur l'expérience, on s'occupe du reste."
       },
       "afrinovatech": {
-        "tagline": "L'innovation tech africaine, au service de la communauté."
+        "tagline": "L'innovation tech africaine, au service de la communauté.",
+        "story": "Outils et plateformes qui connectent la diaspora aux opportunités, du commerce aux événements culturels."
       },
       "carys": {
-        "tagline": "Soins beauté et coiffure, avec une touche personnelle."
+        "tagline": "Soins beauté et coiffure, avec une touche personnelle.",
+        "story": "Soins de beauté personnalisés pour cheveux texturés — qualité et attention chaleureuse."
       }
     },
-    "ctaTitle": "Vous souhaitez devenir partenaire?",
-    "ctaBody": "Si votre entreprise partage notre mission de service local et de confiance, écrivez-nous.",
-    "ctaButton": "Nous contacter"
+    "form": {
+      "title": "Devenez partenaire",
+      "intro": "Si votre entreprise partage notre mission de service local de confiance, parlons-en.",
+      "nameLabel": "Votre nom",
+      "namePlaceholder": "Jeanne Martin",
+      "businessLabel": "Nom de l'entreprise",
+      "businessPlaceholder": "Acme Inc.",
+      "emailLabel": "Courriel",
+      "emailPlaceholder": "vous@entreprise.ca",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Parlez-nous de votre entreprise et de comment on pourrait collaborer.",
+      "submit": "Envoyer la demande",
+      "submitting": "Envoi…",
+      "successTitle": "Demande envoyée",
+      "successBody": "Merci — nous vous contacterons bientôt.",
+      "errorTitle": "Échec de l'envoi",
+      "errorBody": "Veuillez réessayer, ou écrivez-nous à hello@nextdoorpros.ca."
+    }
   },
   "Services": {
     "title": "Services",
