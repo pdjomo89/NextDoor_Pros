@@ -1,11 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { useAction, useQuery } from 'convex/react';
 import {
   AlertTriangle,
   CheckCircle2,
+  ExternalLink,
   Loader2,
   Sparkles,
 } from 'lucide-react';
@@ -34,6 +34,10 @@ export type MembershipLabels = {
   alreadyActiveTitle: string;
   alreadyActiveBody: string;
   goToDashboard: string;
+  planMonthly?: string;
+  planAnnual?: string;
+  renewsOn?: string;
+  manageBtn?: string;
   noListingTitle?: string;
   noListingBody?: string;
   createListing?: string;
@@ -57,16 +61,23 @@ export function MembershipPicker({
     | null
     | undefined;
   const startCheckout = useAction(api.membership.startMembershipCheckout);
-  const router = useRouter();
+  const getPortalLink = useAction(api.membership.getCustomerPortalLink);
 
-  const [busy, setBusy] = React.useState<'monthly' | 'annual' | null>(null);
+  const [busy, setBusy] = React.useState<'monthly' | 'annual' | 'manage' | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (membership && membership.status === 'active') {
-      router.replace(`/${locale}${returnTo}`);
+  async function onManage() {
+    setError(null);
+    setBusy('manage');
+    try {
+      const { url } = await getPortalLink({ locale, returnTo });
+      window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : String(err));
+      setBusy(null);
     }
-  }, [membership, router, locale, returnTo]);
+  }
 
   async function onPick(plan: 'monthly' | 'annual') {
     setError(null);
@@ -90,14 +101,60 @@ export function MembershipPicker({
   }
 
   if (membership.status === 'active') {
+    const planLabel =
+      membership.plan === 'monthly'
+        ? l.planMonthly
+        : membership.plan === 'annual'
+          ? l.planAnnual
+          : null;
+    const renewsOn = membership.currentPeriodEnd
+      ? new Date(membership.currentPeriodEnd).toLocaleDateString(
+          locale === 'fr' ? 'fr-CA' : 'en-CA',
+          { year: 'numeric', month: 'short', day: 'numeric' },
+        )
+      : null;
     return (
       <div className="rounded-2xl border border-forest/30 bg-forest/5 p-8 text-center">
         <CheckCircle2 className="mx-auto h-10 w-10 text-forest" />
         <h2 className="mt-3 text-xl font-semibold text-navy">{l.alreadyActiveTitle}</h2>
         <p className="mt-2 text-navy/70">{l.alreadyActiveBody}</p>
-        <Button asChild variant="secondary" size="lg" className="mt-5">
-          <Link href={returnTo}>{l.goToDashboard}</Link>
+        {(planLabel || renewsOn) && (
+          <p className="mt-3 text-sm text-navy/55">
+            {planLabel}
+            {planLabel && renewsOn && ' · '}
+            {renewsOn && l.renewsOn && (
+              <>
+                {l.renewsOn} <span className="font-medium text-navy">{renewsOn}</span>
+              </>
+            )}
+          </p>
+        )}
+        <Button
+          type="button"
+          variant="secondary"
+          size="lg"
+          className="mt-5"
+          onClick={onManage}
+          disabled={busy === 'manage'}
+        >
+          {busy === 'manage' ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ExternalLink className="h-4 w-4" />
+          )}
+          {busy === 'manage' ? l.redirecting : l.manageBtn ?? l.goToDashboard}
         </Button>
+        <p className="mt-4">
+          <Link
+            href={returnTo}
+            className="text-sm text-navy/55 hover:text-navy hover:underline"
+          >
+            {l.goToDashboard}
+          </Link>
+        </p>
+        {error && (
+          <p className="mx-auto mt-3 max-w-sm text-sm text-red-700">{error}</p>
+        )}
       </div>
     );
   }

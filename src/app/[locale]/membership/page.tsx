@@ -61,6 +61,10 @@ export default async function MembershipPage({
           alreadyActiveTitle: t('alreadyActiveTitle'),
           alreadyActiveBody: t('alreadyActiveBody'),
           goToDashboard: t('goToDashboard'),
+          planMonthly: t('planMonthly'),
+          planAnnual: t('planAnnual'),
+          renewsOn: t('renewsOn'),
+          manageBtn: t('manageBtn'),
           cancelledNotice: t('cancelledNotice'),
           errorTitle: t('errorTitle'),
         }}
