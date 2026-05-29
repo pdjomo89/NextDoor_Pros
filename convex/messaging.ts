@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { internalAction, mutation, query } from './_generated/server';
+import { internalAction, internalMutation, mutation, query } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
 
@@ -163,6 +163,78 @@ export const startGuestConversation = mutation({
     }
 
     return { guestToken, conversationId };
+  },
+});
+
+/**
+ * Create (or reuse) an on-platform conversation for a paid service so the pro
+ * and customer can coordinate without exchanging phone/email. Seeds a first
+ * (redacted) customer message and returns the guest's private-link token.
+ */
+export const createServiceConversation = internalMutation({
+  args: {
+    contractorId: v.id('contractors'),
+    customerEmail: v.string(),
+    customerName: v.optional(v.string()),
+    seedMessage: v.string(),
+  },
+  handler: async (ctx, { contractorId, customerEmail, customerName, seedMessage }) => {
+    const contractor = await ctx.db.get(contractorId);
+    if (!contractor) return null;
+
+    const cleanEmail = customerEmail.trim().toLowerCase().slice(0, 320);
+    const cleanName = customerName?.trim().slice(0, MAX_NAME_LEN) || undefined;
+    const { text, flagged } = redactContactInfo(seedMessage.trim().slice(0, MAX_BODY_LEN));
+    const now = Date.now();
+
+    let convo = await ctx.db
+      .query('conversations')
+      .withIndex('by_contractor_email', (q) =>
+        q.eq('contractorId', contractorId).eq('customerEmail', cleanEmail),
+      )
+      .first();
+
+    let guestToken: string;
+    let conversationId: Id<'conversations'>;
+    if (convo && convo.guestToken) {
+      guestToken = convo.guestToken;
+      conversationId = convo._id;
+    } else {
+      guestToken = newGuestToken();
+      conversationId = await ctx.db.insert('conversations', {
+        contractorId,
+        contractorOwnerId: contractor.ownerId,
+        customerEmail: cleanEmail,
+        customerName: cleanName,
+        guestToken,
+        lastMessageAt: now,
+        lastMessagePreview: '',
+        lastSenderRole: 'customer',
+        customerUnread: 0,
+        contractorUnread: 0,
+        status: 'active',
+      });
+      convo = await ctx.db.get(conversationId);
+    }
+
+    if (text) {
+      const contractorWasUnread = convo?.contractorUnread ?? 0;
+      await ctx.db.insert('messages', {
+        conversationId,
+        senderRole: 'customer',
+        body: text,
+        flagged,
+      });
+      await ctx.db.patch(conversationId, {
+        lastMessageAt: now,
+        lastMessagePreview: text.slice(0, 140),
+        lastSenderRole: 'customer',
+        contractorUnread: contractorWasUnread + 1,
+        ...(cleanName && !convo?.customerName ? { customerName: cleanName } : {}),
+      });
+    }
+
+    return { guestToken };
   },
 });
 

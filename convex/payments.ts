@@ -590,9 +590,6 @@ export const unrecordStripeEvent = internalMutation({
 export const sendPaymentConfirmation = internalAction({
   args: { paymentId: v.id('payments') },
   handler: async (ctx, { paymentId }) => {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return;
-
     const data: {
       payment: Doc<'payments'>;
       contractor: Doc<'contractors'> | null;
@@ -602,18 +599,38 @@ export const sendPaymentConfirmation = internalAction({
     if (!data?.payment || !data.contractor) return;
 
     const { payment, contractor, service, ownerEmail } = data;
-    const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
-    const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@nextdoorpros.ca';
-
     const amount = (payment.amountCents / 100).toFixed(2);
     const serviceTitle = service?.title ?? 'Service';
+
+    // Open an on-platform thread so the two can coordinate without exchanging
+    // phone/email. Reuses an existing thread if one is already open.
+    const seed =
+      payment.note?.trim() ||
+      `Hi, I just paid for "${serviceTitle}". Looking forward to coordinating the details.`;
+    const convo = await ctx.runMutation(internal.messaging.createServiceConversation, {
+      contractorId: contractor._id,
+      customerEmail: payment.customerEmail,
+      customerName: payment.customerName,
+      seedMessage: seed,
+    });
+    const guestLink = convo?.guestToken
+      ? `${siteUrl()}/en/messages/guest?t=${convo.guestToken}`
+      : `${siteUrl()}/en/messages`;
+    const inboxLink = `${siteUrl()}/en/messages`;
+
+    // Email nudges are best-effort; the thread above exists regardless.
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return;
+
+    const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
+    const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@nextdoorpros.ca';
 
     const customerLines = [
       `Hi${payment.customerName ? ` ${payment.customerName}` : ''},`,
       '',
       `Thanks for your payment of $${amount} CAD to ${contractor.businessName} for "${serviceTitle}".`,
-      `They'll be in touch shortly to coordinate the work.`,
-      payment.note ? `\nYour note to the pro:\n${payment.note}` : '',
+      `Coordinate the work with them on NextDoor Pros — no need to share your phone or email:`,
+      guestLink,
       '',
       'NextDoor Pros',
     ].filter(Boolean);
@@ -621,14 +638,24 @@ export const sendPaymentConfirmation = internalAction({
     const proLines = [
       `Hi ${contractor.businessName},`,
       '',
-      `${payment.customerName || payment.customerEmail} just paid you $${amount} CAD for "${serviceTitle}".`,
-      `Reply-to: ${payment.customerEmail}`,
+      `${payment.customerName || 'A customer'} just paid you $${amount} CAD for "${serviceTitle}".`,
       payment.customerCitySlug ? `City: ${payment.customerCitySlug}` : '',
-      payment.note ? `\nNote from the customer:\n${payment.note}` : '',
+      `Reply and coordinate in your inbox — their (and your) phone and email stay private:`,
+      inboxLink,
       '',
       `Funds will be deposited to your bank on Stripe's payout schedule.`,
       '',
       'NextDoor Pros',
+    ].filter(Boolean);
+
+    // Internal ops paper trail keeps the full details (not sent to the pro).
+    const platformLines = [
+      `Payment ${payment._id}`,
+      `Pro: ${contractor.businessName}`,
+      `Service: ${serviceTitle} — $${amount} CAD`,
+      `Customer: ${payment.customerName || ''} <${payment.customerEmail}>`,
+      payment.customerCitySlug ? `City: ${payment.customerCitySlug}` : '',
+      payment.note ? `\nNote: ${payment.note}` : '',
     ].filter(Boolean);
 
     async function send(to: string, replyTo: string | null, subject: string, text: string) {
@@ -661,17 +688,17 @@ export const sendPaymentConfirmation = internalAction({
     if (ownerEmail) {
       await send(
         ownerEmail,
-        payment.customerEmail,
+        null,
         `[NextDoor Pros] You got paid $${amount} CAD`,
         proLines.join('\n'),
       );
     }
-    // Always BCC the platform inbox so we have a paper trail.
+    // Always send the platform inbox a paper trail.
     await send(
       platform,
       null,
       `[NextDoor Pros] Booking — ${contractor.businessName} — $${amount}`,
-      `Payment ${payment._id}\n\n${proLines.join('\n')}`,
+      platformLines.join('\n'),
     );
   },
 });
