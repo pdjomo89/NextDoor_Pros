@@ -85,7 +85,7 @@ export default async function LocaleLayout({
     url: `${SITE_URL}/${locale}`,
     logo: `${SITE_URL}/logo.png`,
     description: meta('description'),
-    email: 'hello@nextdoorpros.ca',
+    email: 'hello@mynextdoorpros.com',
     areaServed: { '@type': 'Country', name: 'Canada' },
   };
   const siteLd = {

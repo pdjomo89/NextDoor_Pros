@@ -623,7 +623,7 @@ export const sendPaymentConfirmation = internalAction({
     if (!apiKey) return;
 
     const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
-    const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@nextdoorpros.ca';
+    const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@mynextdoorpros.com';
 
     const customerLines = [
       `Hi${payment.customerName ? ` ${payment.customerName}` : ''},`,

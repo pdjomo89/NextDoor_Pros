@@ -10,7 +10,7 @@ import type { Doc } from './_generated/dataModel';
 
 const MAX_MESSAGE_LEN = 5000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DEFAULT_TO = 'hello@nextdoorpros.ca';
+const DEFAULT_TO = 'hello@mynextdoorpros.com';
 const DEFAULT_FROM = 'NextDoor Pros <onboarding@resend.dev>';
 
 /**
@@ -82,7 +82,7 @@ export const markStatus = internalMutation({
  * Best-effort email delivery via Resend (https://resend.com).
  * Required env vars on the Convex deployment:
  *   RESEND_API_KEY       — Resend API key
- *   CONTACT_TO_EMAIL     — destination inbox (defaults to hello@nextdoorpros.ca)
+ *   CONTACT_TO_EMAIL     — destination inbox (defaults to hello@mynextdoorpros.com)
  *   CONTACT_FROM_EMAIL   — verified "From" address (defaults to onboarding@resend.dev for testing)
  *
  * Without RESEND_API_KEY the message is still saved (status = 'skipped').

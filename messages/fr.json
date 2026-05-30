@@ -113,7 +113,7 @@
       "successTitle": "Demande envoyée",
       "successBody": "Merci — nous vous contacterons bientôt.",
       "errorTitle": "Échec de l'envoi",
-      "errorBody": "Veuillez réessayer, ou écrivez-nous à hello@nextdoorpros.ca."
+      "errorBody": "Veuillez réessayer, ou écrivez-nous à hello@mynextdoorpros.com."
     }
   },
   "Services": {
@@ -290,11 +290,11 @@
       "successTitle": "Merci — message envoyé.",
       "successBody": "Nous reviendrons vers vous d'ici un jour ouvrable.",
       "errorTitle": "Échec de l'envoi du message",
-      "errorBody": "Une erreur est survenue. Réessayez ou écrivez-nous à hello@nextdoorpros.ca."
+      "errorBody": "Une erreur est survenue. Réessayez ou écrivez-nous à hello@mynextdoorpros.com."
     },
     "info": {
       "emailLabel": "Courriel",
-      "emailValue": "hello@nextdoorpros.ca",
+      "emailValue": "hello@mynextdoorpros.com",
       "hoursLabel": "Heures de soutien",
       "hoursValue": "Lun–Sam, 8h–20h (heure locale)",
       "hqLabel": "Siège social",

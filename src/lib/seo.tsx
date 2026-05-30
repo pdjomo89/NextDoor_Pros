@@ -3,7 +3,7 @@ import { routing, type Locale } from '@/i18n/routing';
 
 /** Production origin. Override with NEXT_PUBLIC_SITE_URL (no trailing slash). */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://nextdoorpros.ca'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://mynextdoorpros.com'
 ).replace(/\/$/, '');
 
 export const SITE_NAME = 'NextDoor Pros';
