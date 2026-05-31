@@ -615,6 +615,24 @@
         "removeConfirm": "Supprimer ce service ? Les clients ne pourront plus le réserver.",
         "saveError": "Échec de l'enregistrement — vérifiez le prix et réessayez.",
         "feeNote": "Terminez la configuration Stripe avant d'ajouter des services tarifés."
+      },
+      "bookings": {
+        "title": "Réservations et versements",
+        "intro": "Les paiements des clients sont conservés en sécurité jusqu'à la fin du travail. Marquez une tâche comme livrée : vous êtes payé dès que le client confirme (ou automatiquement un jour plus tard).",
+        "empty": "Aucune réservation pour l'instant. Lorsqu'un client paie un service, elle apparaît ici.",
+        "customer": "Client",
+        "statusHeld": "En attente d'achèvement",
+        "statusDelivered": "Livré — en attente du client",
+        "statusReleasing": "Libération…",
+        "statusReleased": "Versé",
+        "statusRefunded": "Remboursé",
+        "statusDisputed": "Litige",
+        "markDelivered": "Marquer comme livré",
+        "markingDelivered": "Enregistrement…",
+        "deliveredHint": "Nous avons demandé au client de confirmer. S'il ne répond pas, le paiement vous sera versé automatiquement dans un jour.",
+        "payoutLabel": "vous recevez, après les frais de 10 %, sur",
+        "releasedOn": "Versé",
+        "error": "Une erreur s'est produite — veuillez réessayer."
       }
     },
     "profile": {
@@ -707,7 +725,7 @@
     "success": {
       "loading": "Vérification de votre réservation…",
       "successTitle": "Réservation confirmée !",
-      "successBody": "Merci — votre paiement a été accepté. Vous recevrez un reçu par courriel, et le pro vous contactera sous peu.",
+      "successBody": "Merci — votre paiement est confirmé et conservé en sécurité par NextDoor Pros. Il n'est versé au pro qu'une fois le travail terminé ; nous vous enverrons un lien pour le libérer lorsqu'il marquera la tâche comme terminée.",
       "paidTo": "Payé à",
       "pendingTitle": "Paiement reçu — finalisation en cours",
       "pendingBody": "Stripe finalise la transaction. Vous recevrez un reçu par courriel dans un instant.",
@@ -715,6 +733,23 @@
       "missingBody": "Si vous venez de payer, patientez quelques secondes et actualisez — sinon le lien est peut-être expiré ou pour un autre compte.",
       "amountLabel": "Montant :",
       "browseMore": "Parcourir plus de services"
+    },
+    "confirm": {
+      "loading": "Chargement de votre réservation…",
+      "missingTitle": "Réservation introuvable",
+      "missingBody": "Ce lien est peut-être expiré ou incorrect. Vérifiez le lien dans votre courriel, ou écrivez-nous depuis votre messagerie NextDoor Pros.",
+      "reviewTitle": "Confirmer que le travail est terminé",
+      "reviewBody": "Libérer le paiement envoie les fonds au pro. Ne le faites qu'une fois satisfait du travail réalisé.",
+      "amountLabel": "Montant :",
+      "proLabel": "Pro :",
+      "confirmBtn": "Confirmer et libérer le paiement",
+      "confirming": "Libération…",
+      "doneTitle": "Paiement libéré",
+      "doneBody": "Merci ! Le paiement a été versé au pro. Au plaisir de vous revoir.",
+      "alreadyTitle": "Rien à libérer",
+      "alreadyBody": "Cette réservation a déjà été réglée ou n'est plus admissible à une libération.",
+      "error": "Une erreur s'est produite — veuillez réessayer.",
+      "inboxLink": "Aller à mes messages"
     }
   },
   "Footer": {

@@ -2,11 +2,19 @@ import Stripe from 'stripe';
 import { httpAction, type ActionCtx } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
+import { reversalDeltaCents } from './payments';
 
 function stripeClient(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY not set');
   return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
+}
+
+/** Secret token authorizing an account-less customer's completion link. */
+function newConfirmToken(): string {
+  return (
+    crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+  );
 }
 
 export const handler = httpAction(async (ctx, request) => {
@@ -85,10 +93,10 @@ export const handler = httpAction(async (ctx, request) => {
         await handleChargeRefunded(ctx, event.data.object as Stripe.Charge);
         break;
       case 'charge.dispute.created':
-        await handleDispute(ctx, event.data.object as Stripe.Dispute, 'disputed');
+        await handleDispute(ctx, event.data.object as Stripe.Dispute, 'created');
         break;
       case 'charge.dispute.closed':
-        await handleDispute(ctx, event.data.object as Stripe.Dispute, null);
+        await handleDispute(ctx, event.data.object as Stripe.Dispute, 'closed');
         break;
       default:
         // Ignore unrelated events — Stripe retries when we 5xx, so we
@@ -145,10 +153,32 @@ async function handleCheckoutCompleted(
       ? session.payment_intent
       : session.payment_intent?.id;
 
+  // We hold the funds on the platform balance (separate charges & transfers),
+  // so we need the charge id to use as the transfer's `source_transaction`
+  // when the booking is later released to the pro.
+  let chargeId: string | undefined;
+  if (paymentIntentId) {
+    try {
+      const stripe = stripeClient();
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+      chargeId =
+        typeof pi.latest_charge === 'string'
+          ? pi.latest_charge
+          : pi.latest_charge?.id;
+    } catch (err) {
+      console.error('could not retrieve payment intent for charge id', err);
+    }
+  }
+
+  // Mint the secret the (account-less) customer uses to confirm completion.
+  const confirmToken = payment.confirmToken ?? newConfirmToken();
+
   await ctx.runMutation(internal.payments.patchPaymentRow, {
     id: payment._id,
-    status: 'paid',
+    status: 'held',
+    confirmToken,
     ...(paymentIntentId ? { stripePaymentIntentId: paymentIntentId } : {}),
+    ...(chargeId ? { stripeChargeId: chargeId } : {}),
   });
 
   await ctx.scheduler.runAfter(0, internal.payments.sendPaymentConfirmation, {
@@ -187,17 +217,39 @@ async function handleChargeRefunded(
   );
   if (!payment) return;
 
+  // If the booking was already released, the pro holds their share — pull it
+  // back proportionally to what's been refunded. Idempotent: we only reverse
+  // the delta beyond what we've reversed before, so webhook retries and our
+  // own refundBooking action (which also fires this event) never double-count.
+  let transferReversedCents: number | undefined;
+  if (payment.stripeTransferId) {
+    const delta = reversalDeltaCents(payment, charge.amount_refunded);
+    if (delta > 0) {
+      const stripe = stripeClient();
+      await stripe.transfers.createReversal(payment.stripeTransferId, {
+        amount: delta,
+        metadata: { platform: 'nextdoor_pros', paymentId: payment._id },
+      });
+      transferReversedCents = (payment.transferReversedCents ?? 0) + delta;
+    }
+  }
+
+  // Mark fully refunded only when the whole charge is refunded; a partial
+  // refund leaves the booking in its current state (with the reversal logged).
+  const fullyRefunded = charge.amount_refunded >= charge.amount;
+
   await ctx.runMutation(internal.payments.patchPaymentRow, {
     id: payment._id,
-    status: 'refunded',
     stripeChargeId: charge.id,
+    ...(transferReversedCents !== undefined ? { transferReversedCents } : {}),
+    ...(fullyRefunded ? { status: 'refunded', refundedAt: Date.now() } : {}),
   });
 }
 
 async function handleDispute(
   ctx: ActionCtx,
   dispute: Stripe.Dispute,
-  newStatus: string | null,
+  phase: 'created' | 'closed',
 ) {
   const paymentIntentId =
     typeof dispute.payment_intent === 'string'
@@ -211,9 +263,52 @@ async function handleDispute(
   );
   if (!payment) return;
 
+  if (phase === 'created') {
+    // Freeze the booking and remember where it was so we can put it back if the
+    // dispute is won. We intentionally do NOT reverse the pro's transfer yet —
+    // only on a lost outcome (reverse-on-loss) — so a winning dispute needs no
+    // re-transfer. While 'disputed', confirmCompletion and the auto-release
+    // cron both skip it (they only act on 'held').
+    if (payment.status === 'disputed') return; // already frozen
+    await ctx.runMutation(internal.payments.patchPaymentRow, {
+      id: payment._id,
+      status: 'disputed',
+      preDisputeStatus: payment.status,
+    });
+    return;
+  }
+
+  // phase === 'closed'
+  if (dispute.status === 'lost') {
+    // Chargeback stands — the customer keeps the money. Recover the pro's
+    // released share (proportional to the disputed amount), then settle as
+    // refunded. reversalDeltaCents is idempotent via transferReversedCents.
+    let transferReversedCents: number | undefined;
+    if (payment.stripeTransferId) {
+      const delta = reversalDeltaCents(payment, dispute.amount);
+      if (delta > 0) {
+        const stripe = stripeClient();
+        await stripe.transfers.createReversal(payment.stripeTransferId, {
+          amount: delta,
+          metadata: { platform: 'nextdoor_pros', paymentId: payment._id },
+        });
+        transferReversedCents = (payment.transferReversedCents ?? 0) + delta;
+      }
+    }
+    await ctx.runMutation(internal.payments.patchPaymentRow, {
+      id: payment._id,
+      status: 'refunded',
+      refundedAt: Date.now(),
+      ...(transferReversedCents !== undefined ? { transferReversedCents } : {}),
+    });
+    return;
+  }
+
+  // Won (or a warning closed without a chargeback) — restore the prior state.
+  // The funds were never reversed, so nothing else to do.
   await ctx.runMutation(internal.payments.patchPaymentRow, {
     id: payment._id,
-    ...(newStatus ? { status: newStatus } : { status: 'paid' }), // restore on close
+    status: payment.preDisputeStatus ?? 'held',
   });
 }
 

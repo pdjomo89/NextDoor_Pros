@@ -86,14 +86,41 @@ export default defineSchema({
     stripeCheckoutSessionId: v.string(),
     stripePaymentIntentId: v.optional(v.string()),
     stripeChargeId: v.optional(v.string()),
+    // The transfer that moved the held funds to the pro on release.
+    stripeTransferId: v.optional(v.string()),
+    // Amount actually transferred to the pro, in the platform's settlement
+    // currency (may differ from amountCents − fee due to cross-currency FX).
+    payoutTransferredCents: v.optional(v.number()),
+    // How much of that transfer we've reversed (pulled back from the pro) on
+    // refunds. Drives idempotent, proportional reversal across partial refunds.
+    transferReversedCents: v.optional(v.number()),
+    refundedAt: v.optional(v.number()),
+    // Status captured when a dispute opens, so we can restore it if the
+    // dispute is won (vs. settling to 'refunded' if it's lost).
+    preDisputeStatus: v.optional(v.string()),
 
-    // 'pending' | 'paid' | 'failed' | 'refunded' | 'disputed'
+    // Escrow lifecycle. Money lands on the platform balance (separate charges
+    // & transfers), is held until the work is done, then transferred to the pro.
+    //   'pending'   — Checkout Session created, awaiting payment
+    //   'held'      — customer paid; funds held on the platform balance
+    //   'releasing' — release in flight (transfer being created)
+    //   'released'  — transferred to the pro's connected account
+    //   'failed' | 'refunded' | 'disputed'
     status: v.string(),
+    // Set when the pro marks the work delivered; starts the auto-release clock.
+    deliveredAt: v.optional(v.number()),
+    // When/how the held funds were released to the pro.
+    releasedAt: v.optional(v.number()),
+    releaseMethod: v.optional(v.string()), // 'customer' | 'auto' | 'admin'
+    // Secret that lets the (account-less) customer confirm completion via a link.
+    confirmToken: v.optional(v.string()),
     errorMessage: v.optional(v.string()),
   })
     .index('by_contractor', ['contractorId'])
     .index('by_session', ['stripeCheckoutSessionId'])
-    .index('by_status', ['status']),
+    .index('by_status', ['status'])
+    .index('by_confirmToken', ['confirmToken'])
+    .index('by_status_delivered', ['status', 'deliveredAt']),
 
   // Idempotency log for incoming Stripe webhook events.
   stripeEvents: defineTable({

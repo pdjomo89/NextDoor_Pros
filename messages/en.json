@@ -615,6 +615,24 @@
         "removeConfirm": "Remove this service? Customers won't be able to book it anymore.",
         "saveError": "Couldn't save — check the price and try again.",
         "feeNote": "You need to finish Stripe onboarding before you can add priced services."
+      },
+      "bookings": {
+        "title": "Bookings & payouts",
+        "intro": "Customer payments are held safely until the work is done. Mark a job delivered and you're paid once the customer confirms (or automatically a day later).",
+        "empty": "No bookings yet. When a customer pays for a service, it shows up here.",
+        "customer": "Customer",
+        "statusHeld": "Awaiting completion",
+        "statusDelivered": "Delivered — awaiting customer",
+        "statusReleasing": "Releasing…",
+        "statusReleased": "Paid out",
+        "statusRefunded": "Refunded",
+        "statusDisputed": "Disputed",
+        "markDelivered": "Mark work delivered",
+        "markingDelivered": "Saving…",
+        "deliveredHint": "We've asked the customer to confirm. If they don't respond, the payment is released to you automatically a day from now.",
+        "payoutLabel": "you receive after the 10% fee, of",
+        "releasedOn": "Paid out",
+        "error": "Something went wrong — please try again."
       }
     },
     "profile": {
@@ -707,7 +725,7 @@
     "success": {
       "loading": "Checking your booking…",
       "successTitle": "Booking confirmed!",
-      "successBody": "Thanks — your payment went through. You'll receive a receipt by email, and the pro will be in touch shortly.",
+      "successBody": "Thanks — your payment is confirmed and held safely by NextDoor Pros. It's released to the pro only once the work is done; we'll email you a link to release it when they mark the job complete.",
       "paidTo": "Paid to",
       "pendingTitle": "Payment received — finishing up",
       "pendingBody": "Stripe is finalising the transaction. You'll receive a receipt by email in a moment.",
@@ -715,6 +733,23 @@
       "missingBody": "If you just paid, give it a few seconds and refresh — otherwise the link may be expired or for a different account.",
       "amountLabel": "Amount:",
       "browseMore": "Browse more services"
+    },
+    "confirm": {
+      "loading": "Loading your booking…",
+      "missingTitle": "We couldn't find that booking",
+      "missingBody": "This link may be expired or incorrect. Check the link in your email, or reach out from your NextDoor Pros inbox.",
+      "reviewTitle": "Confirm the work is complete",
+      "reviewBody": "Releasing payment sends the funds to the pro. Only do this once you're happy the work is done.",
+      "amountLabel": "Amount:",
+      "proLabel": "Pro:",
+      "confirmBtn": "Confirm & release payment",
+      "confirming": "Releasing…",
+      "doneTitle": "Payment released",
+      "doneBody": "Thank you! The payment has been released to the pro. We hope to see you again.",
+      "alreadyTitle": "Nothing to release",
+      "alreadyBody": "This booking has already been settled or is no longer eligible for release.",
+      "error": "Something went wrong — please try again.",
+      "inboxLink": "Go to my messages"
     }
   },
   "Footer": {

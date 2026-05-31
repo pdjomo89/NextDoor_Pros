@@ -8,6 +8,7 @@ import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
 import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
 import { PaymentsSection, type PaymentsLabels } from '@/components/payments-section';
+import { BookingsSection, type BookingsLabels } from '@/components/bookings-section';
 import {
   MembershipStatusCard,
   type MembershipStatusLabels,
@@ -36,6 +37,7 @@ type Labels = {
   whatsapp: string;
   photos: PhotoLabels;
   payments: PaymentsLabels;
+  bookings: BookingsLabels;
   membership: MembershipStatusLabels;
 };
 
@@ -162,6 +164,8 @@ export function DashboardClient({
           <PhotoManager labels={l.photos} />
 
           <PaymentsSection locale={locale} labels={l.payments} />
+
+          <BookingsSection locale={locale} labels={l.bookings} />
         </div>
       )}
     </div>

@@ -60,7 +60,7 @@ export function CheckoutSuccessClient({
   const formatter = locale === 'fr' ? CAD_FR : CAD;
   const amount = formatter.format(payment.amountCents / 100);
 
-  if (payment.status === 'paid') {
+  if (payment.status === 'held' || payment.status === 'released') {
     return (
       <Card
         icon="success"

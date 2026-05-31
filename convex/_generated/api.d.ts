@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as contactMessages from "../contactMessages.js";
 import type * as contractors from "../contractors.js";
+import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as jobs from "../jobs.js";
 import type * as membership from "../membership.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   contactMessages: typeof contactMessages;
   contractors: typeof contractors;
+  crons: typeof crons;
   http: typeof http;
   jobs: typeof jobs;
   membership: typeof membership;

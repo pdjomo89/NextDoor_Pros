@@ -16,6 +16,45 @@ import type { Doc, Id } from './_generated/dataModel';
 /** Platform commission on every payment (basis points). 10% = 1000 bp. */
 export const APPLICATION_FEE_BPS = 1000;
 
+/**
+ * How long after a pro marks the work delivered we auto-release the held funds
+ * if the customer hasn't confirmed (or disputed). Overridable via env.
+ */
+function autoReleaseMs(): number {
+  const days = Number(process.env.PAYOUT_HOLD_DAYS);
+  return (Number.isFinite(days) && days > 0 ? days : 1) * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * How much of the pro's transfer still needs to be reversed given the charge's
+ * cumulative refunded amount. Reverses the actually-transferred payout (in the
+ * platform's settlement currency) in proportion to the refunded fraction of the
+ * presentment-currency charge, capped so we never reverse more than we sent.
+ * Pure + idempotent: callers persist the running total in `transferReversedCents`,
+ * so a re-delivered webhook returns 0.
+ *
+ * `refundedTotalCents` is in the charge's presentment currency (e.g. CAD);
+ * `payoutTransferredCents` is in the transfer currency (e.g. USD). The reversal
+ * is a proportion, so the currency mismatch is intentional and correct.
+ */
+export function reversalDeltaCents(
+  payment: {
+    amountCents: number;
+    payoutTransferredCents?: number;
+    transferReversedCents?: number;
+  },
+  refundedTotalCents: number,
+): number {
+  const transferred = payment.payoutTransferredCents ?? 0;
+  if (transferred <= 0 || payment.amountCents <= 0) return 0;
+  const desired = Math.min(
+    transferred,
+    Math.round((transferred * refundedTotalCents) / payment.amountCents),
+  );
+  const already = payment.transferReversedCents ?? 0;
+  return Math.max(0, desired - already);
+}
+
 function stripeClient(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
@@ -31,6 +70,39 @@ function stripeClient(): Stripe {
 
 function siteUrl(): string {
   return process.env.SITE_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+}
+
+/**
+ * Best-effort transactional email via Resend (same setup as contactMessages).
+ * Silently no-ops when RESEND_API_KEY isn't configured.
+ */
+async function sendResendEmail(opts: {
+  to: string;
+  subject: string;
+  text: string;
+  replyTo?: string | null;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [opts.to],
+        ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+        subject: opts.subject,
+        text: opts.text,
+      }),
+    });
+  } catch (err) {
+    console.error('resend email failed', err);
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -374,6 +446,8 @@ export const createCheckoutSession = action({
       throw new Error('CONTRACTOR_NOT_READY');
     }
 
+    // Platform commission, withheld at release time (separate charges &
+    // transfers): the pro receives priceCents − applicationFeeCents.
     const applicationFeeCents = Math.round((service.priceCents * APPLICATION_FEE_BPS) / 10000);
 
     const stripe = stripeClient();
@@ -396,9 +470,11 @@ export const createCheckoutSession = action({
           quantity: 1,
         },
       ],
+      // No transfer_data / application_fee here: the charge lands on the
+      // PLATFORM balance and is held in escrow. The funds are transferred to
+      // the pro (minus the platform fee) only once the service is confirmed
+      // complete — see releaseFunds below.
       payment_intent_data: {
-        application_fee_amount: applicationFeeCents,
-        transfer_data: { destination: contractor.stripeAccountId },
         metadata: {
           platform: 'nextdoor_pros',
           contractorId: contractor._id,
@@ -521,6 +597,15 @@ export const patchPaymentRow = internalMutation({
     status: v.optional(v.string()),
     stripePaymentIntentId: v.optional(v.string()),
     stripeChargeId: v.optional(v.string()),
+    stripeTransferId: v.optional(v.string()),
+    payoutTransferredCents: v.optional(v.number()),
+    transferReversedCents: v.optional(v.number()),
+    refundedAt: v.optional(v.number()),
+    preDisputeStatus: v.optional(v.string()),
+    confirmToken: v.optional(v.string()),
+    deliveredAt: v.optional(v.number()),
+    releasedAt: v.optional(v.number()),
+    releaseMethod: v.optional(v.string()),
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, { id, ...patch }) => {
@@ -619,16 +704,14 @@ export const sendPaymentConfirmation = internalAction({
     const inboxLink = `${siteUrl()}/en/messages`;
 
     // Email nudges are best-effort; the thread above exists regardless.
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return;
-
-    const from = process.env.CONTACT_FROM_EMAIL ?? 'NextDoor Pros <onboarding@resend.dev>';
+    if (!process.env.RESEND_API_KEY) return;
     const platform = process.env.CONTACT_TO_EMAIL ?? 'hello@mynextdoorpros.com';
 
     const customerLines = [
       `Hi${payment.customerName ? ` ${payment.customerName}` : ''},`,
       '',
-      `Thanks for your payment of $${amount} CAD to ${contractor.businessName} for "${serviceTitle}".`,
+      `Thanks — your payment of $${amount} CAD for "${serviceTitle}" with ${contractor.businessName} is confirmed.`,
+      `Your money is held safely by NextDoor Pros and is released to the pro only once the work is done. We'll email you a link to release it when ${contractor.businessName} marks the job complete.`,
       `Coordinate the work with them on NextDoor Pros — no need to share your phone or email:`,
       guestLink,
       '',
@@ -638,19 +721,18 @@ export const sendPaymentConfirmation = internalAction({
     const proLines = [
       `Hi ${contractor.businessName},`,
       '',
-      `${payment.customerName || 'A customer'} just paid you $${amount} CAD for "${serviceTitle}".`,
+      `${payment.customerName || 'A customer'} just booked and paid $${amount} CAD for "${serviceTitle}".`,
       payment.customerCitySlug ? `City: ${payment.customerCitySlug}` : '',
-      `Reply and coordinate in your inbox — their (and your) phone and email stay private:`,
+      `The funds are held in escrow by NextDoor Pros. When the work is done, mark it delivered from your dashboard — you'll be paid once the customer confirms (or automatically a day later).`,
+      `Coordinate in your inbox — both sides' phone and email stay private:`,
       inboxLink,
-      '',
-      `Funds will be deposited to your bank on Stripe's payout schedule.`,
       '',
       'NextDoor Pros',
     ].filter(Boolean);
 
     // Internal ops paper trail keeps the full details (not sent to the pro).
     const platformLines = [
-      `Payment ${payment._id}`,
+      `Payment ${payment._id} — HELD`,
       `Pro: ${contractor.businessName}`,
       `Service: ${serviceTitle} — $${amount} CAD`,
       `Customer: ${payment.customerName || ''} <${payment.customerEmail}>`,
@@ -658,48 +740,24 @@ export const sendPaymentConfirmation = internalAction({
       payment.note ? `\nNote: ${payment.note}` : '',
     ].filter(Boolean);
 
-    async function send(to: string, replyTo: string | null, subject: string, text: string) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from,
-            to: [to],
-            ...(replyTo ? { reply_to: replyTo } : {}),
-            subject,
-            text,
-          }),
-        });
-      } catch (err) {
-        console.error('payment confirmation email failed', err);
-      }
-    }
-
-    await send(
-      payment.customerEmail,
-      null,
-      `[NextDoor Pros] Payment confirmation — ${contractor.businessName}`,
-      customerLines.join('\n'),
-    );
+    await sendResendEmail({
+      to: payment.customerEmail,
+      subject: `[NextDoor Pros] Payment held — ${contractor.businessName}`,
+      text: customerLines.join('\n'),
+    });
     if (ownerEmail) {
-      await send(
-        ownerEmail,
-        null,
-        `[NextDoor Pros] You got paid $${amount} CAD`,
-        proLines.join('\n'),
-      );
+      await sendResendEmail({
+        to: ownerEmail,
+        subject: `[NextDoor Pros] New booking — $${amount} CAD held`,
+        text: proLines.join('\n'),
+      });
     }
     // Always send the platform inbox a paper trail.
-    await send(
-      platform,
-      null,
-      `[NextDoor Pros] Booking — ${contractor.businessName} — $${amount}`,
-      platformLines.join('\n'),
-    );
+    await sendResendEmail({
+      to: platform,
+      subject: `[NextDoor Pros] Booking — ${contractor.businessName} — $${amount}`,
+      text: platformLines.join('\n'),
+    });
   },
 });
 
@@ -714,5 +772,415 @@ export const getPaymentForEmail = internalQuery({
       ? await ctx.db.get(payment.contractorServiceId)
       : null;
     return { payment, contractor, service, ownerEmail: owner?.email ?? null };
+  },
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// Escrow release — pay the pro after the service is completed.
+//
+// Money is held on the platform balance (separate charges & transfers). It is
+// transferred to the pro's connected account, minus the platform fee, when:
+//   • the customer confirms completion via their secret link, or
+//   • the pro marked the work delivered and the hold window lapsed (cron).
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Pro marks a held booking as delivered — starts the auto-release clock. */
+export const markWorkDelivered = mutation({
+  args: { paymentId: v.id('payments') },
+  handler: async (ctx, { paymentId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('UNAUTHENTICATED');
+
+    const payment = await ctx.db.get(paymentId);
+    if (!payment) throw new Error('NOT_FOUND');
+
+    const contractor = await ctx.db.get(payment.contractorId);
+    if (!contractor || contractor.ownerId !== userId) throw new Error('FORBIDDEN');
+
+    if (payment.status !== 'held') throw new Error('NOT_HELD');
+
+    await ctx.db.patch(paymentId, { deliveredAt: Date.now() });
+    await ctx.scheduler.runAfter(0, internal.payments.sendDeliveredNotice, {
+      paymentId,
+    });
+    return { ok: true as const };
+  },
+});
+
+/** Pro dashboard: list this contractor's bookings (no customer email leaked). */
+export const listMyBookings = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+    const contractor = await ctx.db
+      .query('contractors')
+      .withIndex('by_owner', (q) => q.eq('ownerId', userId))
+      .unique();
+    if (!contractor) return [];
+
+    const rows = await ctx.db
+      .query('payments')
+      .withIndex('by_contractor', (q) => q.eq('contractorId', contractor._id))
+      .order('desc')
+      .take(100);
+
+    const out = [];
+    for (const p of rows) {
+      // Only surface bookings that actually took the customer's money.
+      if (p.status === 'pending' || p.status === 'failed') continue;
+      const service = p.contractorServiceId
+        ? await ctx.db.get(p.contractorServiceId)
+        : null;
+      out.push({
+        _id: p._id,
+        createdAt: p._creationTime,
+        status: p.status,
+        amountCents: p.amountCents,
+        applicationFeeCents: p.applicationFeeCents,
+        payoutCents: p.amountCents - p.applicationFeeCents,
+        currency: p.currency,
+        customerName: p.customerName ?? null,
+        customerCitySlug: p.customerCitySlug ?? null,
+        serviceTitle: service?.title ?? null,
+        deliveredAt: p.deliveredAt ?? null,
+        releasedAt: p.releasedAt ?? null,
+      });
+    }
+    return out;
+  },
+});
+
+/** Public: details for the customer's completion-confirmation page. */
+export const getPaymentByConfirmToken = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    if (!token) return null;
+    const row = await ctx.db
+      .query('payments')
+      .withIndex('by_confirmToken', (q) => q.eq('confirmToken', token))
+      .unique();
+    if (!row) return null;
+    const contractor = await ctx.db.get(row.contractorId);
+    const service = row.contractorServiceId
+      ? await ctx.db.get(row.contractorServiceId)
+      : null;
+    return {
+      status: row.status,
+      amountCents: row.amountCents,
+      currency: row.currency,
+      contractorBusinessName: contractor?.businessName ?? null,
+      serviceTitle: service?.title ?? null,
+      deliveredAt: row.deliveredAt ?? null,
+    };
+  },
+});
+
+/** Public: customer confirms the work is complete → release funds to the pro. */
+export const confirmCompletion = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }): Promise<{ status: string }> => {
+    const row = await ctx.db
+      .query('payments')
+      .withIndex('by_confirmToken', (q) => q.eq('confirmToken', token))
+      .unique();
+    if (!row) throw new Error('INVALID_TOKEN');
+
+    // Idempotent: already released or release already in flight.
+    if (row.status === 'released' || row.status === 'releasing') {
+      return { status: row.status };
+    }
+    // Only a held booking can be released by the customer.
+    if (row.status !== 'held') {
+      return { status: row.status };
+    }
+
+    await ctx.db.patch(row._id, { status: 'releasing' });
+    await ctx.scheduler.runAfter(0, internal.payments.releaseFunds, {
+      paymentId: row._id,
+      method: 'customer',
+    });
+    return { status: 'releasing' };
+  },
+});
+
+export const getPaymentForRelease = internalQuery({
+  args: { paymentId: v.id('payments') },
+  handler: async (ctx, { paymentId }) => {
+    const payment = await ctx.db.get(paymentId);
+    if (!payment) return null;
+    const contractor = await ctx.db.get(payment.contractorId);
+    const owner = contractor ? await ctx.db.get(contractor.ownerId) : null;
+    const service = payment.contractorServiceId
+      ? await ctx.db.get(payment.contractorServiceId)
+      : null;
+    return {
+      payment,
+      stripeAccountId: contractor?.stripeAccountId ?? null,
+      businessName: contractor?.businessName ?? null,
+      ownerEmail: owner?.email ?? null,
+      serviceTitle: service?.title ?? null,
+    };
+  },
+});
+
+/**
+ * Create the Stripe Transfer that moves the held funds (minus the platform
+ * fee) to the pro's connected account. Reverts to 'held' on failure so the
+ * customer can retry and the cron can re-attempt.
+ */
+export const releaseFunds = internalAction({
+  args: { paymentId: v.id('payments'), method: v.string() },
+  handler: async (ctx, { paymentId, method }) => {
+    const data: {
+      payment: Doc<'payments'>;
+      stripeAccountId: string | null;
+      businessName: string | null;
+      ownerEmail: string | null;
+      serviceTitle: string | null;
+    } | null = await ctx.runQuery(internal.payments.getPaymentForRelease, { paymentId });
+    if (!data?.payment) return;
+
+    const { payment, stripeAccountId } = data;
+    // Guard: only release something that's been claimed for release. This also
+    // makes the action idempotent — a second run sees 'released' and bails.
+    if (payment.status !== 'releasing') return;
+
+    if (!stripeAccountId) {
+      await ctx.runMutation(internal.payments.patchPaymentRow, {
+        id: paymentId,
+        status: 'held',
+        errorMessage: 'Pro has no connected Stripe account.',
+      });
+      return;
+    }
+    if (!payment.stripeChargeId) {
+      await ctx.runMutation(internal.payments.patchPaymentRow, {
+        id: paymentId,
+        status: 'held',
+        errorMessage: 'Charge id missing; cannot determine settled funds.',
+      });
+      return;
+    }
+
+    try {
+      const stripe = stripeClient();
+      // Pay the pro out of the funds that actually SETTLED for this charge, in
+      // the platform's settlement currency. Our platform settles in USD while
+      // services are charged in CAD, so a CAD transfer can't be funded (no CAD
+      // balance) — and a transfer tied via `source_transaction` is rejected for
+      // the same currency-mismatch reason. Reading the charge's balance
+      // transaction gives the settled amount + currency; we keep our 10% fee
+      // and transfer the rest. This is always fundable (the money is there) and
+      // makes the fee exact regardless of FX.
+      const charge = await stripe.charges.retrieve(payment.stripeChargeId, {
+        expand: ['balance_transaction'],
+      });
+      const bt = charge.balance_transaction;
+      if (!bt || typeof bt === 'string') {
+        throw new Error('charge balance_transaction not available yet');
+      }
+      const payoutCents = Math.round(
+        (bt.amount * (10000 - APPLICATION_FEE_BPS)) / 10000,
+      );
+      const transfer = await stripe.transfers.create({
+        amount: payoutCents,
+        currency: bt.currency,
+        destination: stripeAccountId,
+        metadata: {
+          platform: 'nextdoor_pros',
+          paymentId: paymentId,
+          releaseMethod: method,
+        },
+      });
+
+      await ctx.runMutation(internal.payments.patchPaymentRow, {
+        id: paymentId,
+        status: 'released',
+        stripeTransferId: transfer.id,
+        payoutTransferredCents: payoutCents,
+        releasedAt: Date.now(),
+        releaseMethod: method,
+      });
+
+      await ctx.scheduler.runAfter(0, internal.payments.sendReleaseNotice, { paymentId });
+    } catch (err) {
+      console.error('releaseFunds transfer failed', err);
+      await ctx.runMutation(internal.payments.patchPaymentRow, {
+        id: paymentId,
+        status: 'held',
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
+    }
+  },
+});
+
+/**
+ * Cron entry point: claim every held booking whose hold window has lapsed and
+ * release it to the pro.
+ */
+export const claimDueAutoReleases = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - autoReleaseMs();
+    const rows = await ctx.db
+      .query('payments')
+      .withIndex('by_status_delivered', (q) =>
+        q.eq('status', 'held').lte('deliveredAt', cutoff),
+      )
+      .take(50);
+
+    const ids: Id<'payments'>[] = [];
+    for (const r of rows) {
+      // Skip held bookings the pro hasn't marked delivered yet (deliveredAt
+      // undefined sorts before any real timestamp under lte()).
+      if (r.deliveredAt == null) continue;
+      await ctx.db.patch(r._id, { status: 'releasing' });
+      ids.push(r._id);
+    }
+    return ids;
+  },
+});
+
+export const autoReleaseDue = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const ids: Id<'payments'>[] = await ctx.runMutation(
+      internal.payments.claimDueAutoReleases,
+      {},
+    );
+    for (const paymentId of ids) {
+      await ctx.scheduler.runAfter(0, internal.payments.releaseFunds, {
+        paymentId,
+        method: 'auto',
+      });
+    }
+    return { released: ids.length };
+  },
+});
+
+/** Customer email: pro marked the work delivered → here's the release link. */
+export const sendDeliveredNotice = internalAction({
+  args: { paymentId: v.id('payments') },
+  handler: async (ctx, { paymentId }) => {
+    const data: {
+      payment: Doc<'payments'>;
+      contractor: Doc<'contractors'> | null;
+      service: Doc<'contractorServices'> | null;
+      ownerEmail: string | null;
+    } | null = await ctx.runQuery(internal.payments.getPaymentForEmail, { paymentId });
+    if (!data?.payment || !data.contractor || !data.payment.confirmToken) return;
+
+    const { payment, contractor, service } = data;
+    const amount = (payment.amountCents / 100).toFixed(2);
+    const serviceTitle = service?.title ?? 'the service';
+    const confirmLink = `${siteUrl()}/en/checkout/confirm?t=${payment.confirmToken}`;
+
+    await sendResendEmail({
+      to: payment.customerEmail,
+      subject: `[NextDoor Pros] ${contractor.businessName} marked your job complete`,
+      text: [
+        `Hi${payment.customerName ? ` ${payment.customerName}` : ''},`,
+        '',
+        `${contractor.businessName} marked "${serviceTitle}" ($${amount} CAD) as complete.`,
+        `If you're happy with the work, release the payment here:`,
+        confirmLink,
+        '',
+        `If you do nothing, the held payment is released automatically a day from now. Need help? Reply in your NextDoor Pros inbox.`,
+        '',
+        'NextDoor Pros',
+      ].join('\n'),
+    });
+  },
+});
+
+/** Pro email: held funds have been released to their account. */
+export const sendReleaseNotice = internalAction({
+  args: { paymentId: v.id('payments') },
+  handler: async (ctx, { paymentId }) => {
+    const data: {
+      payment: Doc<'payments'>;
+      stripeAccountId: string | null;
+      businessName: string | null;
+      ownerEmail: string | null;
+      serviceTitle: string | null;
+    } | null = await ctx.runQuery(internal.payments.getPaymentForRelease, { paymentId });
+    if (!data?.payment || !data.ownerEmail) return;
+
+    const { payment, businessName, ownerEmail, serviceTitle } = data;
+    const payout = ((payment.amountCents - payment.applicationFeeCents) / 100).toFixed(2);
+
+    await sendResendEmail({
+      to: ownerEmail,
+      subject: `[NextDoor Pros] You've been paid $${payout} CAD`,
+      text: [
+        `Hi ${businessName ?? ''},`,
+        '',
+        `The held payment for "${serviceTitle ?? 'your service'}" has been released. $${payout} CAD (after the 10% platform fee) is on its way to your bank on Stripe's payout schedule.`,
+        '',
+        'NextDoor Pros',
+      ].join('\n'),
+    });
+  },
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// Refunds — work before AND after release.
+//
+// Before release the funds are still on the platform, so refunding the charge
+// is enough. After release the pro already received their share, so the
+// `charge.refunded` webhook ALSO reverses the transfer (see stripeWebhook.ts).
+// That webhook is the single source of truth for reversal, which keeps the
+// dashboard-initiated and programmatic refund paths consistent and idempotent.
+// ──────────────────────────────────────────────────────────────────────────
+
+export const getPaymentRow = internalQuery({
+  args: { id: v.id('payments') },
+  handler: async (ctx, { id }) => {
+    return await ctx.db.get(id);
+  },
+});
+
+/**
+ * Issue a refund for a booking. Works whether the booking is still held or
+ * already released. Pass `amountCents` for a partial refund (defaults to the
+ * full amount). The matching `charge.refunded` webhook reconciles status and,
+ * for released bookings, reverses the pro's transfer proportionally.
+ *
+ * Internal-only: trigger from an admin tool, `npx convex run`, or a Stripe
+ * dashboard refund (which fires the same webhook). Not exposed to the client.
+ */
+export const refundBooking = internalAction({
+  args: { paymentId: v.id('payments'), amountCents: v.optional(v.number()) },
+  handler: async (ctx, { paymentId, amountCents }) => {
+    const payment: Doc<'payments'> | null = await ctx.runQuery(
+      internal.payments.getPaymentRow,
+      { id: paymentId },
+    );
+    if (!payment) throw new Error('NOT_FOUND');
+    if (payment.status === 'refunded') return { alreadyRefunded: true as const };
+
+    const piId = payment.stripePaymentIntentId;
+    const chargeId = payment.stripeChargeId;
+    if (!piId && !chargeId) throw new Error('NO_CHARGE_TO_REFUND');
+
+    const refundAmount = Math.min(
+      amountCents ?? payment.amountCents,
+      payment.amountCents,
+    );
+    if (!Number.isInteger(refundAmount) || refundAmount <= 0) {
+      throw new Error('INVALID_AMOUNT');
+    }
+
+    const stripe = stripeClient();
+    // Refund from the platform balance. The `charge.refunded` webhook then
+    // handles transfer reversal (if released) and the status update — we don't
+    // reverse here, to keep a single, idempotent reversal path.
+    const refund = await stripe.refunds.create({
+      ...(piId ? { payment_intent: piId } : { charge: chargeId! }),
+      amount: refundAmount,
+      metadata: { platform: 'nextdoor_pros', paymentId },
+    });
+    return { refundId: refund.id, amountCents: refundAmount };
   },
 });
