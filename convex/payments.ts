@@ -1,4 +1,4 @@
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import Stripe from 'stripe';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import {
@@ -228,24 +228,34 @@ export const startOnboarding = action({
       {},
     );
     if (!contractor) {
-      throw new Error('NO_CONTRACTOR_PROFILE');
+      // ConvexError payloads reach the client; plain Errors are masked as a
+      // generic "Server Error", so use ConvexError for anything the pro should
+      // be able to read and act on.
+      throw new ConvexError('Create your business listing before setting up payments.');
     }
 
     const ownerEmail =
       (await ctx.runQuery(internal.payments.getUserEmail, {
         userId: contractor.ownerId,
       })) ?? undefined;
-    const accountId = await ensureExpressAccount(ctx, contractor, ownerEmail);
 
-    const stripe = stripeClient();
-    const link = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: `${siteUrl()}/${locale}/pros/dashboard?stripe=refresh`,
-      return_url: `${siteUrl()}/${locale}/pros/dashboard?stripe=return`,
-      type: 'account_onboarding',
-    });
-
-    return { url: link.url };
+    try {
+      const accountId = await ensureExpressAccount(ctx, contractor, ownerEmail);
+      const stripe = stripeClient();
+      const link = await stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: `${siteUrl()}/${locale}/pros/dashboard?stripe=refresh`,
+        return_url: `${siteUrl()}/${locale}/pros/dashboard?stripe=return`,
+        type: 'account_onboarding',
+      });
+      return { url: link.url };
+    } catch (err) {
+      // Surface the real Stripe reason (e.g. "Connect isn't enabled on this
+      // account") to the pro instead of an opaque "Server Error".
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('startOnboarding failed:', msg);
+      throw new ConvexError(`Stripe couldn't start payment setup: ${msg}`);
+    }
   },
 });
 
