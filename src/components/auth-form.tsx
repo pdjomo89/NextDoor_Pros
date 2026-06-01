@@ -29,19 +29,62 @@ export function AuthForm({ locale, mode }: Props) {
     );
   }
 
+  // Turn a thrown auth error into a message the user can act on. Convex masks
+  // plain server errors as "Server Error" in production, so the specific
+  // Password-provider strings below only match in dev — in production we fall
+  // back to a context-aware message (different for sign-up vs sign-in).
+  function describeError(err: unknown): string {
+    const raw = err instanceof Error ? err.message : String(err);
+    const m = raw.toLowerCase();
+
+    // Reliable on the client regardless of environment.
+    if (
+      m.includes('failed to fetch') ||
+      m.includes('networkerror') ||
+      m.includes('network request') ||
+      m.includes('websocket')
+    ) {
+      return t('errNetwork');
+    }
+
+    // Convex Auth Password-provider signals (visible in dev).
+    if (m.includes('already exists')) return t('errEmailTaken');
+    if (m.includes('invalid password')) return t('errWeakPassword');
+    if (
+      m.includes('invalid credentials') ||
+      m.includes('invalidsecret') ||
+      m.includes('invalidaccountid')
+    ) {
+      return t('errInvalidCredentials');
+    }
+
+    // Production fallback (the real reason is masked by Convex).
+    return mode === 'sign-up' ? t('errSignUpFailed') : t('errInvalidCredentials');
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const password = String(formData.get('password') ?? '');
+
+    // Catch the most common sign-up failure before hitting the server, where
+    // the "Invalid password" reason would otherwise be masked in production.
+    if (mode === 'sign-up' && password.length < 8) {
+      setError(t('errWeakPassword'));
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const formData = new FormData(e.currentTarget);
       formData.set('flow', mode === 'sign-in' ? 'signIn' : 'signUp');
       await signIn('password', formData);
       router.push(`/${locale}/pros/dashboard`);
       router.refresh();
     } catch (err) {
-      setError(t('errInvalidCredentials'));
-      console.error(err);
+      console.error('Auth error:', err);
+      setError(describeError(err));
     } finally {
       setSubmitting(false);
     }
