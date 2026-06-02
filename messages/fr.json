@@ -251,21 +251,38 @@
     "title": "Nouvelles et mises à jour",
     "subtitle": "Lancements, nouvelles villes et conseils de nos pros.",
     "readMore": "Lire la suite",
+    "backToNews": "Retour aux nouvelles",
     "posts": {
       "p1": {
         "title": "Maintenant à Halifax et à Québec",
         "date": "5 mai 2026",
-        "excerpt": "Nous étendons nos services à l'est — réservez des pros vérifiés dans deux provinces de plus cette semaine."
+        "excerpt": "Nous étendons nos services à l'est — réservez des pros vérifiés dans deux provinces de plus cette semaine.",
+        "body": [
+          "NextDoor Pros est officiellement en service à Halifax (Nouvelle-Écosse) et à Québec. Dès cette semaine, les propriétaires des deux villes peuvent parcourir, comparer et réserver des pros locaux vérifiés pour tout, de la plomberie et l'électricité au ménage et à l'entretien saisonnier de la cour.",
+          "Chaque pro qui se joint à ces nouveaux marchés passe par le même processus de vérification que le reste de notre réseau : vérification d'identité, contrôle des licences et des assurances le cas échéant, et examen des travaux antérieurs. Nous ouvrons une ville seulement lorsque nous avons assez de pros qualifiés pour vous offrir un véritable choix — pas une courte liste des premiers inscrits.",
+          "Si vous êtes propriétaire à Halifax ou à Québec, vous pouvez commencer une réservation dès aujourd'hui. Et si vous êtes un pro qualifié dans l'une de ces régions, les candidatures sont ouvertes — vous joindre maintenant, c'est être visible auprès des clients dès le premier jour."
+        ]
       },
       "p2": {
         "title": "Printemps 2026 : services saisonniers ouverts à la réservation",
         "date": "18 avril 2026",
-        "excerpt": "Pelouse, terrasses et nettoyage extérieur — les pros prennent les réservations."
+        "excerpt": "Pelouse, terrasses et nettoyage extérieur — les pros prennent les réservations.",
+        "body": [
+          "Le printemps est la période la plus occupée de l'année pour les travaux extérieurs. Nous avons donc ouvert les réservations saisonnières tôt pour vous aider à réserver un pro avant la cohue. Entretien de la pelouse, rénovation de terrasses, nettoyage de gouttières, lavage à pression et nettoyage général de la cour sont tous offerts dès maintenant.",
+          "Réserver à l'avance compte au printemps : les meilleurs pros remplissent leur horaire rapidement dès le retour du beau temps. Réserver une plage maintenant fixe votre date et votre prix, et vous pouvez écrire à votre pro sur la plateforme pour confirmer les détails avant son arrivée.",
+          "Vous ne savez pas par où commencer? Parcourez les services saisonniers par catégorie, lisez les avis vérifiés de vos voisins et réservez le pro qui convient à votre échéancier et à votre budget. Le paiement est conservé de façon sécuritaire et n'est versé qu'une fois le travail terminé à votre satisfaction."
+        ]
       },
       "p3": {
         "title": "À quoi s'attendre d'un pro NextDoor vérifié",
         "date": "30 mars 2026",
-        "excerpt": "Comment nous vérifions chaque pro — et pourquoi c'est important."
+        "excerpt": "Comment nous vérifions chaque pro — et pourquoi c'est important.",
+        "body": [
+          "Le badge « vérifié » d'un pro NextDoor n'est pas une étiquette marketing — il signifie que le pro a réussi un processus de vérification en plusieurs étapes avant de pouvoir accepter la moindre réservation. Voici en quoi cela consiste et pourquoi cela vous protège.",
+          "D'abord, l'identité. Chaque pro confirme qui il est avant d'être actif, pour que vous sachiez toujours que la personne qui se présente chez vous correspond à son profil. Ensuite, les qualifications : pour les métiers qui l'exigent, nous vérifions les licences actives et les preuves d'assurance, afin que vous ne soyez pas responsable si quelque chose tourne mal.",
+          "Enfin, les antécédents. Nous examinons les travaux passés et mettons en avant des avis honnêtes de vrais clients, et nous gardons toutes les communications et tous les paiements sur la plateforme. Fini les factures à courir après, le partage de coordonnées personnelles, et vous disposez d'un historique sur lequel vous appuyer en cas de pépin.",
+          "La vérification est continue, pas ponctuelle. Les pros qui ne respectent plus nos normes perdent leur badge — alors quand vous le voyez, vous pouvez réserver en toute confiance."
+        ]
       }
     }
   },
