@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ArrowRight, Calendar } from 'lucide-react';
+import { Link } from '@/i18n/routing';
 import { pageMetadata } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
+import { POSTS, POST_IMAGE, POST_SLUG } from './posts';
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1444084316824-dc26d6657664?auto=format&fit=crop&w=1600&q=70';
@@ -22,17 +24,6 @@ export async function generateMetadata({
     description: t('subtitle'),
   });
 }
-
-const POSTS = ['p1', 'p2', 'p3'] as const;
-
-const unsplash = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=70`;
-
-const POST_IMAGE: Record<(typeof POSTS)[number], string> = {
-  p1: unsplash('1519178614-68673b201f36'),
-  p2: unsplash('1599685315640-9ceab2f58148'),
-  p3: unsplash('1521791136064-7986c2920216'),
-};
 
 export default async function NewsPage({
   params,
@@ -74,7 +65,10 @@ export default async function NewsPage({
       <section className="container py-16 md:py-20">
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
           {/* Featured */}
-          <article className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm transition-shadow hover:shadow-md md:col-span-2 md:flex-row">
+          <Link
+            href={`/news/${POST_SLUG[featured]}`}
+            className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm transition-shadow hover:shadow-md md:col-span-2 md:flex-row"
+          >
             <div className="relative aspect-[16/10] overflow-hidden bg-navy/5 md:aspect-auto md:w-5/12">
               <Image
                 src={POST_IMAGE[featured]}
@@ -101,12 +95,13 @@ export default async function NewsPage({
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </span>
             </div>
-          </article>
+          </Link>
 
           {/* Rest */}
           {rest.map((id) => (
-            <article
+            <Link
               key={id}
+              href={`/news/${POST_SLUG[id]}`}
               className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-navy/5">
@@ -130,7 +125,7 @@ export default async function NewsPage({
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>

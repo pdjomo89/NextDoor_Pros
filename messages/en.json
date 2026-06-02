@@ -251,21 +251,38 @@
     "title": "News & updates",
     "subtitle": "Product launches, new cities, and tips from our pros.",
     "readMore": "Read more",
+    "backToNews": "Back to news",
     "posts": {
       "p1": {
         "title": "Now live in Halifax and Quebec City",
         "date": "May 5, 2026",
-        "excerpt": "We're expanding east — book vetted pros in two more provinces this week."
+        "excerpt": "We're expanding east — book vetted pros in two more provinces this week.",
+        "body": [
+          "NextDoor Pros is officially live in Halifax, Nova Scotia and Quebec City, Quebec. Starting this week, homeowners in both cities can browse, compare, and book vetted local pros for everything from plumbing and electrical work to cleaning and seasonal yard care.",
+          "Every pro joining in these new markets goes through the same screening as the rest of our network: identity verification, license and insurance checks where applicable, and a review of past work. We launch a city only once we have enough qualified pros to give you real choice — not a thin list of whoever signed up first.",
+          "If you're a homeowner in Halifax or Quebec City, you can start a booking today. And if you're a skilled pro in either region, applications are open — joining now means getting in front of customers from day one as demand ramps up."
+        ]
       },
       "p2": {
         "title": "Spring 2026: seasonal services open for booking",
         "date": "April 18, 2026",
-        "excerpt": "Lawn care, deck refinishing, and outdoor cleanup pros are taking bookings now."
+        "excerpt": "Lawn care, deck refinishing, and outdoor cleanup pros are taking bookings now.",
+        "body": [
+          "Spring is the busiest stretch of the year for outdoor work, so we've opened seasonal bookings early to help you get on a pro's calendar before the rush. Lawn care, deck refinishing, gutter clearing, pressure washing, and general yard cleanup are all available now.",
+          "Booking ahead matters in spring: the best pros fill their schedules quickly once the weather turns. Reserving a slot now locks in your date and your price, and you can message your pro through the platform to confirm details before they arrive.",
+          "Not sure where to start? Browse seasonal services by category, read verified reviews from neighbours, and book the pro that fits your timeline and budget. Payment is held securely and only released once the job is done to your satisfaction."
+        ]
       },
       "p3": {
         "title": "What to expect from a verified NextDoor Pro",
         "date": "March 30, 2026",
-        "excerpt": "How we vet every pro on the platform — and why it matters."
+        "excerpt": "How we vet every pro on the platform — and why it matters.",
+        "body": [
+          "The \"verified\" badge on a NextDoor Pro isn't a marketing label — it means the pro has cleared a multi-step screening process before they can take a single booking. Here's what that involves and why it protects you.",
+          "First, identity. Every pro confirms who they are before going live, so you always know the person showing up at your door matches their profile. Next, credentials: for trades that require it, we verify active licenses and proof of insurance, so you're not liable if something goes wrong on the job.",
+          "Finally, track record. We review past work and surface honest reviews from real customers, and we keep all communication and payment on the platform. That means no chasing invoices, no sharing personal contact details, and a record you can fall back on if anything needs sorting out.",
+          "Verification is ongoing, not one-and-done. Pros who slip below our standards lose their badge — so when you see it, you can book with confidence."
+        ]
       }
     }
   },
