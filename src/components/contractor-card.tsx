@@ -39,7 +39,7 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
   const profileHref = `/pros/${contractor._id}`;
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm ring-1 ring-transparent transition-all hover:-translate-y-0.5 hover:shadow-xl hover:ring-forest/20">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-sm ring-1 ring-transparent transition-all hover:-translate-y-0.5 hover:shadow-xl hover:ring-forest/20">
       <Link href={profileHref} className="relative block aspect-[16/10] overflow-hidden bg-navy/5">
         {hero ? (
           // Convex storage URLs aren't whitelisted in next.config.js images, so use a plain img.

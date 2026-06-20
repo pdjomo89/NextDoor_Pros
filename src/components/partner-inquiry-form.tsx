@@ -61,7 +61,7 @@ export function PartnerInquiryForm({ locale }: { locale: string }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-5 rounded-2xl border border-navy/10 bg-white p-6 shadow-sm sm:p-8"
+      className="space-y-5 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6 shadow-sm sm:p-8"
     >
       {/* honeypot — bots fill this, humans don't see it */}
       <input

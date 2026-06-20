@@ -143,7 +143,7 @@ export default async function ContractorProfilePage({
         </Link>
       </Button>
 
-      <article className="mt-4 rounded-2xl border border-navy/10 bg-white p-6 sm:p-8">
+      <article className="mt-4 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6 sm:p-8">
         <h1 className="text-balance text-3xl font-bold tracking-tight text-navy">
           {contractor.businessName}
         </h1>

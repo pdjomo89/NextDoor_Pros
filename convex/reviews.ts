@@ -29,17 +29,17 @@ export const listForContractor = query({
     reviews.sort((a, b) => b._creationTime - a._creationTime);
     return await Promise.all(
       reviews.map(async (r) => {
-        const author = await ctx.db.get(r.authorId);
+        const author = r.authorId ? await ctx.db.get(r.authorId) : null;
         const email = (author as { email?: string } | null)?.email ?? null;
         const name = (author as { name?: string } | null)?.name ?? null;
         return {
           _id: r._id,
           _creationTime: r._creationTime,
           contractorId: r.contractorId,
-          authorId: r.authorId,
+          authorId: r.authorId ?? null,
           rating: r.rating,
           comment: r.comment,
-          authorName: name ?? (email ? email.split('@')[0] : null),
+          authorName: name ?? (email ? email.split('@')[0] : null) ?? r.guestName ?? null,
         };
       }),
     );
@@ -93,6 +93,38 @@ export const submit = mutation({
     } else {
       await ctx.db.insert('reviews', { contractorId, authorId: userId, rating: r, comment: text });
     }
+    await recompute(ctx, contractorId);
+  },
+});
+
+/**
+ * Create a review from a logged-out (guest) customer. Guests are identified
+ * only by the name they type, so these are never deduplicated or editable.
+ */
+export const submitGuest = mutation({
+  args: {
+    contractorId: v.id('contractors'),
+    rating: v.number(),
+    comment: v.string(),
+    name: v.string(),
+    honeypot: v.optional(v.string()),
+  },
+  handler: async (ctx, { contractorId, rating, comment, name, honeypot }) => {
+    // Bots fill hidden fields; humans never see them. Pretend success.
+    if (honeypot && honeypot.trim().length > 0) return;
+
+    const contractor = await ctx.db.get(contractorId);
+    if (!contractor) throw new Error('Listing not found');
+
+    const guestName = name.trim().slice(0, 80);
+    if (!guestName) throw new Error('Please enter your name');
+
+    await ctx.db.insert('reviews', {
+      contractorId,
+      guestName,
+      rating: clampRating(rating),
+      comment: comment.trim().slice(0, 2000),
+    });
     await recompute(ctx, contractorId);
   },
 });

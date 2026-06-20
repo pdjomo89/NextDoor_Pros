@@ -50,7 +50,7 @@ export function GuestThreadsList() {
   return (
     <div className="space-y-4">
       {loading ? (
-        <div className="flex justify-center rounded-2xl border border-navy/10 bg-white py-14 text-navy/50">
+        <div className="flex justify-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 py-14 text-navy/50">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : !summaries || summaries.length === 0 ? (
@@ -62,7 +62,7 @@ export function GuestThreadsList() {
           </p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
+        <ul className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100">
           {summaries.map((s) => (
             <li key={s.token}>
               <Link

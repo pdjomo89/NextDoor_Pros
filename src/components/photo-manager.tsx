@@ -79,7 +79,7 @@ export function PhotoManager({ labels: l }: { labels: PhotoLabels }) {
   }
 
   return (
-    <div className="rounded-2xl border border-navy/10 bg-white p-6">
+    <div className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-navy">{l.title}</h3>

@@ -130,7 +130,10 @@ export default defineSchema({
 
   reviews: defineTable({
     contractorId: v.id('contractors'),
-    authorId: v.id('users'),
+    // Set when a signed-in user leaves the review; absent for guest reviews.
+    authorId: v.optional(v.id('users')),
+    // Display name supplied by a logged-out (guest) reviewer.
+    guestName: v.optional(v.string()),
     rating: v.number(), // 1..5
     comment: v.string(),
   })

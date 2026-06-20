@@ -3,39 +3,14 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from 'convex/react';
-import { Loader2, Star, Trash2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/star-rating';
+import { StarPicker } from '@/components/star-picker';
 import { getConvexEnv } from '@/lib/convex-env';
 import { api } from '../../convex/_generated/api';
 import type { ReviewDoc } from '@/lib/review-types';
-import { cn } from '@/lib/utils';
-
-function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const [hover, setHover] = React.useState(0);
-  const shown = hover || value;
-  return (
-    <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => onChange(n)}
-          onMouseEnter={() => setHover(n)}
-          aria-label={`${n} star${n === 1 ? '' : 's'}`}
-          className="rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-        >
-          <Star
-            className={cn('h-6 w-6', n <= shown ? 'text-amber-400' : 'text-navy/20')}
-            fill="currentColor"
-            strokeWidth={0}
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function ReviewForm({ contractorId }: { contractorId: string }) {
   const t = useTranslations('Reviews');
@@ -93,7 +68,7 @@ function ReviewForm({ contractorId }: { contractorId: string }) {
   const editing = Boolean(mine);
 
   return (
-    <form onSubmit={onSubmit} className="rounded-2xl border border-navy/10 bg-white p-5">
+    <form onSubmit={onSubmit} className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-5">
       <p className="text-sm font-semibold text-navy">{editing ? t('yourReview') : t('leaveReview')}</p>
       <div className="mt-3">
         <StarPicker value={rating} onChange={setRating} />
@@ -175,7 +150,7 @@ export function ReviewSection({
         ) : (
           <ul className="space-y-4">
             {reviews.map((r) => (
-              <li key={r._id} className="rounded-2xl border border-navy/10 bg-white p-5">
+              <li key={r._id} className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-navy">
                     {r.authorName ?? t('anon')}

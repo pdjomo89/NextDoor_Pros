@@ -102,7 +102,7 @@ export function GuestConversationClient({ token }: { token: string }) {
   }
   if (thread === undefined) {
     return (
-      <div className="flex justify-center rounded-2xl border border-navy/10 bg-white py-16 text-navy/50">
+      <div className="flex justify-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 py-16 text-navy/50">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -112,7 +112,7 @@ export function GuestConversationClient({ token }: { token: string }) {
   }
 
   return (
-    <div className="flex h-[70vh] min-h-[460px] flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white">
+    <div className="flex h-[70vh] min-h-[460px] flex-col overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100">
       <header className="flex items-center gap-3 border-b border-navy/10 px-4 py-3">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-forest/15 text-forest">
           <MessageSquare className="h-4 w-4" />

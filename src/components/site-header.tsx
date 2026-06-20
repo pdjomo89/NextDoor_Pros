@@ -54,6 +54,7 @@ function InboxLink({
 const NAV_ITEMS = [
   { href: '/services', key: 'services' },
   { href: '/jobs', key: 'jobs' },
+  { href: '/reviews', key: 'reviews' },
   { href: '/pricing', key: 'pricing' },
   { href: '/about', key: 'about' },
   { href: '/partners', key: 'partners' },

@@ -122,7 +122,7 @@ export function PaymentsSection({
 
   if (status === undefined || services === undefined) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-navy/10 bg-white py-10 text-navy/60">
+      <div className="flex items-center justify-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 py-10 text-navy/60">
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     );
@@ -184,7 +184,7 @@ export function PaymentsSection({
       : 'in_progress';
 
   return (
-    <article className="space-y-5 rounded-2xl border border-navy/10 bg-white p-6">
+    <article className="space-y-5 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
       <header>
         <h2 className="flex items-center gap-2 text-lg font-semibold text-navy">
           <CreditCard className="h-5 w-5 text-forest" />
@@ -334,7 +334,7 @@ function ServicesCatalog({
           {services.map((s) => (
             <li
               key={s._id}
-              className="flex items-start justify-between gap-3 rounded-xl border border-navy/10 bg-white px-4 py-3"
+              className="flex items-start justify-between gap-3 rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 px-4 py-3"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium text-navy">

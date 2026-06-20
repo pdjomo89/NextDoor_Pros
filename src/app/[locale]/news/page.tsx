@@ -67,7 +67,7 @@ export default async function NewsPage({
           {/* Featured */}
           <Link
             href={`/news/${POST_SLUG[featured]}`}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm transition-shadow hover:shadow-md md:col-span-2 md:flex-row"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-sm transition-shadow hover:shadow-md md:col-span-2 md:flex-row"
           >
             <div className="relative aspect-[16/10] overflow-hidden bg-navy/5 md:aspect-auto md:w-5/12">
               <Image
@@ -102,7 +102,7 @@ export default async function NewsPage({
             <Link
               key={id}
               href={`/news/${POST_SLUG[id]}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-navy/5">
                 <Image

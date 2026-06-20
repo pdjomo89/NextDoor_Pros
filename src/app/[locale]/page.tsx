@@ -92,7 +92,7 @@ export default async function HomePage({
             {(['step1', 'step2', 'step3'] as const).map((step, i) => (
               <div
                 key={step}
-                className="rounded-2xl border border-navy/10 bg-white p-8"
+                className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-8"
               >
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-forest text-lg font-bold text-white">
                   {i + 1}

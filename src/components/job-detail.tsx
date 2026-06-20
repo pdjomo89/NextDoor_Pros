@@ -54,7 +54,7 @@ export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
 
   if (job === null) {
     return (
-      <div className="rounded-xl border border-navy/10 bg-white p-8 text-center">
+      <div className="rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-8 text-center">
         <p className="font-semibold text-navy">{t('notFound')}</p>
         <Button asChild variant="ghost" size="sm" className="mt-3">
           <Link href="/jobs">
@@ -100,7 +100,7 @@ export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
   }
 
   return (
-    <article className="rounded-2xl border border-navy/10 bg-white p-6 sm:p-8">
+    <article className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6 sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h1 className="text-balance text-3xl font-bold text-navy">{job.title}</h1>
         <span className="rounded-full bg-forest/10 px-3 py-1 text-xs font-medium text-forest">

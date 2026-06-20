@@ -17,7 +17,7 @@ export function JobCard({ job }: { job: JobDoc }) {
   return (
     <Link
       href={`/jobs/${job._id}`}
-      className="group flex h-full flex-col rounded-xl border border-navy/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group flex h-full flex-col rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold text-navy">{job.title}</h3>

@@ -19,7 +19,7 @@ export function AuthShell({
 }) {
   return (
     <div className="container py-12 md:py-16">
-      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-navy/10 bg-white shadow-lg shadow-navy/10 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-lg shadow-navy/10 lg:grid-cols-2">
         {/* Brand panel */}
         <div className="relative hidden flex-col justify-between p-10 text-white lg:flex">
           <Image

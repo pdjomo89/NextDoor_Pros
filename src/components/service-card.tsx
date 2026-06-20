@@ -66,7 +66,7 @@ export function ServiceCard({ category }: { category: ServiceCategory }) {
     <Link
       href={`/services/${category.slug}`}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-xl border border-navy/10 bg-white transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-2 ring-transparent',
+        'group flex h-full flex-col overflow-hidden rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-2 ring-transparent',
         accentRing,
       )}
     >

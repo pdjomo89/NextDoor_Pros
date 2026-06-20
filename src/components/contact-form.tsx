@@ -70,7 +70,7 @@ export function ContactForm({ locale }: { locale: Locale }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-4 rounded-2xl border border-navy/10 bg-white p-6 shadow-sm sm:p-7"
+      className="space-y-4 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-200 via-white to-forest-200 p-6 shadow-sm sm:p-7"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t('name')}>

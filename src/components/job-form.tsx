@@ -88,7 +88,7 @@ export function JobForm({ locale }: { locale: Locale }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-6 rounded-2xl border border-navy/10 bg-white p-6"
+      className="space-y-6 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6"
     >
       <Field label={t('jobTitle')} required>
         <input

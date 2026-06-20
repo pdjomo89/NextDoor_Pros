@@ -107,7 +107,7 @@ export function MessagesClient({
   }
 
   return (
-    <div className="grid h-[70vh] min-h-[460px] grid-cols-1 overflow-hidden rounded-2xl border border-navy/10 bg-white md:grid-cols-[320px_1fr]">
+    <div className="grid h-[70vh] min-h-[460px] grid-cols-1 overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 md:grid-cols-[320px_1fr]">
       {/* Conversation list */}
       <aside
         className={cn(

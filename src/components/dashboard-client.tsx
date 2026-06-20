@@ -82,7 +82,7 @@ export function DashboardClient({
       </div>
 
       {!contractor ? (
-        <div className="rounded-2xl border border-navy/10 bg-white p-8 text-center">
+        <div className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-8 text-center">
           <h2 className="text-xl font-semibold text-navy">{l.noListingTitle}</h2>
           <p className="mt-2 text-navy/70">{l.noListingBody}</p>
           <Button asChild variant="secondary" size="lg" className="mt-6">
@@ -91,7 +91,7 @@ export function DashboardClient({
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex items-center justify-between rounded-xl border border-navy/10 bg-white p-5">
+          <div className="flex items-center justify-between rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-5">
             <div className="flex items-center gap-3">
               {contractor.published ? (
                 <CheckCircle2 className="h-6 w-6 text-forest" />
@@ -115,7 +115,7 @@ export function DashboardClient({
             </Button>
           </div>
 
-          <article className="rounded-2xl border border-navy/10 bg-white p-6">
+          <article className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
             <h2 className="text-xl font-semibold text-navy">
               {contractor.businessName}
             </h2>

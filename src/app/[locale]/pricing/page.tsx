@@ -94,7 +94,7 @@ export default async function PricingPage({
               'relative flex flex-col rounded-2xl p-8 transition-transform',
               plan.featured
                 ? 'bg-gradient-to-b from-navy to-navy-600 text-white shadow-xl shadow-navy/30 ring-1 ring-forest/40 md:-mt-4 md:mb-4'
-                : 'border border-navy/10 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md',
+                : 'border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-sm hover:-translate-y-0.5 hover:shadow-md',
             )}
           >
             {plan.featured && (

@@ -167,7 +167,7 @@ export default async function ServiceCityPage({
       {/* FAQ */}
       <section className="mt-14 border-t border-navy/10 pt-8">
         <h2 className="text-lg font-semibold text-navy">{tc('faqTitle')}</h2>
-        <div className="mt-4 divide-y divide-navy/10 overflow-hidden rounded-2xl border border-navy/10 bg-white">
+        <div className="mt-4 divide-y divide-navy/10 overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100">
           {faqs.map((f, i) => (
             <details
               key={i}

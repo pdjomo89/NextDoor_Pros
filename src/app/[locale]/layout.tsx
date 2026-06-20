@@ -99,7 +99,7 @@ export default async function LocaleLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang={locale}>
-        <body className="min-h-screen bg-background font-sans antialiased">
+        <body className="min-h-screen bg-gradient-to-br from-navy-50 via-white to-forest-50 bg-fixed font-sans antialiased">
           <JsonLd data={[orgLd, siteLd]} />
           <ConvexClientProvider>
             <NextIntlClientProvider messages={messages}>

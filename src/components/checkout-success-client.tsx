@@ -47,7 +47,7 @@ export function CheckoutSuccessClient({
   }
   if (payment === undefined) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-navy/10 bg-white py-12 text-navy/60">
+      <div className="flex items-center justify-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 py-12 text-navy/60">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span className="ml-2 text-sm">{l.loading}</span>
       </div>

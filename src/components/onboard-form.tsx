@@ -119,7 +119,7 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     <>
       <form
         onSubmit={onSubmit}
-        className="space-y-6 rounded-2xl border border-navy/10 bg-white p-6 shadow-sm sm:p-7"
+        className="space-y-6 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6 shadow-sm sm:p-7"
       >
         <Field label={t('businessName')} required>
           <input

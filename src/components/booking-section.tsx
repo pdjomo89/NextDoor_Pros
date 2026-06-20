@@ -69,7 +69,7 @@ export function BookingSection({
   if (!contractorAcceptsPayments) return null;
   if (services === undefined) {
     return (
-      <section className="mt-6 rounded-2xl border border-navy/10 bg-white p-6">
+      <section className="mt-6 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
         <div className="flex items-center justify-center py-4 text-navy/60">
           <Loader2 className="h-5 w-5 animate-spin" />
         </div>
@@ -94,7 +94,7 @@ export function BookingSection({
         {services.map((s) => (
           <li
             key={s._id}
-            className="flex h-full flex-col gap-3 rounded-xl border border-navy/10 bg-white p-4"
+            className="flex h-full flex-col gap-3 rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-4"
           >
             <div className="flex-1">
               <h3 className="font-semibold text-navy">{s.title}</h3>

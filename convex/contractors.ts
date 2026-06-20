@@ -117,6 +117,32 @@ export const listByService = query({
 });
 
 /**
+ * Public: a minimal directory of every published listing — id, business name,
+ * service slugs and location — for pickers (e.g. the "leave a review" page).
+ * No photos or contact fields, so it stays cheap and safe for anonymous callers.
+ */
+export const listAllPublished = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db
+      .query('contractors')
+      .filter((q) => q.eq(q.field('published'), true))
+      .collect();
+    return rows
+      .map((c) => ({
+        _id: c._id,
+        businessName: c.businessName,
+        services: c.services,
+        citySlug: c.citySlug,
+        province: c.province,
+        ratingCount: c.ratingCount ?? 0,
+        ratingSum: c.ratingSum ?? 0,
+      }))
+      .sort((a, b) => a.businessName.localeCompare(b.businessName));
+  },
+});
+
+/**
  * Create or update the signed-in user's listing. RLS-equivalent guard is
  * enforced inline: we only ever read/write rows where ownerId == auth user.
  */
