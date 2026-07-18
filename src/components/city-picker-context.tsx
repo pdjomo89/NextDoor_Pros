@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { getCityBySlug, type City } from '@/data/canadian-cities';
+import { getCityBySlug, type City } from '@/data/cameroon-cities';
 
 const STORAGE_KEY = 'ndp:selected-city';
 

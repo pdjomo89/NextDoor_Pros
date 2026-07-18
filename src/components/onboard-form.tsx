@@ -45,7 +45,7 @@ export function OnboardForm({ locale }: { locale: Locale }) {
       setServices(existing.services as ServiceKey[]);
       setStartingAt(
         existing.startingAtPriceCents !== undefined
-          ? (existing.startingAtPriceCents / 100).toFixed(2)
+          ? String(existing.startingAtPriceCents)
           : '',
       );
       setPublished(existing.published);
@@ -78,11 +78,11 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     let startingAtPriceCents: number | undefined;
     const startingAtTrimmed = startingAt.trim().replace(',', '.');
     if (startingAtTrimmed) {
-      const cents = Math.round(Number.parseFloat(startingAtTrimmed) * 100);
-      if (!Number.isFinite(cents) || cents < 0 || cents > 5_000_000) {
+      const amount = Math.round(Number.parseFloat(startingAtTrimmed));
+      if (!Number.isFinite(amount) || amount < 0 || amount > 50_000_000) {
         return setError(t('errStartingAtInvalid'));
       }
-      startingAtPriceCents = cents;
+      startingAtPriceCents = amount;
     }
 
     setSubmitting(true);
@@ -171,20 +171,20 @@ export function OnboardForm({ locale }: { locale: Locale }) {
 
         <Field label={t('startingAt')}>
           <div className="relative max-w-xs">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
-              $
-            </span>
             <input
               type="number"
-              inputMode="decimal"
-              step="0.01"
+              inputMode="numeric"
+              step="1"
               min="0"
-              max="50000"
+              max="50000000"
               value={startingAt}
               onChange={(e) => setStartingAt(e.target.value)}
-              placeholder="50.00"
-              className="form-input pl-7"
+              placeholder="25000"
+              className="form-input pr-16"
             />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
+              FCFA
+            </span>
           </div>
           <p className="mt-1 text-xs text-navy/60">{t('startingAtHelp')}</p>
         </Field>

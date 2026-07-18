@@ -169,9 +169,9 @@ export const upsertMine = mutation({
       args.startingAtPriceCents !== undefined &&
       (!Number.isInteger(args.startingAtPriceCents) ||
         args.startingAtPriceCents < 0 ||
-        args.startingAtPriceCents > 5_000_000)
+        args.startingAtPriceCents > 50_000_000)
     ) {
-      throw new Error('Starting price must be between 0 and 50,000 CAD.');
+      throw new Error('Starting price must be between 0 and 50,000,000 FCFA.');
     }
 
     const existing = await ctx.db

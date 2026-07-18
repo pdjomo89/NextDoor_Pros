@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CityBanner } from '@/components/city-banner';
 import { ServiceListings } from '@/components/service-listings';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
-import { FEATURED_CITIES } from '@/data/canadian-cities';
+import { FEATURED_CITIES } from '@/data/cameroon-cities';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
 
@@ -29,8 +29,8 @@ export async function generateMetadata({
   const description = t(`categories.${category.key}.description`);
   const title =
     locale === 'fr'
-      ? `${name} — pros locaux vérifiés partout au Canada`
-      : `${name} — trusted local pros across Canada`;
+      ? `${name} — pros locaux vérifiés partout au Cameroun`
+      : `${name} — trusted local pros across Cameroon`;
   return pageMetadata({
     locale: locale as Locale,
     path: `/services/${slug}`,
@@ -62,7 +62,7 @@ export default async function ServiceDetailPage({
     description,
     serviceType: name,
     provider: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/${locale}` },
-    areaServed: { '@type': 'Country', name: 'Canada' },
+    areaServed: { '@type': 'Country', name: 'Cameroon' },
     url: `${SITE_URL}/${locale}/services/${slug}`,
   };
   const breadcrumbLd = {

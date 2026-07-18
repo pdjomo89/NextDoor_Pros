@@ -11,11 +11,12 @@ import { ContactProButton } from '@/components/contact-pro-button';
 import { PublicServices } from '@/components/public-services';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
-import { getCityBySlug, getProvinceByCode } from '@/data/canadian-cities';
+import { getCityBySlug, getProvinceByCode } from '@/data/cameroon-cities';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 import type { ReviewDoc } from '@/lib/review-types';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
+import { formatFcfa } from '@/lib/currency';
 import type { Locale } from '@/i18n/routing';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -161,11 +162,7 @@ export default async function ContractorProfilePage({
           <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-forest/10 px-3 py-1.5 text-sm font-semibold text-forest">
             {t('listings.startingAt')}{' '}
             <span className="text-base">
-              {new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
-                style: 'currency',
-                currency: 'CAD',
-                maximumFractionDigits: 0,
-              }).format(contractor.startingAtPriceCents / 100)}
+              {formatFcfa(contractor.startingAtPriceCents, locale)}
             </span>
           </p>
         )}

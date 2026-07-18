@@ -16,7 +16,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale: locale as Locale,
     path: '/services',
-    title: locale === 'fr' ? 'Tous les services locaux au Canada' : 'All local services across Canada',
+    title: locale === 'fr' ? 'Tous les services locaux au Cameroun' : 'All local services across Cameroon',
     description: t('subtitle'),
   });
 }

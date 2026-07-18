@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "NextDoor Pros — Trusted local services across Canada",
+    "title": "NextDoor Pros — Trusted local services across Cameroon",
     "description": "Book vetted local pros for home, beauty, outdoor, moving, seasonal, and handyman jobs in your city."
   },
   "Nav": {
@@ -42,7 +42,7 @@
       "rating": "Average rating"
     },
     "featuredTitle": "Popular services in {city}",
-    "featuredTitleNoCity": "Popular services across Canada",
+    "featuredTitleNoCity": "Popular services across Cameroon",
     "featuredSubtitle": "Browse the categories our customers book most.",
     "howItWorks": {
       "title": "How it works",
@@ -315,7 +315,7 @@
       "hoursLabel": "Support hours",
       "hoursValue": "Mon–Sat, 8am–8pm (local time)",
       "hqLabel": "Headquarters",
-      "hqValue": "Toronto, ON, Canada",
+      "hqValue": "Douala, Littoral, Cameroon",
       "phoneLabel": "Customer service",
       "phoneHelp": "Need information? Give us a call — we're happy to help."
     }
@@ -365,7 +365,7 @@
       "descriptionPlaceholder": "The role, responsibilities, hours, pay, and what you're looking for in a candidate.",
       "city": "City",
       "budget": "Pay",
-      "budgetPlaceholder": "e.g. $25/hr, $4,000/month, negotiable",
+      "budgetPlaceholder": "e.g. 3000 FCFA/hr, 200000 FCFA/month, negotiable",
       "timing": "Schedule",
       "timingPlaceholder": "e.g. Start ASAP, weekends, flexible hours",
       "contactSection": "How candidates reach you",
@@ -377,8 +377,8 @@
       "posting": "Posting...",
       "errCityRequired": "Please pick a city.",
       "errContactRequired": "Add at least one way for people to reach you.",
-      "errBudgetTooLow": "Budget must be at least $5.",
-      "errBudgetTooHigh": "Budget can't exceed $50,000.",
+      "errBudgetTooLow": "Budget must be at least 500 FCFA.",
+      "errBudgetTooHigh": "Budget can't exceed 50,000,000 FCFA.",
       "errEmailRequiredForPaid": "Email is required when pre-paying so we can send the receipt."
     }
   },
@@ -444,7 +444,7 @@
     "proCtaBody": "List your business free and get found by customers looking for {service} in {city}.",
     "proCtaButton": "List my business",
     "nearbyTitle": "{service} in other {province} cities",
-    "browseAll": "Browse {service} across Canada"
+    "browseAll": "Browse {service} across Cameroon"
   },
   "WhatsApp": {
     "label": "Chat on WhatsApp",
@@ -527,8 +527,8 @@
         "formEditTitle": "Edit service",
         "fieldTitle": "Service title",
         "fieldDescription": "Description (optional)",
-        "fieldPrice": "Price (CAD)",
-        "priceHint": "Between $1 and $50,000. Shown to customers on your public profile.",
+        "fieldPrice": "Price (FCFA)",
+        "priceHint": "Between 100 and 50,000,000 FCFA. Shown to customers on your public profile.",
         "fieldActive": "Visible to customers",
         "save": "Save",
         "saving": "Saving…",
@@ -565,13 +565,13 @@
       "phone": "Phone",
       "email": "Email",
       "whatsapp": "WhatsApp number",
-      "startingAt": "Starting price (CAD)",
-      "startingAtHelp": "Shown to customers as \"Starting at $X\" on your listing. Optional — leave blank if you prefer to quote per job.",
+      "startingAt": "Starting price (FCFA)",
+      "startingAtHelp": "Shown to customers as \"Starting at X FCFA\" on your listing. Optional — leave blank if you prefer to quote per job.",
       "publishLabel": "Publish my listing",
       "publishHelp": "Uncheck to keep your listing private while you edit it.",
       "save": "Save listing",
       "saving": "Saving...",
-      "errStartingAtInvalid": "Starting price must be between $0 and $50,000.",
+      "errStartingAtInvalid": "Starting price must be between 0 and 50,000,000 FCFA.",
       "errCityRequired": "Please pick your service city.",
       "errServicesRequired": "Select at least one service category.",
       "errContactRequired": "Add at least one way customers can reach you."

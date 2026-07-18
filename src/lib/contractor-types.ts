@@ -16,7 +16,7 @@ export type ContractorDoc = {
   phone?: string;
   email?: string;
   whatsapp?: string;
-  /** "Starting at $X" — marketing display only; in CAD cents. */
+  /** "Starting at X" — marketing display only; whole FCFA. */
   startingAtPriceCents?: number;
   /** File-storage ids of uploaded photos (present on `getMine`). */
   photos?: string[];

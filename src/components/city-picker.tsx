@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronsUpDown, MapPin } from 'lucide-react';
-import { citiesGroupedByProvince, getProvinceByCode } from '@/data/canadian-cities';
+import { citiesGroupedByProvince, getProvinceByCode } from '@/data/cameroon-cities';
 import { useCity } from '@/components/city-picker-context';
 import { Button } from '@/components/ui/button';
 import {

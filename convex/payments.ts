@@ -59,8 +59,9 @@ export const upsertService = mutation({
     const cleanTitle = title.trim().slice(0, 120);
     const cleanDescription = description?.trim().slice(0, 600) || undefined;
     if (!cleanTitle) throw new Error('TITLE_REQUIRED');
-    if (!Number.isInteger(priceCents) || priceCents < 100 || priceCents > 5_000_000) {
-      // 1 CAD minimum, 50,000 CAD maximum.
+    if (!Number.isInteger(priceCents) || priceCents < 100 || priceCents > 50_000_000) {
+      // 100 FCFA minimum, 50,000,000 FCFA maximum. (Field stores whole francs;
+      // XAF has no minor units, so the historical `priceCents` name is a misnomer.)
       throw new Error('INVALID_PRICE');
     }
 
@@ -83,7 +84,7 @@ export const upsertService = mutation({
       title: cleanTitle,
       description: cleanDescription,
       priceCents,
-      currency: 'cad',
+      currency: 'xaf',
       active,
     });
   },

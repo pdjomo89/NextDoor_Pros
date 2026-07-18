@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Locale } from '@/i18n/routing';
+import { formatFcfa } from '@/lib/currency';
 
 export type ServicesLabels = {
   title: string;
@@ -47,17 +48,8 @@ type ServiceRow = {
   active: boolean;
 };
 
-const CAD = new Intl.NumberFormat('en-CA', {
-  style: 'currency',
-  currency: 'CAD',
-});
-const CAD_FR = new Intl.NumberFormat('fr-CA', {
-  style: 'currency',
-  currency: 'CAD',
-});
-
-function formatPrice(cents: number, locale: Locale) {
-  return (locale === 'fr' ? CAD_FR : CAD).format(cents / 100);
+function formatPrice(amount: number, locale: Locale) {
+  return formatFcfa(amount, locale);
 }
 
 export function ServicesSection({
@@ -162,7 +154,7 @@ function ServiceForm({
   const [title, setTitle] = React.useState(initial?.title ?? '');
   const [description, setDescription] = React.useState(initial?.description ?? '');
   const [price, setPrice] = React.useState(
-    initial ? (initial.priceCents / 100).toFixed(2) : '',
+    initial ? String(initial.priceCents) : '',
   );
   const [active, setActive] = React.useState(initial?.active ?? true);
   const [saving, setSaving] = React.useState(false);
@@ -172,8 +164,8 @@ function ServiceForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const cents = Math.round(Number.parseFloat(price.replace(',', '.')) * 100);
-    if (!Number.isFinite(cents) || cents < 100) {
+    const amount = Math.round(Number.parseFloat(price.replace(',', '.')));
+    if (!Number.isFinite(amount) || amount < 100) {
       setError(l.saveError);
       return;
     }
@@ -183,7 +175,7 @@ function ServiceForm({
         id: initial?._id,
         title,
         description: description.trim() || undefined,
-        priceCents: cents,
+        priceCents: amount,
         active,
       });
       onClose();
@@ -241,21 +233,21 @@ function ServiceForm({
 
       <Field label={l.fieldPrice}>
         <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
-            $
-          </span>
           <input
             required
             type="number"
-            inputMode="decimal"
-            step="0.01"
-            min="1"
-            max="50000"
+            inputMode="numeric"
+            step="1"
+            min="100"
+            max="50000000"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="form-input-svc pl-7"
-            placeholder="80.00"
+            className="form-input-svc pr-16"
+            placeholder="25000"
           />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
+            FCFA
+          </span>
         </div>
         <p className="mt-1 text-xs text-navy/55">{l.priceHint}</p>
       </Field>

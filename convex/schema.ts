@@ -19,9 +19,9 @@ export default defineSchema({
     email: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
 
-    // Marketing-only "Starting at $X" price shown on cards/profile.
-    // Stored in CAD cents. Not used for charging — booking flow uses
-    // the priced services catalog (contractorServices table).
+    // Marketing-only "Starting at X" price shown on cards/profile.
+    // Stored as whole FCFA (XAF has no minor units, so the `Cents` suffix is a
+    // historical misnomer). Informational only — the app takes no payments.
     startingAtPriceCents: v.optional(v.number()),
 
     // Product / work photos uploaded by the pro (Convex file-storage ids).
@@ -36,13 +36,13 @@ export default defineSchema({
     .index('by_owner', ['ownerId'])
     .index('by_city_published', ['citySlug', 'published']),
 
-  // Priced offerings a contractor sells (e.g. "Hair treatment $80").
+  // Priced offerings a contractor lists (e.g. "Hair treatment 25000 FCFA").
   contractorServices: defineTable({
     contractorId: v.id('contractors'),
     title: v.string(),
     description: v.optional(v.string()),
-    priceCents: v.number(), // CAD cents
-    currency: v.string(), // 'cad'
+    priceCents: v.number(), // whole FCFA (XAF has no minor units)
+    currency: v.string(), // 'xaf'
     active: v.boolean(),
   }).index('by_contractor', ['contractorId']),
 

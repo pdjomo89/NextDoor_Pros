@@ -5,6 +5,7 @@ import { Loader2, Tag } from 'lucide-react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Locale } from '@/i18n/routing';
+import { formatFcfa } from '@/lib/currency';
 
 export type PublicServicesLabels = {
   sectionTitle: string;
@@ -19,11 +20,8 @@ type ServiceRow = {
   currency: string;
 };
 
-const CAD = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
-const CAD_FR = new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' });
-
-function formatPrice(cents: number, locale: Locale) {
-  return (locale === 'fr' ? CAD_FR : CAD).format(cents / 100);
+function formatPrice(amount: number, locale: Locale) {
+  return formatFcfa(amount, locale);
 }
 
 /**

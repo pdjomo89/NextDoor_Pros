@@ -5,7 +5,8 @@ import { MapPin, ArrowRight, Award, Sparkles } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { ContactProButton } from '@/components/contact-pro-button';
 import { StarRating } from '@/components/star-rating';
-import { getCityBySlug } from '@/data/canadian-cities';
+import { getCityBySlug } from '@/data/cameroon-cities';
+import { formatFcfa } from '@/lib/currency';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 
@@ -25,11 +26,7 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
   const { count, average } = ratingOf(contractor);
   const startingAt =
     contractor.startingAtPriceCents !== undefined
-      ? new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
-          style: 'currency',
-          currency: 'CAD',
-          maximumFractionDigits: 0,
-        }).format(contractor.startingAtPriceCents / 100)
+      ? formatFcfa(contractor.startingAtPriceCents, locale)
       : null;
 
   const photoUrls = contractor.photoUrls ?? [];

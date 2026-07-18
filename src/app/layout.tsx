@@ -4,8 +4,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: `${SITE_NAME} — Trusted local services across Canada`,
-  description: 'Trusted local services across Canada.',
+  title: `${SITE_NAME} — Trusted local services across Cameroon`,
+  description: 'Trusted local services across Cameroon.',
   applicationName: SITE_NAME,
   icons: {
     icon: '/logo.png',

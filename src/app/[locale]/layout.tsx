@@ -31,7 +31,7 @@ export async function generateMetadata({
     description,
     keywords: [
       'local services',
-      'home services Canada',
+      'home services Cameroon',
       'find a contractor',
       'hire a pro',
       'cleaning',
@@ -45,7 +45,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
-      locale: locale === 'fr' ? 'fr_CA' : 'en_CA',
+      locale: locale === 'fr' ? 'fr_CM' : 'en_CM',
       url: `${SITE_URL}/${locale}`,
       title,
       description,
@@ -86,14 +86,14 @@ export default async function LocaleLayout({
     logo: `${SITE_URL}/logo.png`,
     description: meta('description'),
     email: 'hello@mynextdoorpros.com',
-    areaServed: { '@type': 'Country', name: 'Canada' },
+    areaServed: { '@type': 'Country', name: 'Cameroon' },
   };
   const siteLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE_NAME,
     url: SITE_URL,
-    inLanguage: locale === 'fr' ? 'fr-CA' : 'en-CA',
+    inLanguage: locale === 'fr' ? 'fr-CM' : 'en-CM',
   };
 
   return (

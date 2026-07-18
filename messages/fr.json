@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "NextDoor Pros — Services locaux de confiance partout au Canada",
+    "title": "NextDoor Pros — Services locaux de confiance partout au Cameroun",
     "description": "Réservez des pros locaux vérifiés pour la maison, la beauté, l'extérieur, le déménagement, les services saisonniers et les petits travaux dans votre ville."
   },
   "Nav": {
@@ -42,7 +42,7 @@
       "rating": "Note moyenne"
     },
     "featuredTitle": "Services populaires à {city}",
-    "featuredTitleNoCity": "Services populaires au Canada",
+    "featuredTitleNoCity": "Services populaires au Cameroun",
     "featuredSubtitle": "Découvrez les catégories les plus réservées par nos clients.",
     "howItWorks": {
       "title": "Comment ça marche",
@@ -315,7 +315,7 @@
       "hoursLabel": "Heures de soutien",
       "hoursValue": "Lun–Sam, 8h–20h (heure locale)",
       "hqLabel": "Siège social",
-      "hqValue": "Toronto, ON, Canada",
+      "hqValue": "Douala, Littoral, Cameroun",
       "phoneLabel": "Service à la clientèle",
       "phoneHelp": "Besoin d'informations? Appelez-nous — c'est avec plaisir."
     }
@@ -365,7 +365,7 @@
       "descriptionPlaceholder": "Le poste, les responsabilités, les horaires, la rémunération et le profil recherché.",
       "city": "Ville",
       "budget": "Rémunération",
-      "budgetPlaceholder": "ex. 25 $/h, 4 000 $/mois, à négocier",
+      "budgetPlaceholder": "ex. 3000 FCFA/h, 200000 FCFA/mois, à négocier",
       "timing": "Horaire",
       "timingPlaceholder": "ex. Début dès que possible, week-ends, horaire flexible",
       "contactSection": "Comment les candidats vous joignent",
@@ -377,8 +377,8 @@
       "posting": "Publication...",
       "errCityRequired": "Veuillez choisir une ville.",
       "errContactRequired": "Ajoutez au moins un moyen de vous joindre.",
-      "errBudgetTooLow": "Le budget doit être d'au moins 5 $.",
-      "errBudgetTooHigh": "Le budget ne peut pas dépasser 50 000 $.",
+      "errBudgetTooLow": "Le budget doit être d'au moins 500 FCFA.",
+      "errBudgetTooHigh": "Le budget ne peut pas dépasser 50 000 000 FCFA.",
       "errEmailRequiredForPaid": "Le courriel est requis pour le pré-paiement (envoi du reçu)."
     }
   },
@@ -435,16 +435,16 @@
     "q1": "Comment engager un pro en {service} à {city} ?",
     "a1": "Parcourez les pros vérifiés en {service} qui desservent {city} ci-dessus, consultez leurs avis et leurs tarifs, puis contactez-les directement via NextDoor Pros — sans intermédiaire et sans frais de réservation.",
     "q2": "Les pros en {service} à {city} sont-ils vérifiés et assurés ?",
-    "a2": "Oui. Chaque pro inscrit sur NextDoor Pros fait l'objet d'une vérification d'identité et possède une assurance, et les avis affichés proviennent de vrais travaux réalisés à {city} et ailleurs dans la province ({province}).",
+    "a2": "Oui. Chaque pro inscrit sur NextDoor Pros fait l'objet d'une vérification d'identité et possède une assurance, et les avis affichés proviennent de vrais travaux réalisés à {city} et ailleurs dans la région ({province}).",
     "q3": "Combien coûte {service} à {city} ?",
     "a3": "Cela dépend de l'ampleur du travail, mais vous verrez toujours un devis transparent de chaque pro de {city} avant de réserver — aucune surprise une fois le travail terminé.",
-    "q4": "Couvrez-vous d'autres villes de la province ({province}) ?",
-    "a4": "Oui — NextDoor Pros dessert {city} et de nombreuses autres villes de la province ({province}). Si aucun pro n'est disponible dans votre secteur exact, nous vous aiderons à en trouver un à proximité.",
+    "q4": "Couvrez-vous d'autres villes de la région ({province}) ?",
+    "a4": "Oui — NextDoor Pros dessert {city} et de nombreuses autres villes de la région ({province}). Si aucun pro n'est disponible dans votre secteur exact, nous vous aiderons à en trouver un à proximité.",
     "proCtaTitle": "Offrez-vous {service} à {city} ?",
     "proCtaBody": "Inscrivez votre entreprise gratuitement et soyez trouvé par les clients qui cherchent {service} à {city}.",
     "proCtaButton": "Inscrire mon entreprise",
     "nearbyTitle": "{service} dans d'autres villes ({province})",
-    "browseAll": "Voir {service} partout au Canada"
+    "browseAll": "Voir {service} partout au Cameroun"
   },
   "WhatsApp": {
     "label": "Clavarder sur WhatsApp",
@@ -527,8 +527,8 @@
         "formEditTitle": "Modifier le service",
         "fieldTitle": "Titre du service",
         "fieldDescription": "Description (facultatif)",
-        "fieldPrice": "Prix (CAD)",
-        "priceHint": "Entre 1 $ et 50 000 $. Affiché aux clients sur votre profil public.",
+        "fieldPrice": "Prix (FCFA)",
+        "priceHint": "Entre 100 et 50 000 000 FCFA. Affiché aux clients sur votre profil public.",
         "fieldActive": "Visible par les clients",
         "save": "Enregistrer",
         "saving": "Enregistrement…",
@@ -565,13 +565,13 @@
       "phone": "Téléphone",
       "email": "Courriel",
       "whatsapp": "Numéro WhatsApp",
-      "startingAt": "Prix de départ (CAD)",
-      "startingAtHelp": "Affiché aux clients sous la forme « À partir de X $ » sur votre fiche. Facultatif — laissez vide si vous préférez établir un devis au cas par cas.",
+      "startingAt": "Prix de départ (FCFA)",
+      "startingAtHelp": "Affiché aux clients sous la forme « À partir de X FCFA » sur votre fiche. Facultatif — laissez vide si vous préférez établir un devis au cas par cas.",
       "publishLabel": "Publier mon inscription",
       "publishHelp": "Décochez pour garder votre inscription privée pendant que vous l'éditez.",
       "save": "Enregistrer",
       "saving": "Enregistrement...",
-      "errStartingAtInvalid": "Le prix de départ doit être entre 0 $ et 50 000 $.",
+      "errStartingAtInvalid": "Le prix de départ doit être entre 0 et 50 000 000 FCFA.",
       "errCityRequired": "Veuillez choisir votre ville de service.",
       "errServicesRequired": "Sélectionnez au moins un service.",
       "errContactRequired": "Ajoutez au moins un moyen de contact."
