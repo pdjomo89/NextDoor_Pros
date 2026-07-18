@@ -13,7 +13,7 @@ export const POST_IMAGE: Record<PostId, string> = {
 
 // Human-friendly URL slugs mapped to their post id.
 export const POST_SLUG: Record<PostId, string> = {
-  p1: 'now-live-in-halifax-and-quebec-city',
+  p1: 'now-live-in-douala-yaounde-and-bafoussam',
   p2: 'spring-2026-seasonal-services',
   p3: 'what-to-expect-from-a-verified-pro',
 };
