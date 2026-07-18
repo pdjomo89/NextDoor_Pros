@@ -24,10 +24,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     | ContractorDoc
     | null
     | undefined;
-  const membership = useQuery(api.membership.myMembership) as
-    | { status: string }
-    | null
-    | undefined;
   const upsert = useMutation(api.contractors.upsertMine);
 
   const [businessName, setBusinessName] = React.useState('');
@@ -91,9 +87,6 @@ export function OnboardForm({ locale }: { locale: Locale }) {
 
     setSubmitting(true);
     try {
-      // Publishing requires an active subscription. Without one we save the
-      // listing as a draft and send the pro to subscribe.
-      const canPublish = membership?.status === 'active';
       await upsert({
         businessName: businessName.trim(),
         description: description.trim(),
@@ -101,12 +94,9 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         citySlug: city.slug,
         province: city.province,
         startingAtPriceCents,
-        published: published && canPublish,
+        published,
       });
-      const nextPath = canPublish
-        ? `/${locale}/pros/dashboard`
-        : `/${locale}/pros/onboard/membership`;
-      router.push(nextPath);
+      router.push(`/${locale}/pros/dashboard`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

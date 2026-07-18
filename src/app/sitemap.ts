@@ -7,7 +7,7 @@ import { FEATURED_CITY_SLUGS } from '@/data/canadian-cities';
 import { getConvexEnv } from '@/lib/convex-env';
 import { api } from '../../convex/_generated/api';
 
-const STATIC_PATHS = ['', '/services', '/jobs', '/pricing', '/about', '/news', '/contact'];
+const STATIC_PATHS = ['', '/services', '/jobs', '/about', '/news', '/contact'];
 
 function entry(path: string, opts: Partial<MetadataRoute.Sitemap[number]> = {}): MetadataRoute.Sitemap {
   const languages: Record<string, string> = {};

@@ -7,12 +7,7 @@ import { Button } from '@/components/ui/button';
 import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
 import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
-import { PaymentsSection, type PaymentsLabels } from '@/components/payments-section';
-import { BookingsSection, type BookingsLabels } from '@/components/bookings-section';
-import {
-  MembershipStatusCard,
-  type MembershipStatusLabels,
-} from '@/components/membership-status-card';
+import { ServicesSection, type ServicesLabels } from '@/components/services-section';
 import { getCityBySlug } from '@/data/canadian-cities';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { ratingOf } from '@/lib/contractor-types';
@@ -36,9 +31,7 @@ type Labels = {
   email: string;
   whatsapp: string;
   photos: PhotoLabels;
-  payments: PaymentsLabels;
-  bookings: BookingsLabels;
-  membership: MembershipStatusLabels;
+  services: ServicesLabels;
 };
 
 export function DashboardClient({
@@ -159,13 +152,9 @@ export function DashboardClient({
             )}
           </article>
 
-          <MembershipStatusCard locale={locale} labels={l.membership} />
-
           <PhotoManager labels={l.photos} />
 
-          <PaymentsSection locale={locale} labels={l.payments} />
-
-          <BookingsSection locale={locale} labels={l.bookings} />
+          <ServicesSection locale={locale} labels={l.services} />
         </div>
       )}
     </div>

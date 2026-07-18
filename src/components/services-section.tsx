@@ -1,42 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import {
-  CheckCircle2,
-  CircleDashed,
-  CreditCard,
-  ExternalLink,
   Loader2,
   Pencil,
   Plus,
   Trash2,
   AlertTriangle,
+  Tag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Locale } from '@/i18n/routing';
 
-export type PaymentsLabels = {
+export type ServicesLabels = {
   title: string;
   intro: string;
-  statusNotStartedTitle: string;
-  statusNotStartedBody: string;
-  statusInProgressTitle: string;
-  statusInProgressBody: string;
-  statusActiveTitle: string;
-  statusActiveBody: string;
-  setupBtn: string;
-  continueBtn: string;
-  manageBtn: string;
-  refreshBtn: string;
-  refreshing: string;
-  noContractor: string;
-
-  servicesTitle: string;
-  servicesIntro: string;
   servicesEmpty: string;
   addService: string;
   editService: string;
@@ -55,7 +36,6 @@ export type PaymentsLabels = {
   remove: string;
   removeConfirm: string;
   saveError: string;
-  feeNote: string;
 };
 
 type ServiceRow = {
@@ -80,47 +60,17 @@ function formatPrice(cents: number, locale: Locale) {
   return (locale === 'fr' ? CAD_FR : CAD).format(cents / 100);
 }
 
-export function PaymentsSection({
+export function ServicesSection({
   locale,
   labels: l,
 }: {
   locale: Locale;
-  labels: PaymentsLabels;
+  labels: ServicesLabels;
 }) {
-  const status = useQuery(api.payments.myStripeStatus) as
-    | { hasContractor: true; hasAccount: boolean; onboardingComplete: boolean }
-    | null
-    | undefined;
   const services = useQuery(api.payments.listMyServices) as ServiceRow[] | undefined;
+  const [editing, setEditing] = React.useState<ServiceRow | 'new' | null>(null);
 
-  const startOnboarding = useAction(api.payments.startOnboarding);
-  const refreshAccountStatus = useAction(api.payments.refreshAccountStatus);
-  const getDashboardLink = useAction(api.payments.getDashboardLink);
-
-  const [redirecting, setRedirecting] = React.useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  // When the contractor returns from the Stripe-hosted flow, re-sync state.
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const stripeReturn = searchParams?.get('stripe');
-  React.useEffect(() => {
-    if (!stripeReturn || !status?.hasAccount) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        await refreshAccountStatus({});
-      } finally {
-        if (!cancelled) router.replace(`/${locale}/pros/dashboard`);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [stripeReturn, status?.hasAccount, refreshAccountStatus, router, locale]);
-
-  if (status === undefined || services === undefined) {
+  if (services === undefined) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 py-10 text-navy/60">
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -128,202 +78,21 @@ export function PaymentsSection({
     );
   }
 
-  if (status === null) {
-    return (
-      <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-        {l.noContractor}
-      </div>
-    );
-  }
-
-  async function onSetup() {
-    setError(null);
-    setRedirecting(true);
-    try {
-      const { url } = await startOnboarding({ locale });
-      window.location.href = url;
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : String(err));
-      setRedirecting(false);
-    }
-  }
-
-  async function onManage() {
-    setError(null);
-    setRedirecting(true);
-    try {
-      const { url } = await getDashboardLink({});
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setRedirecting(false);
-    }
-  }
-
-  async function onRefresh() {
-    setError(null);
-    setRefreshing(true);
-    try {
-      await refreshAccountStatus({});
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
-  const { hasAccount, onboardingComplete } = status;
-  const state: 'idle' | 'in_progress' | 'active' = !hasAccount
-    ? 'idle'
-    : onboardingComplete
-      ? 'active'
-      : 'in_progress';
-
   return (
-    <article className="space-y-5 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
-      <header>
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-navy">
-          <CreditCard className="h-5 w-5 text-forest" />
-          {l.title}
-        </h2>
-        <p className="mt-1 text-sm text-navy/60">{l.intro}</p>
-      </header>
-
-      {/* Onboarding status panel */}
-      <div
-        className={
-          'flex flex-wrap items-start justify-between gap-4 rounded-xl border p-4 ' +
-          (state === 'active'
-            ? 'border-forest/30 bg-forest/5'
-            : state === 'in_progress'
-              ? 'border-amber-300 bg-amber-50'
-              : 'border-navy/15 bg-navy/5')
-        }
-      >
-        <div className="flex items-start gap-3">
-          {state === 'active' ? (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 text-forest" />
-          ) : state === 'in_progress' ? (
-            <CircleDashed className="mt-0.5 h-5 w-5 text-amber-600" />
-          ) : (
-            <CircleDashed className="mt-0.5 h-5 w-5 text-navy/50" />
-          )}
-          <div>
-            <p className="font-semibold text-navy">
-              {state === 'active'
-                ? l.statusActiveTitle
-                : state === 'in_progress'
-                  ? l.statusInProgressTitle
-                  : l.statusNotStartedTitle}
-            </p>
-            <p className="mt-0.5 text-sm text-navy/70">
-              {state === 'active'
-                ? l.statusActiveBody
-                : state === 'in_progress'
-                  ? l.statusInProgressBody
-                  : l.statusNotStartedBody}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {state === 'idle' && (
-            <Button variant="secondary" size="sm" onClick={onSetup} disabled={redirecting}>
-              {redirecting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CreditCard className="h-4 w-4" />
-              )}
-              {l.setupBtn}
-            </Button>
-          )}
-          {state === 'in_progress' && (
-            <>
-              <Button variant="secondary" size="sm" onClick={onSetup} disabled={redirecting}>
-                {redirecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ExternalLink className="h-4 w-4" />
-                )}
-                {l.continueBtn}
-              </Button>
-              <Button variant="outline" size="sm" onClick={onRefresh} disabled={refreshing}>
-                {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {refreshing ? l.refreshing : l.refreshBtn}
-              </Button>
-            </>
-          )}
-          {state === 'active' && (
-            <Button variant="outline" size="sm" onClick={onManage} disabled={redirecting}>
-              {redirecting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ExternalLink className="h-4 w-4" />
-              )}
-              {l.manageBtn}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Services catalog */}
-      <ServicesCatalog
-        locale={locale}
-        labels={l}
-        services={services}
-        onboardingComplete={onboardingComplete}
-      />
-    </article>
-  );
-}
-
-function ServicesCatalog({
-  locale,
-  labels: l,
-  services,
-  onboardingComplete,
-}: {
-  locale: Locale;
-  labels: PaymentsLabels;
-  services: ServiceRow[];
-  onboardingComplete: boolean;
-}) {
-  const [editing, setEditing] = React.useState<ServiceRow | 'new' | null>(null);
-
-  return (
-    <div className="space-y-3 border-t border-navy/10 pt-5">
+    <article className="space-y-4 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 p-6">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-base font-semibold text-navy">{l.servicesTitle}</h3>
-          <p className="mt-0.5 text-sm text-navy/60">{l.servicesIntro}</p>
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-navy">
+            <Tag className="h-5 w-5 text-forest" />
+            {l.title}
+          </h2>
+          <p className="mt-1 text-sm text-navy/60">{l.intro}</p>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setEditing('new')}
-          disabled={!onboardingComplete}
-          title={!onboardingComplete ? l.statusNotStartedBody : undefined}
-        >
+        <Button variant="secondary" size="sm" onClick={() => setEditing('new')}>
           <Plus className="h-4 w-4" />
           {l.addService}
         </Button>
       </header>
-
-      {!onboardingComplete && (
-        <p className="rounded-lg bg-navy/5 px-3 py-2 text-xs text-navy/60">
-          {l.feeNote}
-        </p>
-      )}
 
       {services.length === 0 ? (
         <p className="rounded-lg border border-dashed border-navy/15 px-3 py-6 text-center text-sm text-navy/50">
@@ -334,7 +103,7 @@ function ServicesCatalog({
           {services.map((s) => (
             <li
               key={s._id}
-              className="flex items-start justify-between gap-3 rounded-xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 px-4 py-3"
+              className="flex items-start justify-between gap-3 rounded-xl border border-navy/10 bg-white/60 px-4 py-3"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium text-navy">
@@ -371,7 +140,7 @@ function ServicesCatalog({
           onClose={() => setEditing(null)}
         />
       )}
-    </div>
+    </article>
   );
 }
 
@@ -382,10 +151,11 @@ function ServiceForm({
   onClose,
 }: {
   locale: Locale;
-  labels: PaymentsLabels;
+  labels: ServicesLabels;
   initial: ServiceRow | null;
   onClose: () => void;
 }) {
+  void locale;
   const upsert = useMutation(api.payments.upsertService);
   const remove = useMutation(api.payments.deleteService);
 
@@ -455,7 +225,7 @@ function ServiceForm({
           value={title}
           maxLength={120}
           onChange={(e) => setTitle(e.target.value)}
-          className="form-input-pay"
+          className="form-input-svc"
         />
       </Field>
 
@@ -465,7 +235,7 @@ function ServiceForm({
           rows={2}
           maxLength={600}
           onChange={(e) => setDescription(e.target.value)}
-          className="form-input-pay resize-y"
+          className="form-input-svc resize-y"
         />
       </Field>
 
@@ -483,7 +253,7 @@ function ServiceForm({
             max="50000"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="form-input-pay pl-7"
+            className="form-input-svc pl-7"
             placeholder="80.00"
           />
         </div>
@@ -537,7 +307,7 @@ function ServiceForm({
       </div>
 
       <style jsx>{`
-        :global(.form-input-pay) {
+        :global(.form-input-svc) {
           width: 100%;
           border-radius: 0.5rem;
           border: 1px solid hsl(215 20% 88%);
@@ -548,7 +318,7 @@ function ServiceForm({
           outline: none;
           transition: border-color 0.15s, box-shadow 0.15s;
         }
-        :global(.form-input-pay:focus) {
+        :global(.form-input-svc:focus) {
           border-color: #1f8a3b;
           box-shadow: 0 0 0 3px rgba(31, 138, 59, 0.15);
         }

@@ -14,11 +14,9 @@ import type * as contractors from "../contractors.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as jobs from "../jobs.js";
-import type * as membership from "../membership.js";
 import type * as messaging from "../messaging.js";
 import type * as payments from "../payments.js";
 import type * as reviews from "../reviews.js";
-import type * as stripeWebhook from "../stripeWebhook.js";
 
 import type {
   ApiFromModules,
@@ -33,11 +31,9 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   http: typeof http;
   jobs: typeof jobs;
-  membership: typeof membership;
   messaging: typeof messaging;
   payments: typeof payments;
   reviews: typeof reviews;
-  stripeWebhook: typeof stripeWebhook;
 }>;
 
 /**

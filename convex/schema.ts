@@ -5,21 +5,6 @@ import { authTables } from '@convex-dev/auth/server';
 export default defineSchema({
   ...authTables,
 
-  // Platform subscription, keyed by user. A single active subscription grants
-  // both publishing a pro listing and posting jobs ($15/mo or $160/yr CAD).
-  // See convex/membership.ts.
-  memberships: defineTable({
-    userId: v.id('users'),
-    stripeCustomerId: v.optional(v.string()),
-    stripeSubscriptionId: v.optional(v.string()),
-    plan: v.optional(v.string()), // 'monthly' | 'annual'
-    // 'none' | 'incomplete' | 'active' | 'past_due' | 'cancelled'
-    status: v.string(),
-    currentPeriodEnd: v.optional(v.number()),
-  })
-    .index('by_user', ['userId'])
-    .index('by_stripeCustomer', ['stripeCustomerId']),
-
   contractors: defineTable({
     ownerId: v.id('users'),
 
@@ -47,16 +32,9 @@ export default defineSchema({
     // Denormalised review aggregates (kept in sync by convex/reviews.ts).
     ratingCount: v.optional(v.number()),
     ratingSum: v.optional(v.number()),
-
-    // Stripe Connect (Express) — set when the pro begins payments onboarding.
-    // `stripeOnboardingComplete` mirrors `charges_enabled && payouts_enabled`
-    // from the Stripe account.updated webhook.
-    stripeAccountId: v.optional(v.string()),
-    stripeOnboardingComplete: v.optional(v.boolean()),
   })
     .index('by_owner', ['ownerId'])
-    .index('by_city_published', ['citySlug', 'published'])
-    .index('by_stripeAccount', ['stripeAccountId']),
+    .index('by_city_published', ['citySlug', 'published']),
 
   // Priced offerings a contractor sells (e.g. "Hair treatment $80").
   contractorServices: defineTable({
@@ -67,66 +45,6 @@ export default defineSchema({
     currency: v.string(), // 'cad'
     active: v.boolean(),
   }).index('by_contractor', ['contractorId']),
-
-  // Customer payments. Written once on Checkout Session creation
-  // and patched by the Stripe webhook handler.
-  payments: defineTable({
-    contractorId: v.id('contractors'),
-    contractorServiceId: v.optional(v.id('contractorServices')),
-
-    customerEmail: v.string(),
-    customerName: v.optional(v.string()),
-    customerCitySlug: v.optional(v.string()),
-    note: v.optional(v.string()),
-
-    amountCents: v.number(),
-    applicationFeeCents: v.number(),
-    currency: v.string(),
-
-    stripeCheckoutSessionId: v.string(),
-    stripePaymentIntentId: v.optional(v.string()),
-    stripeChargeId: v.optional(v.string()),
-    // The transfer that moved the held funds to the pro on release.
-    stripeTransferId: v.optional(v.string()),
-    // Amount actually transferred to the pro, in the platform's settlement
-    // currency (may differ from amountCents − fee due to cross-currency FX).
-    payoutTransferredCents: v.optional(v.number()),
-    // How much of that transfer we've reversed (pulled back from the pro) on
-    // refunds. Drives idempotent, proportional reversal across partial refunds.
-    transferReversedCents: v.optional(v.number()),
-    refundedAt: v.optional(v.number()),
-    // Status captured when a dispute opens, so we can restore it if the
-    // dispute is won (vs. settling to 'refunded' if it's lost).
-    preDisputeStatus: v.optional(v.string()),
-
-    // Escrow lifecycle. Money lands on the platform balance (separate charges
-    // & transfers), is held until the work is done, then transferred to the pro.
-    //   'pending'   — Checkout Session created, awaiting payment
-    //   'held'      — customer paid; funds held on the platform balance
-    //   'releasing' — release in flight (transfer being created)
-    //   'released'  — transferred to the pro's connected account
-    //   'failed' | 'refunded' | 'disputed'
-    status: v.string(),
-    // Set when the pro marks the work delivered; starts the auto-release clock.
-    deliveredAt: v.optional(v.number()),
-    // When/how the held funds were released to the pro.
-    releasedAt: v.optional(v.number()),
-    releaseMethod: v.optional(v.string()), // 'customer' | 'auto' | 'admin'
-    // Secret that lets the (account-less) customer confirm completion via a link.
-    confirmToken: v.optional(v.string()),
-    errorMessage: v.optional(v.string()),
-  })
-    .index('by_contractor', ['contractorId'])
-    .index('by_session', ['stripeCheckoutSessionId'])
-    .index('by_status', ['status'])
-    .index('by_confirmToken', ['confirmToken'])
-    .index('by_status_delivered', ['status', 'deliveredAt']),
-
-  // Idempotency log for incoming Stripe webhook events.
-  stripeEvents: defineTable({
-    eventId: v.string(),
-    type: v.string(),
-  }).index('by_eventId', ['eventId']),
 
   reviews: defineTable({
     contractorId: v.id('contractors'),

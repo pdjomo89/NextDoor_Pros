@@ -1,7 +1,6 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
-import { hasActiveMembership } from './membership';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Public read queries
@@ -50,7 +49,7 @@ export const listMine = query({
 });
 
 // ──────────────────────────────────────────────────────────────────────────
-// Posting — requires an active platform subscription.
+// Posting
 // ──────────────────────────────────────────────────────────────────────────
 
 export const create = mutation({
@@ -66,7 +65,6 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error('Not signed in');
-    if (!(await hasActiveMembership(ctx, userId))) throw new Error('SUBSCRIPTION_REQUIRED');
 
     if (args.title.trim() === '' || args.description.trim() === '') {
       throw new Error('Title and description are required.');

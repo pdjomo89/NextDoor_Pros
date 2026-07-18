@@ -3,9 +3,8 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMutation, useQuery } from 'convex/react';
-import { Loader2, Send, Sparkles } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { useMutation } from 'convex/react';
+import { Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { useCity } from '@/components/city-picker-context';
@@ -21,11 +20,6 @@ export function JobForm({ locale }: { locale: Locale }) {
   const router = useRouter();
   const { city } = useCity();
   const create = useMutation(api.jobs.create);
-
-  const membership = useQuery(api.membership.myMembership) as
-    | { status: string; plan: string | null; currentPeriodEnd: number | null }
-    | null
-    | undefined;
 
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -58,31 +52,6 @@ export function JobForm({ locale }: { locale: Locale }) {
       setError(err instanceof Error ? err.message : String(err));
       setSubmitting(false);
     }
-  }
-
-  // Posting requires an active subscription.
-  if (membership === undefined) {
-    return (
-      <div className="flex items-center justify-center py-16 text-navy/60">
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!membership || membership.status !== 'active') {
-    return (
-      <div className="rounded-2xl border border-forest/30 bg-forest/[0.04] p-8 text-center">
-        <Sparkles className="mx-auto h-10 w-10 text-forest" />
-        <h2 className="mt-3 text-xl font-semibold text-navy">{t('gateTitle')}</h2>
-        <p className="mx-auto mt-2 max-w-md text-navy/70">{t('gateBody')}</p>
-        <Button asChild variant="secondary" size="lg" className="mt-5">
-          <Link href={`/membership?returnTo=${encodeURIComponent('/jobs/new')}`}>
-            <Sparkles className="h-4 w-4" />
-            {t('gateCta')}
-          </Link>
-        </Button>
-      </div>
-    );
   }
 
   return (

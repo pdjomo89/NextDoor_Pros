@@ -1,7 +1,6 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
-import { hasActiveMembership } from './membership';
 
 /**
  * Return the signed-in user's contractor listing (or null).
@@ -39,7 +38,7 @@ export const viewer = query({
  *
  * Contact fields (`phone` / `email` / `whatsapp`) are deliberately stripped —
  * customers reach pros only through platform-mediated messaging. They stay in
- * the DB for ops/Stripe and are still readable by the owner via `getMine`.
+ * the DB for ops and are still readable by the owner via `getMine`.
  */
 export const getPublic = query({
   args: { id: v.id('contractors') },
@@ -165,10 +164,6 @@ export const upsertMine = mutation({
     }
     if (args.services.length === 0) {
       throw new Error('Select at least one service.');
-    }
-    // Publishing a listing requires an active subscription; drafts are free.
-    if (args.published && !(await hasActiveMembership(ctx, userId))) {
-      throw new Error('SUBSCRIPTION_REQUIRED');
     }
     if (
       args.startingAtPriceCents !== undefined &&

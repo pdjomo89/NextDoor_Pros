@@ -25,9 +25,6 @@ export type ContractorDoc = {
   published: boolean;
   ratingCount?: number;
   ratingSum?: number;
-  /** Stripe Connect — set once the pro has finished onboarding. */
-  stripeAccountId?: string;
-  stripeOnboardingComplete?: boolean;
 };
 
 /** Average star rating (0 if no reviews) and review count for a contractor. */

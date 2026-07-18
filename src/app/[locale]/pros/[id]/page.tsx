@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/star-rating';
 import { ReviewSection } from '@/components/review-section';
 import { ContactProButton } from '@/components/contact-pro-button';
-import { BookingSection } from '@/components/booking-section';
+import { PublicServices } from '@/components/public-services';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
 import { getCityBySlug, getProvinceByCode } from '@/data/canadian-cities';
@@ -209,27 +209,12 @@ export default async function ContractorProfilePage({
           </div>
         )}
 
-        <BookingSection
+        <PublicServices
           contractorId={contractor._id as never}
-          contractorAcceptsPayments={contractor.stripeOnboardingComplete === true}
           locale={locale as Locale}
           labels={{
             sectionTitle: tBook('sectionTitle'),
             sectionIntro: tBook('sectionIntro'),
-            bookButton: tBook('bookButton'),
-            modalTitle: tBook('modalTitle'),
-            emailLabel: tBook('emailLabel'),
-            nameLabel: tBook('nameLabel'),
-            nameOptional: tBook('nameOptional'),
-            noteLabel: tBook('noteLabel'),
-            noteOptional: tBook('noteOptional'),
-            notePlaceholder: tBook('notePlaceholder'),
-            paySecurely: tBook('paySecurely'),
-            redirecting: tBook('redirecting'),
-            cancel: tBook('cancel'),
-            errorTitle: tBook('errorTitle'),
-            feeDisclosure: tBook('feeDisclosure'),
-            empty: tBook('empty'),
           }}
         />
 
