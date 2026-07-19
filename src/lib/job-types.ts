@@ -13,5 +13,5 @@ export type JobDoc = {
   province: string;
   budget?: string;
   timing?: string;
-  status: 'open' | 'closed' | 'filled';
+  status: 'pending_payment' | 'open' | 'closed' | 'filled';
 };

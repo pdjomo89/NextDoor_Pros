@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CityBanner } from '@/components/city-banner';
 import { ServiceListings } from '@/components/service-listings';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
-import { FEATURED_CITIES } from '@/data/cameroon-cities';
+import { FEATURED_CITIES } from '@/data/geography';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
 

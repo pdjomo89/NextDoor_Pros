@@ -1,23 +1,39 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
+import { countryOfCity } from './markets';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Public read queries
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Public list of open jobs. Optionally filter by city slug and/or category. */
+/**
+ * Public list of open jobs. Optionally scope by country (market isolation),
+ * and filter by city slug and/or category.
+ */
 export const list = query({
   args: {
+    country: v.optional(v.string()),
     citySlug: v.optional(v.string()),
     category: v.optional(v.string()),
   },
-  handler: async (ctx, { citySlug, category }) => {
-    const rows = await ctx.db
-      .query('jobs')
-      .withIndex('by_status', (q) => q.eq('status', 'open'))
-      .order('desc')
-      .collect();
+  handler: async (ctx, { country, citySlug, category }) => {
+    // Country-scoped browse uses the by_country_status index; otherwise fall
+    // back to all open jobs. (No second market exists yet, so callers don't
+    // pass `country` today — the path is here + indexed for when one launches.)
+    const rows = country
+      ? await ctx.db
+          .query('jobs')
+          .withIndex('by_country_status', (q) =>
+            q.eq('country', country).eq('status', 'open'),
+          )
+          .order('desc')
+          .collect()
+      : await ctx.db
+          .query('jobs')
+          .withIndex('by_status', (q) => q.eq('status', 'open'))
+          .order('desc')
+          .collect();
     return rows.filter((j) => {
       if (citySlug && j.citySlug !== citySlug) return false;
       if (category && j.category !== category) return false;
@@ -73,6 +89,7 @@ export const create = mutation({
     return await ctx.db.insert('jobs', {
       posterId: userId,
       status: 'open',
+      country: countryOfCity(args.citySlug),
       ...args,
     });
   },
@@ -100,7 +117,12 @@ export const update = mutation({
     if (!existing) throw new Error('Job not found');
     if (existing.posterId !== userId) throw new Error('Not your job');
 
-    await ctx.db.patch(id, patch);
+    // Keep country in lock-step with the city if the city changes.
+    const next =
+      patch.citySlug !== undefined
+        ? { ...patch, country: countryOfCity(patch.citySlug) }
+        : patch;
+    await ctx.db.patch(id, next);
   },
 });
 

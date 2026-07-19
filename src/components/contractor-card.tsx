@@ -5,7 +5,7 @@ import { MapPin, ArrowRight, Award, Sparkles } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { ContactProButton } from '@/components/contact-pro-button';
 import { StarRating } from '@/components/star-rating';
-import { getCityBySlug } from '@/data/cameroon-cities';
+import { getCityBySlug } from '@/data/geography';
 import { formatFcfa } from '@/lib/currency';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';

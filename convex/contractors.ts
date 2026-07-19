@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
+import { countryOfCity } from './markets';
 
 /**
  * Return the signed-in user's contractor listing (or null).
@@ -79,14 +80,23 @@ export const listByService = query({
   args: {
     serviceKey: v.string(),
     citySlug: v.optional(v.string()),
+    country: v.optional(v.string()),
   },
-  handler: async (ctx, { serviceKey, citySlug }) => {
+  handler: async (ctx, { serviceKey, citySlug, country }) => {
+    // Most specific scope wins: city → country (market isolation) → all.
     let rows;
     if (citySlug) {
       rows = await ctx.db
         .query('contractors')
         .withIndex('by_city_published', (q) =>
           q.eq('citySlug', citySlug).eq('published', true),
+        )
+        .collect();
+    } else if (country) {
+      rows = await ctx.db
+        .query('contractors')
+        .withIndex('by_country_published', (q) =>
+          q.eq('country', country).eq('published', true),
         )
         .collect();
     } else {
@@ -121,12 +131,19 @@ export const listByService = query({
  * No photos or contact fields, so it stays cheap and safe for anonymous callers.
  */
 export const listAllPublished = query({
-  args: {},
-  handler: async (ctx) => {
-    const rows = await ctx.db
-      .query('contractors')
-      .filter((q) => q.eq(q.field('published'), true))
-      .collect();
+  args: { country: v.optional(v.string()) },
+  handler: async (ctx, { country }) => {
+    const rows = country
+      ? await ctx.db
+          .query('contractors')
+          .withIndex('by_country_published', (q) =>
+            q.eq('country', country).eq('published', true),
+          )
+          .collect()
+      : await ctx.db
+          .query('contractors')
+          .filter((q) => q.eq(q.field('published'), true))
+          .collect();
     return rows
       .map((c) => ({
         _id: c._id,
@@ -134,6 +151,7 @@ export const listAllPublished = query({
         services: c.services,
         citySlug: c.citySlug,
         province: c.province,
+        country: c.country ?? null,
         ratingCount: c.ratingCount ?? 0,
         ratingSum: c.ratingSum ?? 0,
       }))
@@ -174,16 +192,20 @@ export const upsertMine = mutation({
       throw new Error('Starting price must be between 0 and 50,000,000 FCFA.');
     }
 
+    // Country is derived server-side from the city — never trusted from the
+    // client — so a listing's market always matches its location.
+    const country = countryOfCity(args.citySlug);
+
     const existing = await ctx.db
       .query('contractors')
       .withIndex('by_owner', (q) => q.eq('ownerId', userId))
       .unique();
 
     if (existing) {
-      await ctx.db.patch(existing._id, args);
+      await ctx.db.patch(existing._id, { ...args, country });
       return existing._id;
     }
-    return await ctx.db.insert('contractors', { ownerId: userId, ...args });
+    return await ctx.db.insert('contractors', { ownerId: userId, ...args, country });
   },
 });
 

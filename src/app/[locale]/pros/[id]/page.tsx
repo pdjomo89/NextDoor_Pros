@@ -11,7 +11,7 @@ import { ContactProButton } from '@/components/contact-pro-button';
 import { PublicServices } from '@/components/public-services';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
-import { getCityBySlug, getProvinceByCode } from '@/data/cameroon-cities';
+import { getCityBySlug, getProvinceByCode } from '@/data/geography';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 import type { ReviewDoc } from '@/lib/review-types';

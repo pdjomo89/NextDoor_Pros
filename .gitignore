@@ -10,3 +10,6 @@ next-env.d.ts
 # Regenerated locally by `convex dev` / `convex codegen`.
 convex/_generated/ai/
 .vercel
+
+# Local Claude Code settings
+.claude/

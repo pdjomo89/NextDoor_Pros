@@ -3,7 +3,7 @@ import { fetchQuery } from 'convex/nextjs';
 import { routing } from '@/i18n/routing';
 import { SITE_URL, localePath } from '@/lib/seo';
 import { SERVICE_CATEGORIES } from '@/lib/services';
-import { FEATURED_CITY_SLUGS } from '@/data/cameroon-cities';
+import { FEATURED_CITY_SLUGS } from '@/data/geography';
 import { getConvexEnv } from '@/lib/convex-env';
 import { api } from '../../convex/_generated/api';
 

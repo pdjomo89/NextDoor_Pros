@@ -17,7 +17,7 @@ import {
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { ContactEmployerButton } from '@/components/contact-employer-button';
-import { getCityBySlug } from '@/data/cameroon-cities';
+import { getCityBySlug } from '@/data/geography';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { JobDoc } from '@/lib/job-types';

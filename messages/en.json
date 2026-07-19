@@ -12,6 +12,7 @@
     "news": "News",
     "contact": "Contact",
     "reviews": "Reviews",
+    "pricing": "Pricing",
     "selectCity": "Select your city",
     "searchCity": "Search a city...",
     "noCity": "No city found.",
@@ -245,6 +246,39 @@
       "trustBody": "Background checks, insurance, and real customer reviews."
     }
   },
+  "Pricing": {
+    "eyebrow": "Membership",
+    "title": "Simple pricing for pros",
+    "subtitle": "One membership to get listed, be discovered, and message customers. Pick monthly flexibility or save with annual.",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "bestValue": "Best value",
+    "cta": "Become a pro",
+    "freeTrial": "1st month free",
+    "freeBanner": "Your first month is on us — start free, cancel anytime.",
+    "ctaTrial": "Start 1 month free",
+    "trialNote": "No charge today. After your free month, membership renews automatically until you cancel.",
+    "monthly": {
+      "name": "Monthly",
+      "tagline": "Flexible — cancel anytime",
+      "note": "Billed monthly"
+    },
+    "annual": {
+      "name": "Annual",
+      "tagline": "Our best rate for committed pros",
+      "savings": "{perMonth}/month billed yearly — save {save}"
+    },
+    "featuresTitle": "Every membership includes",
+    "features": [
+      "A verified pro profile with photos of your work",
+      "Listed in your city's directory and search results",
+      "Unlimited customer messages and leads",
+      "Reply to job postings from people hiring nearby",
+      "A verified badge once screening is complete",
+      "Cancel anytime — no long-term contract"
+    ],
+    "note": "Prices in Canadian dollars (CAD). Taxes may apply where applicable."
+  },
   "News": {
     "eyebrow": "The latest",
     "latest": "Latest",
@@ -253,6 +287,16 @@
     "readMore": "Read more",
     "backToNews": "Back to news",
     "posts": {
+      "p4": {
+        "title": "NextDoor Pros is now live in Canada",
+        "date": "July 18, 2026",
+        "excerpt": "Our marketplace crosses the Atlantic: homeowners across Canada can now find vetted local pros — coast to coast, from Toronto to Vancouver.",
+        "body": [
+          "NextDoor Pros is now live in Canada. After starting in Cameroon, we've opened our first market abroad — and we didn't do it halfway. All ten provinces and three territories are covered from day one, with roughly a hundred cities already on the map, from Toronto, Montréal, and Vancouver to Halifax, Winnipeg, Regina, Whitehorse, and Iqaluit.",
+          "Nothing about our standard changes with the border. Every pro joining the Canadian network goes through the same screening as everyone else: identity verification, credential and reference checks where they apply, and a review of real past work. Prices and payments are handled in Canadian dollars, and you still reach pros the same safe way — through the platform, without ever trading personal phone numbers or emails.",
+          "To browse Canadian pros, open the country switcher in the top bar and choose Canada, then pick your city. If you're a homeowner, you can start looking today. And if you're a skilled pro anywhere in Canada, applications are open — joining now means being among the first names customers see as each city fills out."
+        ]
+      },
       "p1": {
         "title": "Now live in Douala, Yaoundé, and Bafoussam",
         "date": "May 5, 2026",

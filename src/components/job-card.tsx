@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { MapPin, Clock, DollarSign, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { getCityBySlug } from '@/data/cameroon-cities';
+import { getCityBySlug } from '@/data/geography';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import type { JobDoc } from '@/lib/job-types';
 

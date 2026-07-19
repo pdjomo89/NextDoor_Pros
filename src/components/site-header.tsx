@@ -8,6 +8,7 @@ import { Menu, X, LogIn, Briefcase, MessageSquare } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
+import { CountryPicker } from '@/components/country-picker';
 import { LanguageToggle } from '@/components/language-toggle';
 import { getConvexEnv } from '@/lib/convex-env';
 import { readGuestThreads } from '@/lib/guest-threads';
@@ -54,6 +55,7 @@ function InboxLink({
 const NAV_ITEMS = [
   { href: '/services', key: 'services' },
   { href: '/jobs', key: 'jobs' },
+  { href: '/pricing', key: 'pricing' },
   { href: '/reviews', key: 'reviews' },
   { href: '/about', key: 'about' },
   { href: '/partners', key: 'partners' },
@@ -142,6 +144,7 @@ export function SiteHeader({
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <CountryPicker locale={locale} />
           <CityPicker locale={locale} />
           {signedIn ? (
             <>
@@ -204,6 +207,7 @@ export function SiteHeader({
               })}
             </nav>
             <div className="flex flex-wrap items-center gap-2">
+              <CountryPicker locale={locale} />
               <CityPicker locale={locale} />
             </div>
             <div className="flex flex-wrap gap-2">

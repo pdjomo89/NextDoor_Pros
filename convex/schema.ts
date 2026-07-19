@@ -2,6 +2,18 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { authTables } from '@convex-dev/auth/server';
 
+// ─── Money storage convention (multi-currency foundation) ──────────────────
+//
+// Every monetary amount is stored as an INTEGER in its currency's minor unit
+// (the smallest indivisible amount): XAF → 1 = 1 franc (exponent 0), USD → 100
+// = $1.00 (exponent 2). Formatting divides by the right power of ten — see
+// src/lib/currency.ts. Because XAF's exponent is 0, all existing whole-franc
+// amounts are already valid minor-unit values; adopting this convention needs
+// no data migration.
+//
+// Phase 3 (with the per-listing `country` dimension) will: add a `country`
+// field to contractors/jobs, drop the misleading `Cents` suffix from amount
+// fields, and make `currency` non-optional where it is implicit today.
 export default defineSchema({
   ...authTables,
 
@@ -14,14 +26,19 @@ export default defineSchema({
     services: v.array(v.string()),
     citySlug: v.string(),
     province: v.string(),
+    // ISO 3166-1 alpha-2 market this listing belongs to (derived from citySlug).
+    // Optional during rollout; backfilled to 'CM' then treated as required.
+    country: v.optional(v.string()),
 
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
 
     // Marketing-only "Starting at X" price shown on cards/profile.
-    // Stored as whole FCFA (XAF has no minor units, so the `Cents` suffix is a
-    // historical misnomer). Informational only — the app takes no payments.
+    // Stored as an integer in the currency's MINOR UNIT (see money convention
+    // below). Currency is implicitly the contractor's market (XAF today, whose
+    // exponent is 0, so the value equals whole francs). Informational only.
+    // Phase 3: rename off the `Cents` suffix + add an explicit `country`.
     startingAtPriceCents: v.optional(v.number()),
 
     // Product / work photos uploaded by the pro (Convex file-storage ids).
@@ -34,7 +51,8 @@ export default defineSchema({
     ratingSum: v.optional(v.number()),
   })
     .index('by_owner', ['ownerId'])
-    .index('by_city_published', ['citySlug', 'published']),
+    .index('by_city_published', ['citySlug', 'published'])
+    .index('by_country_published', ['country', 'published']),
 
   // Priced offerings a contractor lists (e.g. "Hair treatment 25000 FCFA").
   contractorServices: defineTable({
@@ -80,6 +98,9 @@ export default defineSchema({
     category: v.string(),
     citySlug: v.string(),
     province: v.string(),
+    // ISO 3166-1 alpha-2 market this job belongs to (derived from citySlug).
+    // Optional during rollout; backfilled to 'CM' then treated as required.
+    country: v.optional(v.string()),
 
     budget: v.optional(v.string()),
     timing: v.optional(v.string()),
@@ -87,11 +108,36 @@ export default defineSchema({
     contactEmail: v.optional(v.string()),
     contactPhone: v.optional(v.string()),
 
-    // 'open' | 'closed' | 'filled'
+    // 'pending_payment' | 'open' | 'closed' | 'filled'
+    // 'pending_payment' jobs are hidden from the public board until the
+    // Fapshi posting fee is confirmed (see convex/jobFees.ts).
     status: v.string(),
   })
     .index('by_poster', ['posterId'])
-    .index('by_status', ['status']),
+    .index('by_status', ['status'])
+    .index('by_country_status', ['country', 'status']),
+
+  // ─── Job-posting fees (collect-only, via the market's payment provider) ──
+  //
+  // One row per attempt to pay the posting fee for a job. Created alongside a
+  // 'pending_payment' job; flipped to 'successful' by the provider's webhook,
+  // which then publishes the job. Provider is chosen per market (Fapshi for
+  // Cameroon, Stripe elsewhere). See convex/jobFees.ts + convex/http.ts and the
+  // PaymentProvider abstraction in convex/paymentTypes.ts.
+  jobPayments: defineTable({
+    jobId: v.id('jobs'),
+    posterId: v.id('users'),
+    provider: v.string(), // ProviderName: 'fapshi' | 'stripe'
+    transId: v.optional(v.string()), // provider transaction/session id (set after initiate-pay)
+    externalId: v.string(), // idempotency key we send to the provider (= jobId)
+    amount: v.number(), // minor units of `currency` (XAF exponent 0 → whole francs)
+    currency: v.string(), // lowercase ISO 4217, e.g. 'xaf'
+    // 'created' | 'pending' | 'successful' | 'failed' | 'expired'
+    status: v.string(),
+    link: v.optional(v.string()), // Fapshi hosted-checkout URL
+  })
+    .index('by_transId', ['transId'])
+    .index('by_job', ['jobId']),
 
   // ─── Platform-mediated messaging ───────────────────────────────────────
   //

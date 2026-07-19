@@ -16,10 +16,12 @@ type FilterCat = JobCategory | 'all';
 export function JobsList() {
   const t = useTranslations('Jobs');
   const tCat = useTranslations('Services.categories');
-  const { city } = useCity();
+  const { city, country } = useCity();
   const [filter, setFilter] = React.useState<FilterCat>('all');
 
   const jobs = useQuery(api.jobs.list, {
+    // Scope to the active market; a chosen city narrows further within it.
+    country,
     citySlug: city?.slug,
     category: filter === 'all' ? undefined : filter,
   }) as JobDoc[] | undefined;

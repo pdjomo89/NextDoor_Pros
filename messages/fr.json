@@ -12,6 +12,7 @@
     "news": "Nouvelles",
     "contact": "Contact",
     "reviews": "Avis",
+    "pricing": "Tarifs",
     "selectCity": "Choisir votre ville",
     "searchCity": "Rechercher une ville...",
     "noCity": "Aucune ville trouvée.",
@@ -245,6 +246,39 @@
       "trustBody": "Vérifications d'antécédents, assurance et vrais avis clients."
     }
   },
+  "Pricing": {
+    "eyebrow": "Abonnement",
+    "title": "Une tarification simple pour les pros",
+    "subtitle": "Un seul abonnement pour être référencé, être découvert et échanger avec les clients. Choisissez la souplesse mensuelle ou économisez à l'année.",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "bestValue": "Meilleure offre",
+    "cta": "Devenir pro",
+    "freeTrial": "1er mois gratuit",
+    "freeBanner": "Votre premier mois est offert — commencez gratuitement, annulez à tout moment.",
+    "ctaTrial": "Commencer 1 mois gratuit",
+    "trialNote": "Aucun frais aujourd'hui. Après votre mois gratuit, l'abonnement se renouvelle automatiquement jusqu'à l'annulation.",
+    "monthly": {
+      "name": "Mensuel",
+      "tagline": "Souple — annulable à tout moment",
+      "note": "Facturé mensuellement"
+    },
+    "annual": {
+      "name": "Annuel",
+      "tagline": "Notre meilleur tarif pour les pros engagés",
+      "savings": "{perMonth}/mois facturé à l'année — économisez {save}"
+    },
+    "featuresTitle": "Chaque abonnement comprend",
+    "features": [
+      "Un profil de pro vérifié avec des photos de vos réalisations",
+      "Référencé dans l'annuaire de votre ville et les résultats de recherche",
+      "Messages et demandes de clients illimités",
+      "Répondez aux offres des personnes qui recrutent près de chez vous",
+      "Un badge vérifié une fois la vérification terminée",
+      "Annulable à tout moment — sans engagement"
+    ],
+    "note": "Prix en dollars canadiens (CAD). Des taxes peuvent s'appliquer."
+  },
   "News": {
     "eyebrow": "Les dernières nouvelles",
     "latest": "Récent",
@@ -253,6 +287,16 @@
     "readMore": "Lire la suite",
     "backToNews": "Retour aux nouvelles",
     "posts": {
+      "p4": {
+        "title": "NextDoor Pros est désormais disponible au Canada",
+        "date": "18 juillet 2026",
+        "excerpt": "Notre marketplace traverse l'Atlantique : partout au Canada, les ménages peuvent maintenant trouver des pros locaux vérifiés — d'un océan à l'autre, de Toronto à Vancouver.",
+        "body": [
+          "NextDoor Pros est désormais disponible au Canada. Après nos débuts au Cameroun, nous ouvrons notre premier marché à l'étranger — et sans faire les choses à moitié. Les dix provinces et les trois territoires sont couverts dès le premier jour, avec une centaine de villes déjà sur la carte, de Toronto, Montréal et Vancouver à Halifax, Winnipeg, Regina, Whitehorse et Iqaluit.",
+          "Notre exigence ne change pas avec la frontière. Chaque pro qui rejoint le réseau canadien passe par la même vérification que les autres : vérification d'identité, contrôle des qualifications et des références le cas échéant, et examen de travaux réels déjà réalisés. Les prix et les paiements sont gérés en dollars canadiens, et vous contactez les pros de la même façon sécurisée — via la plateforme, sans jamais échanger de numéros de téléphone ni de courriels personnels.",
+          "Pour parcourir les pros canadiens, ouvrez le sélecteur de pays dans la barre du haut et choisissez le Canada, puis sélectionnez votre ville. Si vous êtes un ménage, vous pouvez commencer vos recherches dès aujourd'hui. Et si vous êtes un pro qualifié où que ce soit au Canada, les candidatures sont ouvertes — vous joindre maintenant, c'est figurer parmi les premiers noms que voient les clients à mesure que chaque ville se remplit."
+        ]
+      },
       "p1": {
         "title": "Désormais disponible à Douala, Yaoundé et Bafoussam",
         "date": "5 mai 2026",

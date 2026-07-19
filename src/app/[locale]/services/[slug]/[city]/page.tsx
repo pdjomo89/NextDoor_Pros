@@ -12,7 +12,7 @@ import {
   citiesInProvince,
   getCityBySlug,
   getProvinceByCode,
-} from '@/data/cameroon-cities';
+} from '@/data/geography';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
 

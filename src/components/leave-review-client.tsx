@@ -7,6 +7,7 @@ import { CheckCircle2, Loader2, Send, Stars } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StarPicker } from '@/components/star-picker';
 import { StarRating } from '@/components/star-rating';
+import { useCity } from '@/components/city-picker-context';
 import { getConvexEnv } from '@/lib/convex-env';
 import { api } from '../../convex/_generated/api';
 import type { ReviewDoc } from '@/lib/review-types';
@@ -25,9 +26,11 @@ export function LeaveReviewClient() {
   const t = useTranslations('ReviewsPage');
   const configured = getConvexEnv().configured;
 
-  const pros = useQuery(api.contractors.listAllPublished, configured ? {} : 'skip') as
-    | ProOption[]
-    | undefined;
+  const { country } = useCity();
+  const pros = useQuery(
+    api.contractors.listAllPublished,
+    configured ? { country } : 'skip',
+  ) as ProOption[] | undefined;
   const viewer = useQuery(api.contractors.viewer, configured ? {} : 'skip') as
     | { _id: string } | null | undefined;
 

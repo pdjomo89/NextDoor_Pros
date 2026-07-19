@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronsUpDown, MapPin } from 'lucide-react';
-import { citiesGroupedByProvince, getProvinceByCode } from '@/data/cameroon-cities';
+import { citiesGroupedByProvince, getProvinceByCode } from '@/data/geography';
 import { useCity } from '@/components/city-picker-context';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,8 +27,11 @@ type Props = {
 export function CityPicker({ locale, variant = 'compact', className }: Props) {
   const t = useTranslations('Nav');
   const [open, setOpen] = React.useState(false);
-  const { city, setCity } = useCity();
-  const grouped = React.useMemo(() => citiesGroupedByProvince(), []);
+  const { city, country, setCity } = useCity();
+  const grouped = React.useMemo(
+    () => citiesGroupedByProvince(country),
+    [country],
+  );
 
   const label = city
     ? `${city.name}, ${city.province}`
