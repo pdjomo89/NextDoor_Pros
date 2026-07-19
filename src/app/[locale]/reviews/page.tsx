@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { LeaveReviewClient } from '@/components/leave-review-client';
 import { pageMetadata } from '@/lib/seo';
@@ -30,8 +31,19 @@ export default async function ReviewsPage({
 
   return (
     <div className="flex flex-col">
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-gradient-to-br from-navy via-navy-600 to-forest-800 text-white">
+      {/* Hero — background photo under a colorful gradient */}
+      <section className="relative isolate overflow-hidden text-white">
+        <Image
+          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=70"
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-center"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-navy/95 via-navy-600/90 to-forest-800/85" />
+        <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-72 w-72 rounded-full bg-forest/30 blur-3xl" />
         <div className="container py-16 text-center md:py-20">
           <span className="inline-block rounded-full bg-forest/30 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-forest-100 ring-1 ring-inset ring-forest/40">
             {t('eyebrow')}
