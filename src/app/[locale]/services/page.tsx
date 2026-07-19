@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ServiceCard } from '@/components/service-card';
 import { CityBanner } from '@/components/city-banner';
+import { JobsHero } from '@/components/jobs-hero';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { pageMetadata } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
@@ -31,13 +32,13 @@ export default async function ServicesPage({
   const t = await getTranslations('Services');
 
   return (
-    <div className="container py-16">
-      <header className="mx-auto max-w-2xl text-center">
-        <h1 className="text-balance text-4xl font-bold tracking-tight text-navy sm:text-5xl">
-          {t('title')}
-        </h1>
-        <p className="mt-3 text-navy/70">{t('subtitle')}</p>
-      </header>
+    <div className="container py-12">
+      <JobsHero
+        eyebrow={t('heroEyebrow')}
+        title={t('title')}
+        subtitle={t('subtitle')}
+        image="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=70"
+      />
 
       <div className="mt-8">
         <CityBanner locale={locale as Locale} />

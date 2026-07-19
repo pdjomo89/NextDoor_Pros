@@ -120,6 +120,7 @@
   "Services": {
     "title": "Services",
     "subtitle": "Tout ce dont vous avez besoin, à la même adresse de confiance.",
+    "heroEyebrow": "Annuaire des services locaux",
     "categories": {
       "home": {
         "title": "Services à domicile",

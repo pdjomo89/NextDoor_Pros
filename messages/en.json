@@ -120,6 +120,7 @@
   "Services": {
     "title": "Services",
     "subtitle": "Everything you need, from one trusted source.",
+    "heroEyebrow": "Local services directory",
     "categories": {
       "home": {
         "title": "Home services",
