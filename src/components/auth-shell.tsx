@@ -21,20 +21,20 @@ export function AuthShell({
     <div className="container py-12 md:py-16">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-navy/10 bg-gradient-to-br from-navy-100 via-white to-forest-100 shadow-lg shadow-navy/10 lg:grid-cols-2">
         {/* Brand panel */}
-        <div className="relative hidden flex-col justify-between p-10 text-white lg:flex">
+        <div className="relative hidden flex-col justify-between overflow-hidden p-10 text-white lg:flex">
           <Image
             src={BRAND_IMAGE}
             alt=""
             aria-hidden
             fill
             sizes="(min-width: 1024px) 50vw, 0px"
-            className="-z-10 object-cover object-center"
+            className="absolute inset-0 object-cover object-center"
           />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-navy via-navy/95 to-navy-600/95" />
-          <span className="text-xl font-bold tracking-tight">
+          <div className="absolute inset-0 bg-gradient-to-br from-navy via-navy/95 to-navy-600/95" />
+          <span className="relative z-10 text-xl font-bold tracking-tight">
             NextDoor<span className="text-forest-300"> Pros</span>
           </span>
-          <div>
+          <div className="relative z-10">
             <p className="text-balance text-2xl font-bold leading-snug">{brandHeadline}</p>
             <ul className="mt-6 space-y-3">
               {brandPoints.map((p) => (
