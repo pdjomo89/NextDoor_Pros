@@ -238,4 +238,32 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_stripeAccount', ['stripeAccountId']),
 
+  // ─── Job escrow (platform-collected job payments) ────────────────────────
+  //
+  // The employer pays the agreed job amount to the platform (held), and once the
+  // work is confirmed done the platform transfers it to the pro's connected
+  // account minus commission. One row per payment agreed for a job. Money flow
+  // uses Stripe "separate charges & transfers": the charge lands on the platform
+  // balance; a later Transfer pays the pro. See convex/jobEscrow.ts.
+  jobEscrows: defineTable({
+    jobId: v.id('jobs'),
+    proId: v.id('users'), // payee (the hired pro)
+    employerId: v.id('users'), // payer (the job poster)
+    amount: v.number(), // agreed amount, minor units of `currency`
+    currency: v.string(), // lowercase ISO 4217
+    commissionBps: v.number(), // platform cut in basis points (500 = 5%)
+    // 'requested' | 'held' | 'released' | 'refunded' | 'canceled'
+    status: v.string(),
+    stripeSessionId: v.optional(v.string()),
+    stripePaymentIntentId: v.optional(v.string()), // charge id (transfer source + refund)
+    stripeTransferId: v.optional(v.string()),
+    proMarkedDoneAt: v.optional(v.number()), // starts the auto-release clock
+    releasedAt: v.optional(v.number()),
+  })
+    .index('by_job', ['jobId'])
+    .index('by_session', ['stripeSessionId'])
+    .index('by_pro', ['proId'])
+    .index('by_employer', ['employerId'])
+    .index('by_status', ['status']),
+
 });

@@ -5,6 +5,7 @@ import { auth } from './auth';
 import { getProvider } from './paymentProviders';
 import { parseStripeWebhook, retrieveSubscription } from './stripeSubscriptions';
 import { retrieveConnectAccount } from './stripeConnect';
+import { retrieveEscrowSession } from './stripeEscrow';
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
@@ -62,6 +63,18 @@ http.route({
         payoutsEnabled: acct.payoutsEnabled,
         detailsSubmitted: acct.detailsSubmitted,
       });
+      return new Response('OK', { status: 200 });
+    }
+
+    // Job escrow payment (employer paid the agreed amount → held on platform).
+    if (parsed.paymentSessionId) {
+      const sess = await retrieveEscrowSession(parsed.paymentSessionId);
+      if (sess.paid && sess.escrowId) {
+        await ctx.runMutation(internal.jobEscrow.markEscrowHeld, {
+          sessionId: parsed.paymentSessionId,
+          paymentIntentId: sess.paymentIntentId,
+        });
+      }
       return new Response('OK', { status: 200 });
     }
 

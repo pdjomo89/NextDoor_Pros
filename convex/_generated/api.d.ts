@@ -16,6 +16,7 @@ import type * as crons from "../crons.js";
 import type * as fapshiClient from "../fapshiClient.js";
 import type * as geo from "../geo.js";
 import type * as http from "../http.js";
+import type * as jobEscrow from "../jobEscrow.js";
 import type * as jobs from "../jobs.js";
 import type * as leadUnlocks from "../leadUnlocks.js";
 import type * as markets from "../markets.js";
@@ -27,6 +28,7 @@ import type * as paymentTypes from "../paymentTypes.js";
 import type * as payments from "../payments.js";
 import type * as reviews from "../reviews.js";
 import type * as stripeConnect from "../stripeConnect.js";
+import type * as stripeEscrow from "../stripeEscrow.js";
 import type * as stripeProvider from "../stripeProvider.js";
 import type * as stripeSubscriptions from "../stripeSubscriptions.js";
 
@@ -45,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   fapshiClient: typeof fapshiClient;
   geo: typeof geo;
   http: typeof http;
+  jobEscrow: typeof jobEscrow;
   jobs: typeof jobs;
   leadUnlocks: typeof leadUnlocks;
   markets: typeof markets;
@@ -56,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   payments: typeof payments;
   reviews: typeof reviews;
   stripeConnect: typeof stripeConnect;
+  stripeEscrow: typeof stripeEscrow;
   stripeProvider: typeof stripeProvider;
   stripeSubscriptions: typeof stripeSubscriptions;
 }>;

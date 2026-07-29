@@ -728,5 +728,29 @@
     "active": "Versements activés",
     "opening": "Ouverture…",
     "error": "Impossible de démarrer la configuration. Veuillez réessayer."
+  },
+  "JobPay": {
+    "sectionTitle": "Paiement de la tâche",
+    "requestTitle": "Demander un paiement",
+    "amountLabel": "Montant",
+    "requestCta": "Envoyer la demande de paiement",
+    "needPayouts": "Configurez les versements avant de pouvoir demander un paiement.",
+    "setupPayouts": "Configurer les versements",
+    "requestedPro": "Vous avez demandé {amount}. En attente du paiement de l'employeur.",
+    "payTitle": "Payer cette tâche",
+    "payDetail": "Le pro a demandé {amount} pour cette tâche.",
+    "payCta": "Payer {amount}",
+    "heldPro": "Paiement reçu et conservé en sécurité. Marquez le travail comme terminé une fois fini.",
+    "markDone": "Marquer comme terminé",
+    "awaitingConfirm": "Marqué terminé — en attente de la confirmation de l'employeur. Versement automatique dans {days} jours.",
+    "heldEmployer": "Votre paiement est conservé sous séquestre jusqu'à ce que vous confirmiez la fin du travail.",
+    "confirmCta": "Confirmer et verser {amount}",
+    "refundCta": "Rembourser",
+    "releasedPro": "Versé — {amount} est en route vers vous.",
+    "releasedEmployer": "Versé au pro. Merci !",
+    "refunded": "Ce paiement a été remboursé.",
+    "feeNote": "Frais de plateforme {pct} % — le pro reçoit {proReceives}.",
+    "working": "En cours…",
+    "error": "Une erreur s'est produite. Veuillez réessayer."
   }
 }

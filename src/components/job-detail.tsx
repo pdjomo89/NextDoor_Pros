@@ -17,6 +17,7 @@ import {
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { ContactEmployerButton } from '@/components/contact-employer-button';
+import { JobEscrowPanel } from '@/components/job-escrow-panel';
 import { getCityBySlug } from '@/data/geography';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { api } from '../../convex/_generated/api';
@@ -180,6 +181,13 @@ export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
           </Button>
         </div>
       )}
+
+      {/* Job payment / escrow (participants only, subscription markets) */}
+      <JobEscrowPanel
+        jobId={job._id}
+        posterId={job.posterId}
+        country={job.country}
+      />
     </article>
   );
 }

@@ -728,5 +728,29 @@
     "active": "Payouts active",
     "opening": "Opening…",
     "error": "Couldn't start payout setup. Please try again."
+  },
+  "JobPay": {
+    "sectionTitle": "Job payment",
+    "requestTitle": "Request payment",
+    "amountLabel": "Amount",
+    "requestCta": "Send payment request",
+    "needPayouts": "Set up payouts before you can request payment for a job.",
+    "setupPayouts": "Set up payouts",
+    "requestedPro": "You requested {amount}. Waiting for the employer to pay.",
+    "payTitle": "Pay for this job",
+    "payDetail": "The pro requested {amount} for this job.",
+    "payCta": "Pay {amount}",
+    "heldPro": "Payment received and held safely. Mark the work done once you've finished.",
+    "markDone": "Mark work done",
+    "awaitingConfirm": "Marked done — waiting for the employer to confirm. Funds auto-release in {days} days.",
+    "heldEmployer": "Your payment is held in escrow until you confirm the work is done.",
+    "confirmCta": "Confirm done & release {amount}",
+    "refundCta": "Refund",
+    "releasedPro": "Paid out — {amount} is on its way to you.",
+    "releasedEmployer": "Released to the pro. Thanks!",
+    "refunded": "This payment was refunded.",
+    "feeNote": "Platform fee {pct}% — the pro receives {proReceives}.",
+    "working": "Working…",
+    "error": "Something went wrong. Please try again."
   }
 }
