@@ -220,4 +220,22 @@ export default defineSchema({
     .index('by_user_role', ['userId', 'role'])
     .index('by_stripeSubscription', ['stripeSubscriptionId']),
 
+  // ─── Pro payout accounts (Stripe Connect) ────────────────────────────────
+  //
+  // A pro's Stripe Connect (Express) account, so the platform can pay them out
+  // for jobs. Created when the pro starts onboarding; `payoutsEnabled` flips true
+  // once Stripe clears their identity/bank details (tracked via account.updated
+  // webhook). Only markets whose job payments run through the platform (Canada)
+  // use this today. See convex/connect.ts.
+  connectAccounts: defineTable({
+    userId: v.id('users'),
+    stripeAccountId: v.string(),
+    country: v.optional(v.string()),
+    chargesEnabled: v.boolean(),
+    payoutsEnabled: v.boolean(),
+    detailsSubmitted: v.boolean(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_stripeAccount', ['stripeAccountId']),
+
 });

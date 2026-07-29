@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as connect from "../connect.js";
 import type * as contactMessages from "../contactMessages.js";
 import type * as contractors from "../contractors.js";
 import type * as crons from "../crons.js";
@@ -25,6 +26,7 @@ import type * as paymentProviders from "../paymentProviders.js";
 import type * as paymentTypes from "../paymentTypes.js";
 import type * as payments from "../payments.js";
 import type * as reviews from "../reviews.js";
+import type * as stripeConnect from "../stripeConnect.js";
 import type * as stripeProvider from "../stripeProvider.js";
 import type * as stripeSubscriptions from "../stripeSubscriptions.js";
 
@@ -36,6 +38,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  connect: typeof connect;
   contactMessages: typeof contactMessages;
   contractors: typeof contractors;
   crons: typeof crons;
@@ -52,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   paymentTypes: typeof paymentTypes;
   payments: typeof payments;
   reviews: typeof reviews;
+  stripeConnect: typeof stripeConnect;
   stripeProvider: typeof stripeProvider;
   stripeSubscriptions: typeof stripeSubscriptions;
 }>;

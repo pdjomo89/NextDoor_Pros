@@ -220,7 +220,7 @@ export async function createPortalSession(
  * authoritative state via retrieveSubscription before persisting anything.
  */
 export type StripeWebhookParse =
-  | { ok: true; subscriptionId: string | null }
+  | { ok: true; subscriptionId: string | null; accountId: string | null }
   | { ok: false; status: number; message: string };
 
 export async function parseStripeWebhook(
@@ -247,6 +247,7 @@ export async function parseStripeWebhook(
   const type = evt.type;
   const obj = evt.data?.object ?? {};
   let subscriptionId: string | null = null;
+  let accountId: string | null = null;
 
   if (type === 'checkout.session.completed') {
     if (obj.mode === 'subscription' && typeof obj.subscription === 'string') {
@@ -256,8 +257,11 @@ export async function parseStripeWebhook(
     if (typeof obj.id === 'string') subscriptionId = obj.id;
   } else if (type === 'invoice.paid' || type === 'invoice.payment_failed') {
     if (typeof obj.subscription === 'string') subscriptionId = obj.subscription;
+  } else if (type === 'account.updated') {
+    // Connect account capability change (pro payout onboarding).
+    if (typeof obj.id === 'string') accountId = obj.id;
   }
 
-  // subscriptionId null = an event we don't act on; caller returns 200 anyway.
-  return { ok: true, subscriptionId };
+  // Both null = an event we don't act on; caller returns 200 anyway.
+  return { ok: true, subscriptionId, accountId };
 }

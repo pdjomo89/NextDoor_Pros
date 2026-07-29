@@ -8,6 +8,7 @@ import { SignOutButton } from '@/components/sign-out-button';
 import { StarRating } from '@/components/star-rating';
 import { PhotoManager, type PhotoLabels } from '@/components/photo-manager';
 import { ServicesSection, type ServicesLabels } from '@/components/services-section';
+import { ConnectPayouts } from '@/components/connect-payouts';
 import { countryOfCity, getCityBySlug } from '@/data/geography';
 import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { ratingOf } from '@/lib/contractor-types';
@@ -157,6 +158,9 @@ export function DashboardClient({
           <ServicesSection
             locale={locale}
             labels={l.services}
+            country={contractor.country ?? countryOfCity(contractor.citySlug)}
+          />
+          <ConnectPayouts
             country={contractor.country ?? countryOfCity(contractor.citySlug)}
           />
         </div>

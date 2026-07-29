@@ -4,6 +4,7 @@ import { internal } from './_generated/api';
 import { auth } from './auth';
 import { getProvider } from './paymentProviders';
 import { parseStripeWebhook, retrieveSubscription } from './stripeSubscriptions';
+import { retrieveConnectAccount } from './stripeConnect';
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
@@ -51,6 +52,19 @@ http.route({
     if (!parsed.ok) {
       return new Response(parsed.message, { status: parsed.status });
     }
+
+    // Connect account onboarding progress (pro payout capability).
+    if (parsed.accountId) {
+      const acct = await retrieveConnectAccount(parsed.accountId);
+      await ctx.runMutation(internal.connect.upsertConnectFromStripe, {
+        stripeAccountId: acct.id,
+        chargesEnabled: acct.chargesEnabled,
+        payoutsEnabled: acct.payoutsEnabled,
+        detailsSubmitted: acct.detailsSubmitted,
+      });
+      return new Response('OK', { status: 200 });
+    }
+
     // An event type we don't act on — acknowledge so Stripe stops retrying.
     if (!parsed.subscriptionId) return new Response('OK', { status: 200 });
 

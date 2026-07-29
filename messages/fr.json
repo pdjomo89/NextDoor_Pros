@@ -719,5 +719,14 @@
     "successBanner": "Tout est prêt — votre abonnement est actif.",
     "cancelBanner": "Paiement annulé — aucun montant n'a été prélevé.",
     "errGeneric": "Une erreur s'est produite. Veuillez réessayer."
+  },
+  "Payouts": {
+    "title": "Recevoir vos paiements",
+    "intro": "Configurez les versements pour recevoir vos gains directement sur votre compte bancaire.",
+    "setup": "Configurer les versements",
+    "finish": "Terminer la configuration",
+    "active": "Versements activés",
+    "opening": "Ouverture…",
+    "error": "Impossible de démarrer la configuration. Veuillez réessayer."
   }
 }

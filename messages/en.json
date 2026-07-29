@@ -719,5 +719,14 @@
     "successBanner": "You're all set — your membership is active.",
     "cancelBanner": "Checkout canceled — no charge was made.",
     "errGeneric": "Something went wrong. Please try again."
+  },
+  "Payouts": {
+    "title": "Get paid",
+    "intro": "Set up payouts to receive your job earnings directly to your bank account.",
+    "setup": "Set up payouts",
+    "finish": "Finish payout setup",
+    "active": "Payouts active",
+    "opening": "Opening…",
+    "error": "Couldn't start payout setup. Please try again."
   }
 }
