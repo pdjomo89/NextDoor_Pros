@@ -701,6 +701,8 @@
     "perMonth": "{price}/mois",
     "perYear": "{price}/an",
     "subscribe": "S'abonner",
+    "startTrial": "Commencer l'essai gratuit",
+    "trialBanner": "Vos {months} premiers mois sont gratuits. Choisissez un forfait et ajoutez votre carte — aucun prélèvement avant la fin de l'essai, annulable à tout moment.",
     "subscribing": "Redirection…",
     "activeTitle": "Abonnement actif",
     "statusActive": "Actif",

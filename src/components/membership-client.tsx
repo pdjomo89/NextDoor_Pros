@@ -9,7 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/routing';
 import { getConvexEnv } from '@/lib/convex-env';
 import { formatMoney } from '@/lib/currency';
-import { DEFAULT_COUNTRY, getMarket, type Market } from '@/lib/markets';
+import {
+  DEFAULT_COUNTRY,
+  getMarket,
+  membershipTrialDays,
+  type Market,
+} from '@/lib/markets';
 import { api } from '../../convex/_generated/api';
 
 type Role = 'poster' | 'pro';
@@ -54,6 +59,14 @@ export function MembershipClient() {
         <Banner variant="success">{t('successBanner')}</Banner>
       )}
       {status === 'cancel' && <Banner variant="info">{t('cancelBanner')}</Banner>}
+
+      {membershipTrialDays(country) > 0 && (
+        <Banner variant="info">
+          {t('trialBanner', {
+            months: Math.round(membershipTrialDays(country) / 30),
+          })}
+        </Banner>
+      )}
 
       {viewer === null ? (
         <Notice
@@ -131,6 +144,11 @@ function RoleCard({
   const roleDesc = role === 'poster' ? t('roleEmployerDesc') : t('roleProDesc');
   const quotaLabel =
     role === 'poster' ? t('quotaLabelPoster') : t('quotaLabelPro');
+  const trialDays =
+    market.monetization.model === 'subscription'
+      ? market.monetization.trialDays
+      : 0;
+  const subscribeCta = trialDays > 0 ? t('startTrial') : t('subscribe');
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-navy/10 bg-white p-6">
@@ -187,7 +205,7 @@ function RoleCard({
               price={t('perMonth', { price: money(plan.monthlyMinor) })}
               busy={busy === 'monthly'}
               onClick={() => subscribe('monthly')}
-              cta={t('subscribe')}
+              cta={subscribeCta}
               busyLabel={t('subscribing')}
             />
             <PlanRow
@@ -195,7 +213,7 @@ function RoleCard({
               price={t('perYear', { price: money(plan.yearlyMinor) })}
               busy={busy === 'yearly'}
               onClick={() => subscribe('yearly')}
-              cta={t('subscribe')}
+              cta={subscribeCta}
               busyLabel={t('subscribing')}
             />
           </div>

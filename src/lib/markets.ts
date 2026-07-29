@@ -50,6 +50,8 @@ export type Monetization =
   | { model: 'payg'; leadUnlockFeeMinor: number }
   | {
       model: 'subscription';
+      /** Free-trial length (days) — card collected but not charged until it ends. */
+      trialDays: number;
       poster: MembershipPlanConfig;
       pro: MembershipPlanConfig;
     };
@@ -90,9 +92,11 @@ export const MARKETS: Record<CountryCode, Market> = {
     defaultLocale: 'en',
     paymentProvider: 'stripe',
     // Confirmed 2026-07-29: $15/mo, $160/yr, both sides; hard cap of 2
-    // actions/billing period (block until renewal — no overage).
+    // actions/billing period (block until renewal — no overage). Card collected
+    // at checkout, but the first 60 days (~2 months) are free.
     monetization: {
       model: 'subscription',
+      trialDays: 60,
       poster: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
       pro: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
     },
@@ -144,4 +148,10 @@ export function regionForCurrency(currency: string): CountryCode {
 export function leadUnlockFeeMinor(country?: string | null): number | null {
   const m = getMarket(country).monetization;
   return m.model === 'payg' ? m.leadUnlockFeeMinor : null;
+}
+
+/** Free-trial length (days) for a subscription market; 0 if not applicable. */
+export function membershipTrialDays(country?: string | null): number {
+  const m = getMarket(country).monetization;
+  return m.model === 'subscription' ? m.trialDays : 0;
 }

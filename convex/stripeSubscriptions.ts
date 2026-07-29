@@ -105,6 +105,8 @@ export async function createSubscriptionCheckout(input: {
   country: string;
   successUrl: string;
   cancelUrl: string;
+  /** Free-trial length in days (card collected, first charge deferred). 0 = none. */
+  trialDays?: number;
 }): Promise<{ url: string; sessionId: string }> {
   const form = new URLSearchParams();
   form.set('mode', 'subscription');
@@ -117,6 +119,13 @@ export async function createSubscriptionCheckout(input: {
   form.set('line_items[0][price_data][product_data][name]', input.productName);
   if (input.email) form.set('customer_email', input.email);
   form.set('client_reference_id', input.userId);
+  if (input.trialDays && input.trialDays > 0) {
+    // Free trial: collect the card now, defer the first charge until it ends.
+    form.set('subscription_data[trial_period_days]', String(input.trialDays));
+    // Require a payment method even though $0 is due today, so billing just
+    // starts automatically when the trial ends.
+    form.set('payment_method_collection', 'always');
+  }
   // Carry identity on the session AND the resulting subscription, so the webhook
   // can attribute lifecycle events to the right user/role without extra lookups.
   for (const [k, val] of Object.entries({

@@ -14,7 +14,11 @@ import {
   createSubscriptionCheckout,
   type SubscriptionInterval,
 } from './stripeSubscriptions';
-import { membershipPlanConfig, monetizationModel } from './markets';
+import {
+  membershipPlanConfig,
+  membershipTrialDays,
+  monetizationModel,
+} from './markets';
 import type { MembershipRole } from './markets';
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -209,6 +213,7 @@ export const startMembership = action({
       country,
       successUrl: `${siteUrl}/${locale}/membership?status=success`,
       cancelUrl: `${siteUrl}/${locale}/membership?status=cancel`,
+      trialDays: membershipTrialDays(country),
     });
     return { url };
   },

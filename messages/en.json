@@ -701,6 +701,8 @@
     "perMonth": "{price}/month",
     "perYear": "{price}/year",
     "subscribe": "Subscribe",
+    "startTrial": "Start free trial",
+    "trialBanner": "Your first {months} months are free. Pick a plan and add your card — you won't be charged until the trial ends, and you can cancel anytime before then.",
     "subscribing": "Redirecting…",
     "activeTitle": "Active membership",
     "statusActive": "Active",
