@@ -5,7 +5,8 @@ import { Loader2, Tag } from 'lucide-react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Locale } from '@/i18n/routing';
-import { formatFcfa } from '@/lib/currency';
+import { formatMoney } from '@/lib/currency';
+import { regionForCurrency } from '@/lib/markets';
 
 export type PublicServicesLabels = {
   sectionTitle: string;
@@ -20,8 +21,9 @@ type ServiceRow = {
   currency: string;
 };
 
-function formatPrice(amount: number, locale: Locale) {
-  return formatFcfa(amount, locale);
+function formatPrice(amount: number, currency: string, locale: Locale) {
+  const cur = currency.toUpperCase();
+  return formatMoney(amount, cur, locale, regionForCurrency(cur));
 }
 
 /**
@@ -78,7 +80,7 @@ export function PublicServices({
               )}
             </div>
             <span className="text-lg font-bold text-forest">
-              {formatPrice(s.priceCents, locale)}
+              {formatPrice(s.priceCents, s.currency, locale)}
             </span>
           </li>
         ))}

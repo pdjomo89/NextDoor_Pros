@@ -18,16 +18,22 @@ export function GuestMessageModal({
   intro,
   submit,
   onClose,
+  authenticated = false,
 }: {
   title: string;
   intro: string;
   submit: (args: {
-    email: string;
+    email?: string;
     name?: string;
     body: string;
     locale: string;
   }) => Promise<{ guestToken: string }>;
   onClose: () => void;
+  /**
+   * When true the sender is a signed-in user (their email comes from their
+   * account), so the email/name inputs are hidden and only the body is asked.
+   */
+  authenticated?: boolean;
 }) {
   const t = useTranslations('Messages');
   const locale = useLocale();
@@ -54,12 +60,13 @@ export function GuestMessageModal({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (email.trim() === '' || body.trim() === '') return;
+    if (body.trim() === '') return;
+    if (!authenticated && email.trim() === '') return;
     setBusy(true);
     try {
       const { guestToken } = await submit({
-        email: email.trim(),
-        name: name.trim() || undefined,
+        email: authenticated ? undefined : email.trim(),
+        name: authenticated ? undefined : name.trim() || undefined,
         body: body.trim(),
         locale,
       });
@@ -89,35 +96,39 @@ export function GuestMessageModal({
           <p className="mt-1 text-sm text-navy/70">{intro}</p>
         </header>
 
-        <label className="block">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/55">
-            {t('emailLabel')}
-          </span>
-          <input
-            required
-            type="email"
-            value={email}
-            autoComplete="email"
-            placeholder={t('emailPlaceholder')}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={busy}
-            className="form-input-msg"
-          />
-        </label>
+        {!authenticated && (
+          <>
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/55">
+                {t('emailLabel')}
+              </span>
+              <input
+                required
+                type="email"
+                value={email}
+                autoComplete="email"
+                placeholder={t('emailPlaceholder')}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={busy}
+                className="form-input-msg"
+              />
+            </label>
 
-        <label className="block">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/55">
-            {t('nameLabel')}
-          </span>
-          <input
-            type="text"
-            value={name}
-            autoComplete="name"
-            onChange={(e) => setName(e.target.value)}
-            disabled={busy}
-            className="form-input-msg"
-          />
-        </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/55">
+                {t('nameLabel')}
+              </span>
+              <input
+                type="text"
+                value={name}
+                autoComplete="name"
+                onChange={(e) => setName(e.target.value)}
+                disabled={busy}
+                className="form-input-msg"
+              />
+            </label>
+          </>
+        )}
 
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/55">

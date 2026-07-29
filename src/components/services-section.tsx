@@ -14,7 +14,13 @@ import { Button } from '@/components/ui/button';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Locale } from '@/i18n/routing';
-import { formatFcfa } from '@/lib/currency';
+import { currencyMinorUnits, formatMoney } from '@/lib/currency';
+import { getMarket, regionForCurrency } from '@/lib/markets';
+
+/** Friendly currency label (FCFA is the local name for XAF). */
+function currencyLabel(currency: string): string {
+  return currency.toUpperCase() === 'XAF' ? 'FCFA' : currency.toUpperCase();
+}
 
 export type ServicesLabels = {
   title: string;
@@ -48,19 +54,24 @@ type ServiceRow = {
   active: boolean;
 };
 
-function formatPrice(amount: number, locale: Locale) {
-  return formatFcfa(amount, locale);
+function formatPrice(amount: number, currency: string, locale: Locale) {
+  const cur = currency.toUpperCase();
+  return formatMoney(amount, cur, locale, regionForCurrency(cur));
 }
 
 export function ServicesSection({
   locale,
   labels: l,
+  country,
 }: {
   locale: Locale;
   labels: ServicesLabels;
+  /** The contractor's market (their service country) — drives the price currency. */
+  country?: string;
 }) {
   const services = useQuery(api.payments.listMyServices) as ServiceRow[] | undefined;
   const [editing, setEditing] = React.useState<ServiceRow | 'new' | null>(null);
+  const market = getMarket(country);
 
   if (services === undefined) {
     return (
@@ -112,7 +123,7 @@ export function ServicesSection({
                   </p>
                 )}
                 <p className="mt-1 text-sm font-semibold text-forest">
-                  {formatPrice(s.priceCents, locale)}
+                  {formatPrice(s.priceCents, s.currency, locale)}
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => setEditing(s)}>
@@ -129,6 +140,7 @@ export function ServicesSection({
           locale={locale}
           labels={l}
           initial={editing === 'new' ? null : editing}
+          currency={market.currency}
           onClose={() => setEditing(null)}
         />
       )}
@@ -140,21 +152,31 @@ function ServiceForm({
   locale,
   labels: l,
   initial,
+  currency,
   onClose,
 }: {
   locale: Locale;
   labels: ServicesLabels;
   initial: ServiceRow | null;
+  /** Contractor's market currency (uppercase ISO), for label + minor-unit math. */
+  currency: string;
   onClose: () => void;
 }) {
   void locale;
   const upsert = useMutation(api.payments.upsertService);
   const remove = useMutation(api.payments.deleteService);
 
+  const exponent = currencyMinorUnits(currency); // XAF→0, CAD→2
+  const curLabel = currencyLabel(currency);
+
   const [title, setTitle] = React.useState(initial?.title ?? '');
   const [description, setDescription] = React.useState(initial?.description ?? '');
+  // Show the stored minor-unit value as a human amount (using the row's own
+  // currency exponent, which normally matches the current market).
   const [price, setPrice] = React.useState(
-    initial ? String(initial.priceCents) : '',
+    initial
+      ? String(initial.priceCents / 10 ** currencyMinorUnits(initial.currency))
+      : '',
   );
   const [active, setActive] = React.useState(initial?.active ?? true);
   const [saving, setSaving] = React.useState(false);
@@ -164,7 +186,10 @@ function ServiceForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const amount = Math.round(Number.parseFloat(price.replace(',', '.')));
+    // Convert the human amount to the market currency's minor unit before saving.
+    const amount = Math.round(
+      Number.parseFloat(price.replace(',', '.')) * 10 ** exponent,
+    );
     if (!Number.isFinite(amount) || amount < 100) {
       setError(l.saveError);
       return;
@@ -236,17 +261,16 @@ function ServiceForm({
           <input
             required
             type="number"
-            inputMode="numeric"
-            step="1"
-            min="100"
-            max="50000000"
+            inputMode="decimal"
+            step={exponent > 0 ? '0.01' : '1'}
+            min={100 / 10 ** exponent}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="form-input-svc pr-16"
-            placeholder="25000"
+            placeholder={exponent > 0 ? '49.99' : '25000'}
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
-            FCFA
+            {curLabel}
           </span>
         </div>
         <p className="mt-1 text-xs text-navy/55">{l.priceHint}</p>

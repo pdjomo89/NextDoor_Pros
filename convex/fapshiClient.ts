@@ -3,8 +3,8 @@
 //
 // Implements the shared `PaymentProvider` interface (convex/paymentTypes.ts).
 // Pure helpers (NOT registered Convex functions) so the payment action
-// (convex/jobFees.ts) and the HTTP webhook (convex/http.ts) can share them via
-// the provider registry. Uses the global `fetch`, available in the default
+// (convex/leadUnlocks.ts) and the HTTP webhook (convex/http.ts) can share them
+// via the provider registry. Uses the global `fetch`, available in the default
 // Convex runtime — no "use node" required.
 //
 // Base URLs:  sandbox → https://sandbox.fapshi.com   live → https://live.fapshi.com

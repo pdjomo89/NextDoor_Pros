@@ -13,10 +13,16 @@ export type ContractorDoc = {
   services: ServiceKey[];
   citySlug: string;
   province: string;
+  /** ISO 3166-1 alpha-2 market (derived from citySlug); drives the currency. */
+  country?: string;
   phone?: string;
   email?: string;
   whatsapp?: string;
-  /** "Starting at X" — marketing display only; whole FCFA. */
+  /**
+   * "Starting at X" — marketing display only. Stored in the MINOR UNIT of the
+   * contractor's market currency (XAF → whole francs, CAD → cents). Format with
+   * `formatMoney` using the market from `country`.
+   */
   startingAtPriceCents?: number;
   /** File-storage ids of uploaded photos (present on `getMine`). */
   photos?: string[];

@@ -5,8 +5,9 @@ import { MapPin, ArrowRight, Award, Sparkles } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { ContactProButton } from '@/components/contact-pro-button';
 import { StarRating } from '@/components/star-rating';
-import { getCityBySlug } from '@/data/geography';
-import { formatFcfa } from '@/lib/currency';
+import { countryOfCity, getCityBySlug } from '@/data/geography';
+import { formatMoney } from '@/lib/currency';
+import { getMarket } from '@/lib/markets';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 
@@ -24,9 +25,17 @@ export function ContractorCard({ contractor }: { contractor: ContractorDoc }) {
   const locale = useLocale();
   const city = getCityBySlug(contractor.citySlug);
   const { count, average } = ratingOf(contractor);
+  const market = getMarket(
+    contractor.country ?? countryOfCity(contractor.citySlug),
+  );
   const startingAt =
     contractor.startingAtPriceCents !== undefined
-      ? formatFcfa(contractor.startingAtPriceCents, locale)
+      ? formatMoney(
+          contractor.startingAtPriceCents,
+          market.currency,
+          locale,
+          market.country,
+        )
       : null;
 
   const photoUrls = contractor.photoUrls ?? [];

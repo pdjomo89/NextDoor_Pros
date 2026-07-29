@@ -12,13 +12,27 @@ import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { ContractorDoc } from '@/lib/contractor-types';
 import type { Locale } from '@/i18n/routing';
+import { countryOfCity } from '@/data/geography';
+import { getMarket } from '@/lib/markets';
+import { currencyMinorUnits } from '@/lib/currency';
 import { cn } from '@/lib/utils';
+
+/** Friendly currency label for the price input (FCFA is the local name for XAF). */
+function currencyLabel(currency: string): string {
+  return currency === 'XAF' ? 'FCFA' : currency;
+}
 
 export function OnboardForm({ locale }: { locale: Locale }) {
   const t = useTranslations('Pros.onboard');
   const tCat = useTranslations('Services.categories');
   const router = useRouter();
-  const { city, setCity } = useCity();
+  const { city, setCity, country } = useCity();
+
+  // Currency follows the pro's selected market (the country their service is in).
+  const market = getMarket(country);
+  const priceCurrency = market.currency;
+  const priceExponent = currencyMinorUnits(priceCurrency); // XAF→0, CAD→2
+  const priceLabel = currencyLabel(priceCurrency);
 
   const existing = useQuery(api.contractors.getMine) as
     | ContractorDoc
@@ -43,11 +57,19 @@ export function OnboardForm({ locale }: { locale: Locale }) {
       setBusinessName(existing.businessName);
       setDescription(existing.description);
       setServices(existing.services as ServiceKey[]);
-      setStartingAt(
-        existing.startingAtPriceCents !== undefined
-          ? String(existing.startingAtPriceCents)
-          : '',
-      );
+      // Stored value is in the minor unit of the record's own market — convert
+      // back to a human amount for the input (XAF: unchanged; CAD: cents→dollars).
+      if (existing.startingAtPriceCents !== undefined) {
+        const exExponent = currencyMinorUnits(
+          getMarket(existing.country ?? countryOfCity(existing.citySlug))
+            .currency,
+        );
+        setStartingAt(
+          String(existing.startingAtPriceCents / 10 ** exExponent),
+        );
+      } else {
+        setStartingAt('');
+      }
       setPublished(existing.published);
       if (existing.citySlug && !city) setCity(existing.citySlug);
     }
@@ -78,7 +100,11 @@ export function OnboardForm({ locale }: { locale: Locale }) {
     let startingAtPriceCents: number | undefined;
     const startingAtTrimmed = startingAt.trim().replace(',', '.');
     if (startingAtTrimmed) {
-      const amount = Math.round(Number.parseFloat(startingAtTrimmed));
+      // Convert the human amount to the market currency's minor unit before
+      // storing (XAF: ×1, CAD: ×100).
+      const amount = Math.round(
+        Number.parseFloat(startingAtTrimmed) * 10 ** priceExponent,
+      );
       if (!Number.isFinite(amount) || amount < 0 || amount > 50_000_000) {
         return setError(t('errStartingAtInvalid'));
       }
@@ -169,24 +195,25 @@ export function OnboardForm({ locale }: { locale: Locale }) {
           {t('contactPrivacyNote')}
         </div>
 
-        <Field label={t('startingAt')}>
+        <Field label={t('startingAt', { currency: priceLabel })}>
           <div className="relative max-w-xs">
             <input
               type="number"
-              inputMode="numeric"
-              step="1"
+              inputMode="decimal"
+              step={priceExponent > 0 ? '0.01' : '1'}
               min="0"
-              max="50000000"
               value={startingAt}
               onChange={(e) => setStartingAt(e.target.value)}
-              placeholder="25000"
+              placeholder={priceExponent > 0 ? '49.99' : '25000'}
               className="form-input pr-16"
             />
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-navy/50">
-              FCFA
+              {priceLabel}
             </span>
           </div>
-          <p className="mt-1 text-xs text-navy/60">{t('startingAtHelp')}</p>
+          <p className="mt-1 text-xs text-navy/60">
+            {t('startingAtHelp', { currency: priceLabel })}
+          </p>
         </Field>
 
         <label className="flex items-center gap-3 rounded-xl border border-navy/10 p-4">

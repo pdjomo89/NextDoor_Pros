@@ -58,7 +58,13 @@ export function ContactProButton({
           title={t('modalTitle')}
           intro={t('modalIntro')}
           submit={({ email, name, body, locale }) =>
-            startGuest({ contractorId: contractorId as never, email, name, body, locale })
+            startGuest({
+              contractorId: contractorId as never,
+              email: email ?? '',
+              name,
+              body,
+              locale,
+            })
           }
           onClose={() => setOpen(false)}
         />

@@ -1,5 +1,12 @@
 # Stripe removal
 
+> **Historical.** This records the 2026-07-18 removal of the *old*
+> membership/escrow Stripe integration. Payments were later **re-introduced** in
+> a different form — per-lead unlock fees (Fapshi, Cameroon) and Stripe
+> **subscriptions** (Canada). For the current model see **`docs/monetization.md`**.
+> The statement below ("no online payments, subscriptions, or escrow") was true
+> only between 2026-07-18 and the new billing work.
+
 The Stripe integration was **completely removed** on 2026-07-18. The app no
 longer has any online payments, subscriptions, or escrow. This note records what
 was removed and the product decisions behind it, so the absence is intentional

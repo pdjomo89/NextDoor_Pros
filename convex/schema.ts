@@ -108,36 +108,14 @@ export default defineSchema({
     contactEmail: v.optional(v.string()),
     contactPhone: v.optional(v.string()),
 
-    // 'pending_payment' | 'open' | 'closed' | 'filled'
-    // 'pending_payment' jobs are hidden from the public board until the
-    // Fapshi posting fee is confirmed (see convex/jobFees.ts).
+    // 'open' | 'closed' | 'filled'. Posting is free (Cameroon) or covered by the
+    // poster's membership quota (Canada), so jobs go live immediately — there is
+    // no 'pending_payment' state. Pros pay per lead unlocked (see leadUnlocks).
     status: v.string(),
   })
     .index('by_poster', ['posterId'])
     .index('by_status', ['status'])
     .index('by_country_status', ['country', 'status']),
-
-  // ─── Job-posting fees (collect-only, via the market's payment provider) ──
-  //
-  // One row per attempt to pay the posting fee for a job. Created alongside a
-  // 'pending_payment' job; flipped to 'successful' by the provider's webhook,
-  // which then publishes the job. Provider is chosen per market (Fapshi for
-  // Cameroon, Stripe elsewhere). See convex/jobFees.ts + convex/http.ts and the
-  // PaymentProvider abstraction in convex/paymentTypes.ts.
-  jobPayments: defineTable({
-    jobId: v.id('jobs'),
-    posterId: v.id('users'),
-    provider: v.string(), // ProviderName: 'fapshi' | 'stripe'
-    transId: v.optional(v.string()), // provider transaction/session id (set after initiate-pay)
-    externalId: v.string(), // idempotency key we send to the provider (= jobId)
-    amount: v.number(), // minor units of `currency` (XAF exponent 0 → whole francs)
-    currency: v.string(), // lowercase ISO 4217, e.g. 'xaf'
-    // 'created' | 'pending' | 'successful' | 'failed' | 'expired'
-    status: v.string(),
-    link: v.optional(v.string()), // Fapshi hosted-checkout URL
-  })
-    .index('by_transId', ['transId'])
-    .index('by_job', ['jobId']),
 
   // ─── Platform-mediated messaging ───────────────────────────────────────
   //
@@ -192,5 +170,54 @@ export default defineSchema({
     // True when the redactor stripped something from the original text.
     flagged: v.boolean(),
   }).index('by_conversation', ['conversationId']),
+
+  // ─── Lead unlocks (pay-as-you-go markets, e.g. Cameroon) ─────────────────
+  //
+  // A pro pays a small fee to unlock ONE job lead — i.e. to open a conversation
+  // with that job's poster. One row per (pro, job) unlock attempt; flipped to
+  // 'successful' by the provider webhook, after which the pro may contact the
+  // poster. In subscription markets (Canada) the same table records a
+  // quota-covered unlock (amount 0). See convex/leadUnlocks.ts + convex/http.ts.
+  leadUnlocks: defineTable({
+    proId: v.id('users'),
+    jobId: v.id('jobs'),
+    // ISO 3166-1 alpha-2 market of the job (derived from its city).
+    country: v.optional(v.string()),
+    provider: v.string(), // ProviderName: 'fapshi' | 'stripe'
+    transId: v.optional(v.string()), // provider transaction id (set after initiate-pay)
+    externalId: v.string(), // idempotency key we send to the provider
+    amount: v.number(), // minor units of `currency` (0 for quota-covered unlocks)
+    currency: v.string(), // lowercase ISO 4217, e.g. 'xaf'
+    // 'created' | 'pending' | 'successful' | 'failed' | 'expired'
+    status: v.string(),
+    link: v.optional(v.string()), // hosted-checkout URL (payg markets)
+  })
+    .index('by_transId', ['transId'])
+    .index('by_pro_job', ['proId', 'jobId'])
+    .index('by_pro', ['proId']),
+
+  // ─── Memberships (subscription markets, e.g. Canada) ─────────────────────
+  //
+  // A recurring subscription granting a per-billing-period quota of actions
+  // (job posts for a poster, lead unlocks for a pro). At most one active row per
+  // (user, role). Driven by Stripe subscription webhooks in Phase 2; plan config
+  // (prices, quotas) lives in convex/markets.ts. Quota usage is derived by
+  // counting jobs / leadUnlocks created within the current period, not stored.
+  memberships: defineTable({
+    userId: v.id('users'),
+    role: v.string(), // MembershipRole: 'poster' | 'pro'
+    country: v.optional(v.string()),
+    provider: v.string(), // 'stripe'
+    plan: v.string(), // 'monthly' | 'yearly'
+    // 'incomplete' | 'active' | 'past_due' | 'canceled' | 'expired'
+    status: v.string(),
+    currentPeriodStart: v.optional(v.number()),
+    currentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+  })
+    .index('by_user_role', ['userId', 'role'])
+    .index('by_stripeSubscription', ['stripeSubscriptionId']),
 
 });

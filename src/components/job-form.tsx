@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { useAction } from 'convex/react';
+import { useMutation } from 'convex/react';
 import { Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
@@ -17,10 +17,7 @@ export function JobForm({ locale }: { locale: Locale }) {
   const tCat = useTranslations('Services.categories');
   const tJobs = useTranslations('Jobs');
   const { city } = useCity();
-  const startJobPosting = useAction(api.jobFees.startJobPosting);
-
-  // Keep in sync with JOB_POSTING_FEE in convex/jobFees.ts (display only).
-  const JOB_POSTING_FEE_XAF = 1000;
+  const createJob = useMutation(api.jobs.create);
 
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -38,7 +35,7 @@ export function JobForm({ locale }: { locale: Locale }) {
 
     setSubmitting(true);
     try {
-      const { link } = await startJobPosting({
+      await createJob({
         title: title.trim(),
         description: description.trim(),
         category,
@@ -46,11 +43,10 @@ export function JobForm({ locale }: { locale: Locale }) {
         province: city.province,
         budget: budget.trim() || undefined,
         timing: timing.trim() || undefined,
-        locale,
       });
-      // Hand off to Fapshi's hosted checkout (MTN MoMo / Orange Money). On
-      // success the payer is returned to /jobs/mine?paid=<jobId>.
-      window.location.href = link;
+      // Posting is free in Cameroon — the job goes live immediately. Pros pay a
+      // per-lead unlock fee to contact the poster (see convex/leadUnlocks.ts).
+      window.location.href = `/${locale}/jobs/mine`;
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setSubmitting(false);
@@ -125,13 +121,6 @@ export function JobForm({ locale }: { locale: Locale }) {
 
       <div className="rounded-xl border border-forest/30 bg-forest/[0.04] p-4 text-sm text-navy/70">
         {t('contactPrivacyNote')}
-      </div>
-
-      <div className="rounded-xl border border-navy/15 bg-navy/[0.03] p-4 text-sm text-navy/80">
-        Posting a job requires a one-time fee of{' '}
-        <strong>{JOB_POSTING_FEE_XAF.toLocaleString()} FCFA</strong>, paid
-        securely via MTN Mobile Money or Orange Money. Your job goes live as
-        soon as the payment is confirmed.
       </div>
 
       {error && (

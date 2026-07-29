@@ -1,5 +1,11 @@
 # Multi-country marketplace
 
+> **Payment/fee sections below are historical.** The charge-on-post posting fee
+> (`jobFees.ts`, `JOB_POSTING_FEE`, the `jobPayments` table) has been **removed**.
+> The current billing model — free posting + per-lead unlock fees (Cameroon) and
+> Stripe subscriptions (Canada) — lives in **`docs/monetization.md`**. The
+> country/geography foundation described here is still accurate.
+
 Goal: turn the app from a single hardcoded country (Cameroon) into a global
 marketplace where **country is a first-class dimension** — each market has its
 own cities, currency, payment rail, and isolated listings — launched one country

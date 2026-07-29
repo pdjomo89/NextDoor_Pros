@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { countryOfCity, currencyForCountry } from './markets';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Service catalog — CRUD over the contractorServices table.
@@ -60,10 +61,16 @@ export const upsertService = mutation({
     const cleanDescription = description?.trim().slice(0, 600) || undefined;
     if (!cleanTitle) throw new Error('TITLE_REQUIRED');
     if (!Number.isInteger(priceCents) || priceCents < 100 || priceCents > 50_000_000) {
-      // 100 FCFA minimum, 50,000,000 FCFA maximum. (Field stores whole francs;
-      // XAF has no minor units, so the historical `priceCents` name is a misnomer.)
+      // Bounds are in the currency's MINOR UNIT (XAF → whole francs, CAD →
+      // cents), so 100–50,000,000 minor units. The `priceCents` name is
+      // historical (XAF has no minor units).
       throw new Error('INVALID_PRICE');
     }
+
+    // Price is denominated in the contractor's market currency.
+    const currency = currencyForCountry(
+      contractor.country ?? countryOfCity(contractor.citySlug),
+    ).toLowerCase();
 
     if (id) {
       const existing = await ctx.db.get(id);
@@ -74,6 +81,7 @@ export const upsertService = mutation({
         title: cleanTitle,
         description: cleanDescription,
         priceCents,
+        currency,
         active,
       });
       return id;
@@ -84,7 +92,7 @@ export const upsertService = mutation({
       title: cleanTitle,
       description: cleanDescription,
       priceCents,
-      currency: 'xaf',
+      currency,
       active,
     });
   },

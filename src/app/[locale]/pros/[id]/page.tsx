@@ -11,12 +11,17 @@ import { ContactProButton } from '@/components/contact-pro-button';
 import { PublicServices } from '@/components/public-services';
 import { getViewer } from '@/lib/contractors';
 import { getConvexEnv } from '@/lib/convex-env';
-import { getCityBySlug, getProvinceByCode } from '@/data/geography';
+import {
+  countryOfCity,
+  getCityBySlug,
+  getProvinceByCode,
+} from '@/data/geography';
+import { getMarket } from '@/lib/markets';
 import { SERVICE_CATEGORIES } from '@/lib/services';
 import { ratingOf, type ContractorDoc } from '@/lib/contractor-types';
 import type { ReviewDoc } from '@/lib/review-types';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
-import { formatFcfa } from '@/lib/currency';
+import { formatMoney } from '@/lib/currency';
 import type { Locale } from '@/i18n/routing';
 import { api } from '../../../../../convex/_generated/api';
 
@@ -162,7 +167,17 @@ export default async function ContractorProfilePage({
           <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-forest/10 px-3 py-1.5 text-sm font-semibold text-forest">
             {t('listings.startingAt')}{' '}
             <span className="text-base">
-              {formatFcfa(contractor.startingAtPriceCents, locale)}
+              {(() => {
+                const market = getMarket(
+                  contractor.country ?? countryOfCity(contractor.citySlug),
+                );
+                return formatMoney(
+                  contractor.startingAtPriceCents,
+                  market.currency,
+                  locale,
+                  market.country,
+                );
+              })()}
             </span>
           </p>
         )}

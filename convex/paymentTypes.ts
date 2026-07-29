@@ -11,7 +11,7 @@
 
 export type ProviderName = 'fapshi' | 'stripe';
 
-/** Status we persist on a `jobPayments` row. */
+/** Status we persist on a `leadUnlocks` row. */
 export type LocalPaymentStatus =
   | 'created' // local-only: row exists, no provider transaction yet
   | 'pending'

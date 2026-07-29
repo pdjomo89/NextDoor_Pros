@@ -167,24 +167,41 @@ export const startGuestConversation = mutation({
 });
 
 /**
- * A guest candidate messages a job's poster: email + a first message. Mirrors
- * `startGuestConversation` but keys the thread on the job and its poster (a
- * plain user), not a contractor. Returns a secret `guestToken` for the link.
+ * A signed-in pro messages a job's poster after unlocking the lead. Contacting
+ * a poster is gated: the pro must be signed in AND hold a successful lead unlock
+ * for this job (a paid Fapshi unlock in Cameroon; a membership-covered unlock in
+ * Canada — see convex/leadUnlocks.ts). The pro's email comes from their account,
+ * never the browser. Returns a secret `guestToken` for the private-link thread.
  */
 export const startJobConversation = mutation({
   args: {
     jobId: v.id('jobs'),
-    email: v.string(),
     name: v.optional(v.string()),
     body: v.string(),
     locale: v.optional(v.string()),
   },
-  handler: async (ctx, { jobId, email, name, body, locale }) => {
+  handler: async (ctx, { jobId, name, body, locale }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('NOT_SIGNED_IN');
+
     const job = await ctx.db.get(jobId);
     if (!job) throw new Error('NOT_FOUND');
     if (job.status !== 'open') throw new Error('NOT_OPEN');
+    if (job.posterId === userId) throw new Error('OWN_JOB');
 
-    const cleanEmail = email.trim().toLowerCase().slice(0, 320);
+    // Paywall: the lead must be unlocked before the pro can contact the poster.
+    const unlocks = await ctx.db
+      .query('leadUnlocks')
+      .withIndex('by_pro_job', (q) =>
+        q.eq('proId', userId).eq('jobId', jobId),
+      )
+      .collect(); // bounded: a handful of attempts per (pro, job)
+    if (!unlocks.some((u) => u.status === 'successful')) {
+      throw new Error('LOCKED');
+    }
+
+    const user = await ctx.db.get(userId);
+    const cleanEmail = (user?.email ?? '').trim().toLowerCase().slice(0, 320);
     if (!EMAIL_RE.test(cleanEmail)) throw new Error('INVALID_EMAIL');
 
     const cleanName = name?.trim().slice(0, MAX_NAME_LEN) || undefined;
@@ -234,6 +251,7 @@ export const startJobConversation = mutation({
     await ctx.db.insert('messages', {
       conversationId,
       senderRole: 'customer',
+      senderId: userId, // the signed-in pro who unlocked this lead
       body: text,
       flagged,
     });

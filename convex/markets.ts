@@ -15,16 +15,71 @@ import { countryOfCity as geoCountryOfCity } from './geo';
 
 export type CountryCode = 'CM' | 'CA';
 
+/** The two sides of the marketplace that can be monetized. */
+export type MembershipRole = 'poster' | 'pro';
+
+/**
+ * How a market charges. Amounts are ALWAYS in the currency's MINOR UNIT (see the
+ * money convention in convex/schema.ts). Placeholder numbers below are marked
+ * TODO(pricing) — tune them before a market goes live.
+ *
+ *  - 'payg'         Cameroon: no membership. Pros pay a small fee per lead they
+ *                   unlock; posters post for free.
+ *  - 'subscription' Canada: both posters and pros hold a monthly/yearly
+ *                   membership granting a quota of actions per billing period.
+ */
+export type MonetizationModel = 'payg' | 'subscription';
+
+/** Per-side recurring plan config (subscription markets). */
+export type MembershipPlanConfig = {
+  /** Monthly price, minor units of the market currency. */
+  monthlyMinor: number;
+  /** Yearly price, minor units of the market currency. */
+  yearlyMinor: number;
+  /** Actions allowed per billing period (posts for a poster, unlocks for a pro). */
+  quotaPerPeriod: number;
+};
+
+export type Monetization =
+  | {
+      model: 'payg';
+      /** Fee a pro pays to unlock one lead, minor units of the market currency. */
+      leadUnlockFeeMinor: number;
+    }
+  | {
+      model: 'subscription';
+      poster: MembershipPlanConfig;
+      pro: MembershipPlanConfig;
+    };
+
 export type Market = {
   country: CountryCode;
   /** ISO 4217, uppercase (e.g. 'XAF'). */
   currency: string;
   paymentProvider: ProviderName;
+  monetization: Monetization;
 };
 
 export const MARKETS: Record<CountryCode, Market> = {
-  CM: { country: 'CM', currency: 'XAF', paymentProvider: 'fapshi' },
-  CA: { country: 'CA', currency: 'CAD', paymentProvider: 'stripe' },
+  CM: {
+    country: 'CM',
+    currency: 'XAF',
+    paymentProvider: 'fapshi',
+    // Confirmed 2026-07-29: pro pays 300 XAF (whole francs) per lead unlocked.
+    monetization: { model: 'payg', leadUnlockFeeMinor: 300 },
+  },
+  CA: {
+    country: 'CA',
+    currency: 'CAD',
+    paymentProvider: 'stripe',
+    // Confirmed 2026-07-29: $15/mo, $160/yr, both sides; hard cap of 2
+    // actions/billing period (block until renewal — no overage).
+    monetization: {
+      model: 'subscription',
+      poster: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
+      pro: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
+    },
+  },
 };
 
 export const DEFAULT_COUNTRY: CountryCode = 'CM';
@@ -51,4 +106,41 @@ export function providerForCountry(country?: string | null): ProviderName {
 /** Currency (uppercase ISO 4217) a country transacts in. */
 export function currencyForCountry(country?: string | null): string {
   return getMarket(country).currency;
+}
+
+/** How a country charges: pay-as-you-go (CM) or subscription (CA). */
+export function monetizationModel(country?: string | null): MonetizationModel {
+  return getMarket(country).monetization.model;
+}
+
+/**
+ * The lead-unlock fee (minor units) for a pay-as-you-go market. Throws if the
+ * market is subscription-based — unlocks there are covered by the membership
+ * quota, not charged per lead.
+ */
+export function leadUnlockFeeMinor(country?: string | null): number {
+  const m = getMarket(country).monetization;
+  if (m.model !== 'payg') {
+    throw new Error(
+      `Market ${getMarket(country).country} is subscription-based; it has no per-lead unlock fee.`,
+    );
+  }
+  return m.leadUnlockFeeMinor;
+}
+
+/**
+ * The membership plan config for a side of a subscription market. Throws if the
+ * market is pay-as-you-go (no memberships there).
+ */
+export function membershipPlanConfig(
+  country: string | null | undefined,
+  role: MembershipRole,
+): MembershipPlanConfig {
+  const m = getMarket(country).monetization;
+  if (m.model !== 'subscription') {
+    throw new Error(
+      `Market ${getMarket(country).country} is pay-as-you-go; it has no memberships.`,
+    );
+  }
+  return m[role];
 }

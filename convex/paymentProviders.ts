@@ -1,7 +1,7 @@
 // ──────────────────────────────────────────────────────────────────────────
 // Payment-provider registry.
 //
-// Resolves a `ProviderName` to its adapter. Callers (convex/jobFees.ts, the
+// Resolves a `ProviderName` to its adapter. Callers (convex/leadUnlocks.ts, the
 // webhook in convex/http.ts) talk only to the `PaymentProvider` interface, so
 // adding a rail is: write an adapter + register it here.
 // ──────────────────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ const PROVIDERS: Record<ProviderName, PaymentProvider> = {
 export const PROVIDER_NAMES: ProviderName[] = ['fapshi', 'stripe'];
 
 // A payment's provider is chosen from its job's market — see providerForCountry
-// in convex/markets.ts — and stored on the jobPayments row.
+// in convex/markets.ts — and stored on the leadUnlocks row.
 
 export function getProvider(name: string): PaymentProvider {
   const provider = PROVIDERS[name as ProviderName];

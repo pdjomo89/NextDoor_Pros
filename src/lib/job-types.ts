@@ -11,7 +11,9 @@ export type JobDoc = {
   category: JobCategory;
   citySlug: string;
   province: string;
+  /** ISO 3166-1 alpha-2 market (derived from the city); optional during rollout. */
+  country?: string;
   budget?: string;
   timing?: string;
-  status: 'pending_payment' | 'open' | 'closed' | 'filled';
+  status: 'open' | 'closed' | 'filled';
 };

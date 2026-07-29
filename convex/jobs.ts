@@ -1,7 +1,8 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
-import { countryOfCity } from './markets';
+import { countryOfCity, monetizationModel } from './markets';
+import { assertMembershipQuota } from './memberships';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Public read queries
@@ -86,10 +87,18 @@ export const create = mutation({
       throw new Error('Title and description are required.');
     }
 
+    const country = countryOfCity(args.citySlug);
+    // Subscription markets (Canada): posting consumes the poster's membership
+    // quota — require an active membership with quota left. Pay-as-you-go markets
+    // (Cameroon) post for free.
+    if (monetizationModel(country) === 'subscription') {
+      await assertMembershipQuota(ctx, userId, 'poster', country);
+    }
+
     return await ctx.db.insert('jobs', {
       posterId: userId,
       status: 'open',
-      country: countryOfCity(args.citySlug),
+      country,
       ...args,
     });
   },

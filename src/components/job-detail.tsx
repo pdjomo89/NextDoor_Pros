@@ -156,7 +156,11 @@ export function JobDetail({ locale: _, id }: { locale: Locale; id: string }) {
           <h2 className="font-semibold text-navy">{t('contactSection')}</h2>
           <p className="mt-1 text-sm text-navy/70">{t('contactHelp')}</p>
           <div className="mt-4">
-            <ContactEmployerButton jobId={job._id} posterId={job.posterId} />
+            <ContactEmployerButton
+              jobId={job._id}
+              posterId={job.posterId}
+              country={job.country}
+            />
           </div>
         </div>
       )}

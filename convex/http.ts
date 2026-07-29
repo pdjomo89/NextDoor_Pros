@@ -2,41 +2,80 @@ import { httpRouter } from 'convex/server';
 import { httpAction } from './_generated/server';
 import { internal } from './_generated/api';
 import { auth } from './auth';
-import { PROVIDER_NAMES, getProvider } from './paymentProviders';
+import { getProvider } from './paymentProviders';
+import { parseStripeWebhook, retrieveSubscription } from './stripeSubscriptions';
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
 
-// ─── Payment webhooks (one route per provider) ───────────────────────────────
+// ─── Fapshi webhook — per-lead unlock fees (Cameroon) ─────────────────────────
 //
-// Each provider authenticates the request its own way (Fapshi: `x-wh-secret`
-// header; Stripe: HMAC `stripe-signature`). We never trust the body's status —
-// after verifying + extracting the transaction id, we re-fetch the
-// authoritative status via provider.getStatus before settling the job.
+// Fapshi authenticates with the `x-wh-secret` header. We never trust the body's
+// status: after verifying + extracting the transaction id, we re-fetch the
+// authoritative status via getStatus, then settle the matching lead unlock
+// (idempotent; no-op on an unknown transId).
+//   Configure Fapshi to POST here: https://<deployment>.convex.site/fapshi/webhook
+http.route({
+  path: '/fapshi/webhook',
+  method: 'POST',
+  handler: httpAction(async (ctx, req) => {
+    const provider = getProvider('fapshi');
+    const verified = await provider.verifyWebhook(req);
+    if (!verified.ok) {
+      return new Response(verified.message, { status: verified.status });
+    }
+    const remote = await provider.getStatus(verified.transId);
+    await ctx.runMutation(internal.leadUnlocks.applyUnlockResult, {
+      transId: verified.transId,
+      status: remote.status,
+    });
+    return new Response('OK', { status: 200 });
+  }),
+});
+
+// ─── Stripe webhook — subscription memberships (Canada) ───────────────────────
 //
-// Configure each provider's dashboard to POST here:
-//   Fapshi:  https://<deployment>.convex.site/fapshi/webhook
-//   Stripe:  https://<deployment>.convex.site/stripe/webhook
-for (const name of PROVIDER_NAMES) {
-  http.route({
-    path: `/${name}/webhook`,
-    method: 'POST',
-    handler: httpAction(async (ctx, req) => {
-      const provider = getProvider(name);
-      const verified = await provider.verifyWebhook(req);
-      if (!verified.ok) {
-        return new Response(verified.message, { status: verified.status });
-      }
+// Handles the recurring lifecycle: checkout.session.completed (subscription),
+// customer.subscription.*, invoice.paid / invoice.payment_failed. We verify the
+// signature, extract the subscription id, then re-fetch the authoritative
+// subscription (never trusting the event body) and upsert the membership from
+// its metadata (userId/role/country set at checkout).
+//   Configure Stripe to POST here: https://<deployment>.convex.site/stripe/webhook
+//   Subscribe to: checkout.session.completed, customer.subscription.updated,
+//                 customer.subscription.deleted, invoice.paid, invoice.payment_failed
+http.route({
+  path: '/stripe/webhook',
+  method: 'POST',
+  handler: httpAction(async (ctx, req) => {
+    const parsed = await parseStripeWebhook(req);
+    if (!parsed.ok) {
+      return new Response(parsed.message, { status: parsed.status });
+    }
+    // An event type we don't act on — acknowledge so Stripe stops retrying.
+    if (!parsed.subscriptionId) return new Response('OK', { status: 200 });
 
-      const remote = await provider.getStatus(verified.transId);
-      await ctx.runMutation(internal.jobFees.applyPaymentResult, {
-        transId: verified.transId,
-        status: remote.status,
-      });
-
+    const sub = await retrieveSubscription(parsed.subscriptionId);
+    const userId = sub.metadata.userId;
+    const role = sub.metadata.role;
+    // Not one of our subscriptions (no attribution metadata) — ignore.
+    if (!userId || (role !== 'poster' && role !== 'pro')) {
       return new Response('OK', { status: 200 });
-    }),
-  });
-}
+    }
+
+    await ctx.runMutation(internal.memberships.upsertFromStripe, {
+      subscriptionId: sub.id,
+      stripeStatus: sub.status,
+      customerId: sub.customerId,
+      currentPeriodStart: sub.currentPeriodStart,
+      currentPeriodEnd: sub.currentPeriodEnd,
+      cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+      interval: sub.interval,
+      userId,
+      role,
+      country: sub.metadata.country,
+    });
+    return new Response('OK', { status: 200 });
+  }),
+});
 
 export default http;

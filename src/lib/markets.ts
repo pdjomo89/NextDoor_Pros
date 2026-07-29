@@ -26,6 +26,34 @@ export type CountryCode = 'CM' | 'CA';
 /** Payment rails a market can be wired to. Adapters arrive in Phase 2. */
 export type PaymentProvider = 'fapshi' | 'stripe';
 
+/** The two sides of the marketplace that can be monetized. */
+export type MembershipRole = 'poster' | 'pro';
+
+/**
+ * How a market charges. MIRRORS convex/markets.ts — keep the two in sync.
+ * Amounts are always in the currency's MINOR UNIT (XAF→francs, CAD→cents).
+ *
+ *  - 'payg'         Cameroon: pros pay a small fee per lead unlocked; posting is
+ *                   free.
+ *  - 'subscription' Canada: posters and pros each hold a monthly/yearly
+ *                   membership with a per-period quota.
+ */
+export type MonetizationModel = 'payg' | 'subscription';
+
+export type MembershipPlanConfig = {
+  monthlyMinor: number;
+  yearlyMinor: number;
+  quotaPerPeriod: number;
+};
+
+export type Monetization =
+  | { model: 'payg'; leadUnlockFeeMinor: number }
+  | {
+      model: 'subscription';
+      poster: MembershipPlanConfig;
+      pro: MembershipPlanConfig;
+    };
+
 export type Market = {
   /** ISO 3166-1 alpha-2, e.g. 'CM'. Also used as the region in BCP 47 locales. */
   country: CountryCode;
@@ -39,6 +67,8 @@ export type Market = {
   defaultLocale: Locale;
   /** Payment rail used to collect fees in this market. */
   paymentProvider: PaymentProvider;
+  /** How this market charges (mirrors convex/markets.ts — TODO(pricing) values). */
+  monetization: Monetization;
 };
 
 export const MARKETS: Record<CountryCode, Market> = {
@@ -49,6 +79,8 @@ export const MARKETS: Record<CountryCode, Market> = {
     locales: ['en', 'fr'],
     defaultLocale: 'en',
     paymentProvider: 'fapshi',
+    // Confirmed 2026-07-29: pro pays 300 XAF per lead unlocked.
+    monetization: { model: 'payg', leadUnlockFeeMinor: 300 },
   },
   CA: {
     country: 'CA',
@@ -57,6 +89,13 @@ export const MARKETS: Record<CountryCode, Market> = {
     locales: ['en', 'fr'],
     defaultLocale: 'en',
     paymentProvider: 'stripe',
+    // Confirmed 2026-07-29: $15/mo, $160/yr, both sides; hard cap of 2
+    // actions/billing period (block until renewal — no overage).
+    monetization: {
+      model: 'subscription',
+      poster: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
+      pro: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
+    },
   },
 };
 
@@ -78,4 +117,31 @@ export function allMarkets(): Market[] {
 export function getMarket(country?: string | null): Market {
   if (country && country in MARKETS) return MARKETS[country as CountryCode];
   return DEFAULT_MARKET;
+}
+
+/** How a market charges: pay-as-you-go (CM) or subscription (CA). */
+export function monetizationModel(country?: string | null): MonetizationModel {
+  return getMarket(country).monetization.model;
+}
+
+/**
+ * The market region (country code) that transacts in a given currency — used to
+ * format a stored amount whose currency is known but country isn't (e.g. a
+ * service-price row). Falls back to the default market.
+ */
+export function regionForCurrency(currency: string): CountryCode {
+  const cur = currency.toUpperCase();
+  for (const m of Object.values(MARKETS)) {
+    if (m.currency === cur) return m.country;
+  }
+  return DEFAULT_COUNTRY;
+}
+
+/**
+ * The lead-unlock fee (minor units) for a pay-as-you-go market; `null` if the
+ * market is subscription-based (unlocks covered by membership quota).
+ */
+export function leadUnlockFeeMinor(country?: string | null): number | null {
+  const m = getMarket(country).monetization;
+  return m.model === 'payg' ? m.leadUnlockFeeMinor : null;
 }
