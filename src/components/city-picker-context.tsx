@@ -14,6 +14,13 @@ type CityContextValue = {
   city: City | null;
   setCountry: (country: CountryCode) => void;
   setCity: (slug: string | null) => void;
+  /**
+   * Whether `country` reflects a choice the visitor actually made (persisted)
+   * rather than the fallback default. Lets a caller seed the market from a
+   * weaker signal — geo-IP on the sign-up form — without ever overriding an
+   * explicit pick. `false` until the restore effect has run.
+   */
+  hasStoredCountry: boolean;
 };
 
 const CityContext = React.createContext<CityContextValue | undefined>(undefined);
@@ -21,16 +28,18 @@ const CityContext = React.createContext<CityContextValue | undefined>(undefined)
 export function CityProvider({ children }: { children: React.ReactNode }) {
   const [country, setCountryState] = React.useState<CountryCode>(DEFAULT_COUNTRY);
   const [city, setCityState] = React.useState<City | null>(null);
+  const [hasStoredCountry, setHasStoredCountry] = React.useState(false);
 
   // Restore persisted market + city. City must belong to the active country.
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
     const storedCountry = localStorage.getItem(COUNTRY_KEY);
-    const activeCountry =
-      storedCountry && storedCountry in MARKETS
-        ? (storedCountry as CountryCode)
-        : DEFAULT_COUNTRY;
+    const valid = !!storedCountry && storedCountry in MARKETS;
+    const activeCountry = valid
+      ? (storedCountry as CountryCode)
+      : DEFAULT_COUNTRY;
     setCountryState(activeCountry);
+    setHasStoredCountry(valid);
 
     const storedCity = localStorage.getItem(CITY_KEY);
     const found = storedCity ? getCityBySlug(storedCity) : undefined;
@@ -48,6 +57,7 @@ export function CityProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(CITY_KEY, slug);
       localStorage.setItem(COUNTRY_KEY, found.country);
       setCountryState(found.country); // selecting a city implies its market
+      setHasStoredCountry(true);
       setCityState(found);
     }
   }, []);
@@ -57,6 +67,7 @@ export function CityProvider({ children }: { children: React.ReactNode }) {
       if (!(next in MARKETS)) return;
       localStorage.setItem(COUNTRY_KEY, next);
       setCountryState(next);
+      setHasStoredCountry(true);
       // Clear a city that doesn't belong to the newly-selected market.
       if (city && city.country !== next) {
         localStorage.removeItem(CITY_KEY);
@@ -67,7 +78,7 @@ export function CityProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <CityContext.Provider value={{ country, city, setCountry, setCity }}>
+    <CityContext.Provider value={{ country, city, setCountry, setCity, hasStoredCountry }}>
       {children}
     </CityContext.Provider>
   );

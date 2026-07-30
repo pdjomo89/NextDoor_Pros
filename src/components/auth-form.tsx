@@ -7,6 +7,7 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { useAction, useConvexAuth } from 'convex/react';
 import { Briefcase, HardHat, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCity } from '@/components/city-picker-context';
 import { getConvexEnv } from '@/lib/convex-env';
 import { formatMoney } from '@/lib/currency';
 import {
@@ -40,18 +41,28 @@ export function AuthForm({ locale, mode, country: initialCountry }: Props) {
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Geo-IP only seeds the field — the visitor decides. A pro's country is
-  // otherwise not known until they pick a city during onboarding, and guessing
-  // from the request is wrong for anyone on a VPN or signing up from abroad.
-  const [country, setCountry] = React.useState<CountryCode>(
-    () => getMarket(initialCountry).country,
-  );
+  // The market lives in the app-wide city/country context — the same value the
+  // header picker shows and onboarding reads — so the selector below stays in
+  // agreement with the rest of the UI instead of being a second source of truth.
+  const { country, setCountry, hasStoredCountry } = useCity();
   const market = getMarket(country);
   const monetization = market.monetization;
   // Membership only exists in subscription markets (Canada today). Pay-as-you-go
   // markets (Cameroon) keep the plain email + password form.
   const picksMembership =
     mode === 'sign-up' && monetization.model === 'subscription';
+
+  // Geo-IP is only a fallback for someone who has never chosen a market; an
+  // explicit pick (persisted by the context) always wins.
+  const geoSeeded = React.useRef(false);
+  React.useEffect(() => {
+    if (geoSeeded.current || hasStoredCountry || !initialCountry) return;
+    const geo = getMarket(initialCountry).country;
+    if (geo !== country) {
+      geoSeeded.current = true;
+      setCountry(geo);
+    }
+  }, [hasStoredCountry, initialCountry, country, setCountry]);
 
   const [role, setRole] = React.useState<MembershipRole>('pro');
   const [plan, setPlan] = React.useState<Plan>('yearly');
