@@ -43,6 +43,13 @@ Two consequences worth knowing:
 - A preview only sees backend changes that have been pushed to dev, i.e. after
   `npx convex dev` has run on that branch. Frontend-only branches are unaffected.
 
+Deployment protection is **off** for this project (`ssoProtection: null`), so
+preview URLs are publicly reachable without a Vercel login — they can be shared
+with anyone. Combined with the point above, that means a public preview URL
+talks to the dev backend. Re-enable it under Project Settings → Deployment
+Protection → Vercel Authentication (the previous setting was Standard
+Protection) if previews should ever stop being shareable.
+
 To get isolated per-branch backends instead, generate a **preview** deploy key
 in the Convex dashboard (Settings → Generate Preview Deploy Key), set it as
 `CONVEX_DEPLOY_KEY` at Preview scope, drop the Preview-scoped
