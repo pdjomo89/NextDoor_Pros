@@ -9,10 +9,13 @@ export const metadata: Metadata = { title: 'Create account', robots: { index: fa
 
 export default async function SignUpPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ country?: string }>;
 }) {
   const { locale } = await params;
+  const { country } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations('Auth');
 
@@ -23,7 +26,9 @@ export default async function SignUpPage({
       title={t('signUp.title')}
       subtitle={t('signUp.subtitle')}
     >
-      <AuthForm locale={locale as Locale} mode="sign-up" />
+      {/* `?country=` mirrors the membership hub: it selects the market whose
+          monetization model decides whether the plan picker below renders. */}
+      <AuthForm locale={locale as Locale} mode="sign-up" country={country} />
       <p className="mt-6 text-center text-sm text-navy/70">
         {t('signUp.haveAccount')}{' '}
         <Link href="/auth/sign-in" className="font-semibold text-forest hover:underline">

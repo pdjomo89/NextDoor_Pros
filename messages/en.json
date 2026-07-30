@@ -522,6 +522,10 @@
       "haveAccount": "Already have an account?",
       "signInLink": "Sign in"
     },
+    "accountTypeLabel": "I'm signing up as",
+    "planLabel": "Choose your plan",
+    "yearlySave": "Save {percent}%",
+    "redirectingToCheckout": "Taking you to secure checkout…",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "passwordHint": "At least 8 characters",
@@ -702,7 +706,7 @@
     "perYear": "{price}/year",
     "subscribe": "Subscribe",
     "startTrial": "Start free trial",
-    "trialBanner": "Your first {months} months are free. Pick a plan and add your card — you won't be charged until the trial ends, and you can cancel anytime before then.",
+    "trialBanner": "{months, plural, one {Your first month is free.} other {Your first # months are free.}} Pick a plan and add your card — you won't be charged until the trial ends, and you can cancel anytime before then.",
     "subscribing": "Redirecting…",
     "activeTitle": "Active membership",
     "statusActive": "Active",
@@ -718,6 +722,7 @@
     "opening": "Opening…",
     "successBanner": "You're all set — your membership is active.",
     "cancelBanner": "Checkout canceled — no charge was made.",
+    "checkoutFailedBanner": "Your account is ready, but we couldn't open checkout. Pick a plan below to finish.",
     "errGeneric": "Something went wrong. Please try again."
   },
   "Payouts": {

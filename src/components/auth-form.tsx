@@ -4,22 +4,96 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { LogIn, UserPlus } from 'lucide-react';
+import { useAction, useConvexAuth } from 'convex/react';
+import { Briefcase, HardHat, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getConvexEnv } from '@/lib/convex-env';
+import { formatMoney } from '@/lib/currency';
+import { getMarket, type MembershipRole } from '@/lib/markets';
 import type { Locale } from '@/i18n/routing';
+import { api } from '../../convex/_generated/api';
+
+type Plan = 'monthly' | 'yearly';
 
 type Props = {
   locale: Locale;
   mode: 'sign-in' | 'sign-up';
+  /** Market to sign up into; decides whether a membership is chosen here. */
+  country?: string;
 };
 
-export function AuthForm({ locale, mode }: Props) {
+export function AuthForm({ locale, mode, country }: Props) {
   const t = useTranslations('Auth');
+  const tm = useTranslations('Membership');
   const router = useRouter();
   const { signIn } = useAuthActions();
+  const { isAuthenticated } = useConvexAuth();
+  const startMembership = useAction(api.memberships.startMembership);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const market = getMarket(country);
+  const monetization = market.monetization;
+  // Membership only exists in subscription markets (Canada today). Pay-as-you-go
+  // markets (Cameroon) keep the plain email + password form.
+  const picksMembership =
+    mode === 'sign-up' && monetization.model === 'subscription';
+
+  const [role, setRole] = React.useState<MembershipRole>('pro');
+  const [plan, setPlan] = React.useState<Plan>('yearly');
+
+  // Set once the account exists and we still owe the user a checkout redirect.
+  // Handing off through state (rather than awaiting inline) lets us wait for the
+  // Convex client to pick up the new identity before calling an authed action.
+  const [pendingCheckout, setPendingCheckout] = React.useState<{
+    role: MembershipRole;
+    plan: Plan;
+  } | null>(null);
+
+  // Creating a Checkout session is not idempotent, so run the handoff at most
+  // once even if the effect's dependencies churn.
+  const checkoutStarted = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!pendingCheckout || !isAuthenticated || checkoutStarted.current) return;
+    checkoutStarted.current = true;
+    let canceled = false;
+    (async () => {
+      const query = new URLSearchParams({
+        country: market.country,
+        role: pendingCheckout.role,
+        plan: pendingCheckout.plan,
+      });
+      try {
+        const { url } = await startMembership({
+          role: pendingCheckout.role,
+          plan: pendingCheckout.plan,
+          country: market.country,
+          locale,
+        });
+        if (canceled) return;
+        window.location.href = url;
+      } catch (err) {
+        // The account was created, so there is nothing to retry here — send the
+        // user to the membership hub with their choice preselected instead of
+        // stranding them on a sign-up form they have already completed.
+        console.error('Membership checkout error:', err);
+        if (canceled) return;
+        query.set('status', 'checkout_failed');
+        router.push(`/${locale}/membership?${query.toString()}`);
+      }
+    })();
+    return () => {
+      canceled = true;
+    };
+  }, [
+    pendingCheckout,
+    isAuthenticated,
+    startMembership,
+    market.country,
+    locale,
+    router,
+  ]);
 
   if (!getConvexEnv().configured) {
     return (
@@ -79,19 +153,99 @@ export function AuthForm({ locale, mode }: Props) {
     setSubmitting(true);
     try {
       formData.set('flow', mode === 'sign-in' ? 'signIn' : 'signUp');
+      // The membership radios live in this form for layout, but they are
+      // controlled React state — the auth provider should only see credentials.
+      formData.delete('accountType');
+      formData.delete('plan');
       await signIn('password', formData);
+      if (picksMembership) {
+        // Stay in the submitting state: the effect above takes over and sends
+        // the browser to Stripe Checkout once the new session is live.
+        setPendingCheckout({ role, plan });
+        return;
+      }
       router.push(`/${locale}/pros/dashboard`);
       router.refresh();
+      setSubmitting(false);
     } catch (err) {
       console.error('Auth error:', err);
       setError(describeError(err));
-    } finally {
       setSubmitting(false);
     }
   }
 
+  const money = (minor: number) =>
+    formatMoney(minor, market.currency, locale, market.country);
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {picksMembership && monetization.model === 'subscription' && (
+        <>
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-medium text-navy">
+              {t('accountTypeLabel')}
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <ChoiceCard
+                name="accountType"
+                checked={role === 'poster'}
+                onSelect={() => setRole('poster')}
+                icon={<Briefcase className="h-4 w-4" />}
+                title={tm('roleEmployer')}
+                detail={tm('roleEmployerDesc')}
+              />
+              <ChoiceCard
+                name="accountType"
+                checked={role === 'pro'}
+                onSelect={() => setRole('pro')}
+                icon={<HardHat className="h-4 w-4" />}
+                title={tm('rolePro')}
+                detail={tm('roleProDesc')}
+              />
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-medium text-navy">
+              {t('planLabel')}
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <ChoiceCard
+                name="plan"
+                checked={plan === 'monthly'}
+                onSelect={() => setPlan('monthly')}
+                title={tm('planMonthly')}
+                detail={tm('perMonth', {
+                  price: money(monetization[role].monthlyMinor),
+                })}
+              />
+              <ChoiceCard
+                name="plan"
+                checked={plan === 'yearly'}
+                onSelect={() => setPlan('yearly')}
+                title={tm('planYearly')}
+                detail={tm('perYear', {
+                  price: money(monetization[role].yearlyMinor),
+                })}
+                badge={t('yearlySave', {
+                  percent: yearlySavingsPercent(
+                    monetization[role].monthlyMinor,
+                    monetization[role].yearlyMinor,
+                  ),
+                })}
+              />
+            </div>
+            {monetization.trialDays > 0 && (
+              <p className="mt-1.5 text-xs text-navy/60">
+                {tm('trialBanner', {
+                  months: Math.round(monetization.trialDays / 30),
+                })}
+              </p>
+            )}
+          </fieldset>
+        </>
+      )}
+
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-navy">
           {t('emailLabel')}
@@ -139,12 +293,70 @@ export function AuthForm({ locale, mode }: Props) {
         ) : (
           <UserPlus className="h-4 w-4" />
         )}
-        {submitting
-          ? t('submitting')
-          : mode === 'sign-in'
-            ? t('signInAction')
-            : t('signUpAction')}
+        {pendingCheckout
+          ? t('redirectingToCheckout')
+          : submitting
+            ? t('submitting')
+            : mode === 'sign-in'
+              ? t('signInAction')
+              : t('signUpAction')}
       </Button>
     </form>
+  );
+}
+
+/** Discount of the yearly plan against 12× the monthly price, as a percentage. */
+function yearlySavingsPercent(monthlyMinor: number, yearlyMinor: number) {
+  const full = monthlyMinor * 12;
+  if (full <= 0 || yearlyMinor >= full) return 0;
+  return Math.round(((full - yearlyMinor) / full) * 100);
+}
+
+/** A radio rendered as a selectable card — keyboard and screen-reader native. */
+function ChoiceCard({
+  name,
+  checked,
+  onSelect,
+  icon,
+  title,
+  detail,
+  badge,
+}: {
+  name: string;
+  checked: boolean;
+  onSelect: () => void;
+  icon?: React.ReactNode;
+  title: string;
+  detail: string;
+  badge?: string;
+}) {
+  return (
+    <label
+      className={`flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition ${
+        checked
+          ? 'border-forest bg-forest/[0.06] ring-1 ring-forest/30'
+          : 'border-navy/15 bg-white hover:border-navy/30'
+      }`}
+    >
+      <input
+        type="radio"
+        name={name}
+        checked={checked}
+        onChange={onSelect}
+        className="mt-1 h-3.5 w-3.5 shrink-0 accent-forest"
+      />
+      <span className="min-w-0">
+        <span className="flex items-center gap-1.5 text-sm font-medium text-navy">
+          {icon}
+          {title}
+          {badge && (
+            <span className="rounded-full bg-forest/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-forest">
+              {badge}
+            </span>
+          )}
+        </span>
+        <span className="mt-0.5 block text-xs text-navy/60">{detail}</span>
+      </span>
+    </label>
   );
 }

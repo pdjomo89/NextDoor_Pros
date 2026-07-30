@@ -18,6 +18,17 @@ import {
 import { api } from '../../convex/_generated/api';
 
 type Role = 'poster' | 'pro';
+type Plan = 'monthly' | 'yearly';
+
+/** Validate the `?role=&plan=` pair handed over by sign-up; null if unusable. */
+function readPreselection(
+  role: string | null,
+  plan: string | null,
+): { role: Role; plan: Plan } | null {
+  if (role !== 'poster' && role !== 'pro') return null;
+  if (plan !== 'monthly' && plan !== 'yearly') return null;
+  return { role, plan };
+}
 
 /**
  * Membership hub (subscription markets, e.g. Canada). Reads `?country=` (so the
@@ -32,6 +43,9 @@ export function MembershipClient() {
   const country = (params.get('country') ?? DEFAULT_COUNTRY).toUpperCase();
   const market = getMarket(country);
   const status = params.get('status');
+  // Sign-up hands off `?role=&plan=` so the choice made there is still visible
+  // if the checkout redirect didn't happen (Stripe unreachable, back button).
+  const preselected = readPreselection(params.get('role'), params.get('plan'));
 
   const viewer = useQuery(api.contractors.viewer, configured ? {} : 'skip') as
     | { _id: string }
@@ -59,6 +73,9 @@ export function MembershipClient() {
         <Banner variant="success">{t('successBanner')}</Banner>
       )}
       {status === 'cancel' && <Banner variant="info">{t('cancelBanner')}</Banner>}
+      {status === 'checkout_failed' && (
+        <Banner variant="info">{t('checkoutFailedBanner')}</Banner>
+      )}
 
       {membershipTrialDays(country) > 0 && (
         <Banner variant="info">
@@ -81,8 +98,20 @@ export function MembershipClient() {
         />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2">
-          <RoleCard role="poster" country={country} market={market} />
-          <RoleCard role="pro" country={country} market={market} />
+          <RoleCard
+            role="poster"
+            country={country}
+            market={market}
+            highlight={preselected?.role === 'poster'}
+            highlightPlan={preselected?.role === 'poster' ? preselected.plan : null}
+          />
+          <RoleCard
+            role="pro"
+            country={country}
+            market={market}
+            highlight={preselected?.role === 'pro'}
+            highlightPlan={preselected?.role === 'pro' ? preselected.plan : null}
+          />
         </div>
       )}
     </div>
@@ -93,10 +122,16 @@ function RoleCard({
   role,
   country,
   market,
+  highlight = false,
+  highlightPlan = null,
 }: {
   role: Role;
   country: string;
   market: Market;
+  /** This is the role the user picked at sign-up — draw attention to it. */
+  highlight?: boolean;
+  /** The plan they picked, so its row reads as the one left to confirm. */
+  highlightPlan?: 'monthly' | 'yearly' | null;
 }) {
   const t = useTranslations('Membership');
   const locale = useLocale();
@@ -151,7 +186,11 @@ function RoleCard({
   const subscribeCta = trialDays > 0 ? t('startTrial') : t('subscribe');
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-navy/10 bg-white p-6">
+    <div
+      className={`flex flex-col gap-4 rounded-2xl border bg-white p-6 ${
+        highlight ? 'border-forest ring-1 ring-forest/30' : 'border-navy/10'
+      }`}
+    >
       <div>
         <h2 className="font-semibold text-navy">{roleLabel}</h2>
         <p className="mt-0.5 text-sm text-navy/60">{roleDesc}</p>
@@ -207,6 +246,7 @@ function RoleCard({
               onClick={() => subscribe('monthly')}
               cta={subscribeCta}
               busyLabel={t('subscribing')}
+              highlight={highlightPlan === 'monthly'}
             />
             <PlanRow
               title={t('planYearly')}
@@ -215,6 +255,7 @@ function RoleCard({
               onClick={() => subscribe('yearly')}
               cta={subscribeCta}
               busyLabel={t('subscribing')}
+              highlight={highlightPlan === 'yearly'}
             />
           </div>
         )
@@ -232,6 +273,7 @@ function PlanRow({
   onClick,
   cta,
   busyLabel,
+  highlight = false,
 }: {
   title: string;
   price: string;
@@ -239,9 +281,16 @@ function PlanRow({
   onClick: () => void;
   cta: string;
   busyLabel: string;
+  highlight?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-navy/10 bg-navy/[0.02] px-4 py-3">
+    <div
+      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
+        highlight
+          ? 'border-forest/40 bg-forest/[0.06]'
+          : 'border-navy/10 bg-navy/[0.02]'
+      }`}
+    >
       <div>
         <p className="text-sm font-medium text-navy">{title}</p>
         <p className="text-sm text-navy/60">{price}</p>

@@ -522,6 +522,10 @@
       "haveAccount": "Déjà un compte?",
       "signInLink": "Se connecter"
     },
+    "accountTypeLabel": "Je m'inscris en tant que",
+    "planLabel": "Choisissez votre formule",
+    "yearlySave": "Économisez {percent} %",
+    "redirectingToCheckout": "Redirection vers le paiement sécurisé…",
     "emailLabel": "Courriel",
     "passwordLabel": "Mot de passe",
     "passwordHint": "Au moins 8 caractères",
@@ -702,7 +706,7 @@
     "perYear": "{price}/an",
     "subscribe": "S'abonner",
     "startTrial": "Commencer l'essai gratuit",
-    "trialBanner": "Vos {months} premiers mois sont gratuits. Choisissez un forfait et ajoutez votre carte — aucun prélèvement avant la fin de l'essai, annulable à tout moment.",
+    "trialBanner": "{months, plural, one {Votre premier mois est gratuit.} other {Vos # premiers mois sont gratuits.}} Choisissez un forfait et ajoutez votre carte — aucun prélèvement avant la fin de l'essai, annulable à tout moment.",
     "subscribing": "Redirection…",
     "activeTitle": "Abonnement actif",
     "statusActive": "Actif",
@@ -718,6 +722,7 @@
     "opening": "Ouverture…",
     "successBanner": "Tout est prêt — votre abonnement est actif.",
     "cancelBanner": "Paiement annulé — aucun montant n'a été prélevé.",
+    "checkoutFailedBanner": "Votre compte est prêt, mais nous n'avons pas pu ouvrir le paiement. Choisissez une formule ci-dessous pour terminer.",
     "errGeneric": "Une erreur s'est produite. Veuillez réessayer."
   },
   "Payouts": {

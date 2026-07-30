@@ -76,10 +76,10 @@ export const MARKETS: Record<CountryCode, Market> = {
     paymentProvider: 'stripe',
     // Confirmed 2026-07-29: $15/mo, $160/yr, both sides; hard cap of 2
     // actions/billing period (block until renewal — no overage). Card is
-    // collected at checkout but the first 60 days (~2 months) are free.
+    // collected at checkout but the first 30 days (~1 month) are free.
     monetization: {
       model: 'subscription',
-      trialDays: 60,
+      trialDays: 30,
       poster: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
       pro: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
     },
