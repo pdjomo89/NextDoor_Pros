@@ -522,6 +522,8 @@
       "haveAccount": "Déjà un compte?",
       "signInLink": "Se connecter"
     },
+    "countryLabel": "Pays",
+    "countryHint": "Détermine vos tarifs et la devise de facturation.",
     "accountTypeLabel": "Je m'inscris en tant que",
     "planLabel": "Choisissez votre formule",
     "yearlySave": "Économisez {percent} %",

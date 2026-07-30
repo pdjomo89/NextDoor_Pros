@@ -9,7 +9,12 @@ import { Briefcase, HardHat, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getConvexEnv } from '@/lib/convex-env';
 import { formatMoney } from '@/lib/currency';
-import { getMarket, type MembershipRole } from '@/lib/markets';
+import {
+  allMarkets,
+  getMarket,
+  type CountryCode,
+  type MembershipRole,
+} from '@/lib/markets';
 import type { Locale } from '@/i18n/routing';
 import { api } from '../../convex/_generated/api';
 
@@ -18,11 +23,14 @@ type Plan = 'monthly' | 'yearly';
 type Props = {
   locale: Locale;
   mode: 'sign-in' | 'sign-up';
-  /** Market to sign up into; decides whether a membership is chosen here. */
+  /**
+   * Market to preselect in the country field, resolved server-side from
+   * `?country=` or geo-IP. Only a starting point — the user can change it.
+   */
   country?: string;
 };
 
-export function AuthForm({ locale, mode, country }: Props) {
+export function AuthForm({ locale, mode, country: initialCountry }: Props) {
   const t = useTranslations('Auth');
   const tm = useTranslations('Membership');
   const router = useRouter();
@@ -32,6 +40,12 @@ export function AuthForm({ locale, mode, country }: Props) {
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Geo-IP only seeds the field — the visitor decides. A pro's country is
+  // otherwise not known until they pick a city during onboarding, and guessing
+  // from the request is wrong for anyone on a VPN or signing up from abroad.
+  const [country, setCountry] = React.useState<CountryCode>(
+    () => getMarket(initialCountry).country,
+  );
   const market = getMarket(country);
   const monetization = market.monetization;
   // Membership only exists in subscription markets (Canada today). Pay-as-you-go
@@ -157,6 +171,7 @@ export function AuthForm({ locale, mode, country }: Props) {
       // controlled React state — the auth provider should only see credentials.
       formData.delete('accountType');
       formData.delete('plan');
+      formData.delete('country');
       await signIn('password', formData);
       if (picksMembership) {
         // Stay in the submitting state: the effect above takes over and sends
@@ -179,6 +194,29 @@ export function AuthForm({ locale, mode, country }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {mode === 'sign-up' && (
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium text-navy">
+            {t('countryLabel')}
+          </span>
+          <select
+            name="country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value as CountryCode)}
+            className="w-full rounded-md border border-navy/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/20"
+          >
+            {allMarkets().map((m) => (
+              <option key={m.country} value={m.country}>
+                {m.name[locale]}
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-xs text-navy/55">
+            {t('countryHint')}
+          </span>
+        </label>
+      )}
+
       {picksMembership && monetization.model === 'subscription' && (
         <>
           <fieldset>

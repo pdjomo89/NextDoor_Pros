@@ -522,6 +522,8 @@
       "haveAccount": "Already have an account?",
       "signInLink": "Sign in"
     },
+    "countryLabel": "Country",
+    "countryHint": "Sets your pricing and the currency you'll be billed in.",
     "accountTypeLabel": "I'm signing up as",
     "planLabel": "Choose your plan",
     "yearlySave": "Save {percent}%",
