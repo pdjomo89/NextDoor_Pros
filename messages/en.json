@@ -288,6 +288,17 @@
     "readMore": "Read more",
     "backToNews": "Back to news",
     "posts": {
+      "p5": {
+        "title": "The NextDoor Pros app is coming soon",
+        "date": "July 31, 2026",
+        "excerpt": "We're building NextDoor Pros for iOS and Android — the whole marketplace, in your pocket.",
+        "body": [
+          "NextDoor Pros is coming to your phone. We're building native apps for iOS and Android that carry over everything the site does today: browsing vetted local pros, posting a job, comparing candidates, and messaging — all from the same account you already use.",
+          "The app is where being on your phone actually helps. Push notifications tell you the moment a pro replies or a candidate applies to your job posting, so conversations don't stall waiting for someone to check email. Adding photos to a job — the leaking pipe, the room to paint — takes a tap with the camera instead of a round trip through a laptop. And your messages and job postings travel with you.",
+          "What doesn't change is how people reach each other. Every conversation stays inside NextDoor Pros, with no personal phone numbers or email addresses passed between customers and pros — the same protection on mobile as on the web. Pros go through the same verification, and reviews come from the same real, completed work.",
+          "We're not announcing a release date yet: we'd rather ship it right than ship it early. In the meantime the site works on any mobile browser, so nothing is on hold — and when the app is ready for download, you'll read about it here first."
+        ]
+      },
       "p4": {
         "title": "NextDoor Pros is now live in Canada",
         "date": "July 18, 2026",

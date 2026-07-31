@@ -288,6 +288,17 @@
     "readMore": "Lire la suite",
     "backToNews": "Retour aux nouvelles",
     "posts": {
+      "p5": {
+        "title": "L'application NextDoor Pros arrive bientôt",
+        "date": "31 juillet 2026",
+        "excerpt": "Nous développons NextDoor Pros pour iOS et Android — toute la marketplace, dans votre poche.",
+        "body": [
+          "NextDoor Pros arrive sur votre téléphone. Nous développons des applications natives pour iOS et Android qui reprennent tout ce que le site permet aujourd'hui : parcourir des pros locaux vérifiés, publier une offre, comparer les candidats et échanger des messages — avec le compte que vous utilisez déjà.",
+          "L'application, c'est là où le téléphone change vraiment les choses. Les notifications vous préviennent dès qu'un pro répond ou qu'un candidat postule à votre offre, pour que les échanges n'attendent plus que quelqu'un consulte sa boîte mail. Ajouter des photos à une offre — la fuite, la pièce à peindre — se fait d'un geste avec l'appareil photo, sans passer par un ordinateur. Et vos messages comme vos offres vous suivent partout.",
+          "Ce qui ne change pas, c'est la façon dont les gens se contactent. Toutes les conversations restent dans NextDoor Pros, sans échange de numéros de téléphone ni d'adresses e-mail personnels entre clients et pros — la même protection sur mobile que sur le web. Les pros passent la même vérification, et les avis proviennent des mêmes travaux réellement réalisés.",
+          "Nous n'annonçons pas encore de date de sortie : nous préférons la livrer bien plutôt que vite. En attendant, le site fonctionne sur tous les navigateurs mobiles, donc rien n'est en pause — et dès que l'application sera téléchargeable, vous l'apprendrez ici en premier."
+        ]
+      },
       "p4": {
         "title": "NextDoor Pros est désormais disponible au Canada",
         "date": "18 juillet 2026",
