@@ -641,7 +641,8 @@
       "errStartingAtInvalid": "Starting price must be between 0 and 50,000,000 FCFA.",
       "errCityRequired": "Please pick your service city.",
       "errServicesRequired": "Select at least one service category.",
-      "errContactRequired": "Add at least one way customers can reach you."
+      "errContactRequired": "Add at least one way customers can reach you.",
+      "errMembershipRequired": "You need an active membership before you can publish a listing. Pick a plan and add your payment details on the membership page."
     }
   },
   "Footer": {
@@ -720,6 +721,7 @@
     "subscribe": "Subscribe",
     "startTrial": "Start free trial",
     "trialBanner": "{months, plural, one {Your first month is free.} other {Your first # months are free.}} Pick a plan and add your card — you won't be charged until the trial ends, and you can cancel anytime before then.",
+    "trialUsedBanner": "Your free trial has already been used on this account — it's a one-time offer for new members. Whichever plan you pick below starts billing right away, and you can cancel any time.",
     "subscribing": "Redirecting…",
     "activeTitle": "Active membership",
     "statusActive": "Active",
@@ -746,7 +748,8 @@
     "successBanner": "You're all set — your membership is active.",
     "cancelBanner": "Checkout canceled — no charge was made.",
     "checkoutFailedBanner": "Your account is ready, but we couldn't open checkout. Pick a plan below to finish.",
-    "errGeneric": "Something went wrong. Please try again."
+    "errGeneric": "Something went wrong. Please try again.",
+    "requiredBanner": "Your pro tools open as soon as your membership is active. Pick a plan below and add your payment details to finish setting up your account."
   },
   "Payouts": {
     "title": "Get paid",

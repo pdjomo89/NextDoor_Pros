@@ -52,6 +52,11 @@ export function MembershipClient() {
     | null
     | undefined;
 
+  // The free trial is a new-account offer. Don't advertise one to someone who
+  // has already had theirs — the backend wouldn't grant it either.
+  const trialOffered =
+    useQuery(api.memberships.trialAvailable, configured ? {} : 'skip') ?? true;
+
   if (market.monetization.model !== 'subscription') {
     return (
       <Notice
@@ -76,14 +81,21 @@ export function MembershipClient() {
       {status === 'checkout_failed' && (
         <Banner variant="info">{t('checkoutFailedBanner')}</Banner>
       )}
-
-      {membershipTrialDays(country) > 0 && (
-        <Banner variant="info">
-          {t('trialBanner', {
-            months: Math.round(membershipTrialDays(country) / 30),
-          })}
-        </Banner>
+      {/* Bounced here from a pro page they can't open yet. */}
+      {status === 'required' && (
+        <Banner variant="info">{t('requiredBanner')}</Banner>
       )}
+
+      {membershipTrialDays(country) > 0 &&
+        (trialOffered ? (
+          <Banner variant="info">
+            {t('trialBanner', {
+              months: Math.round(membershipTrialDays(country) / 30),
+            })}
+          </Banner>
+        ) : (
+          <Banner variant="info">{t('trialUsedBanner')}</Banner>
+        ))}
 
       {viewer === null ? (
         <Notice
@@ -102,6 +114,7 @@ export function MembershipClient() {
             role="poster"
             country={country}
             market={market}
+            trialOffered={trialOffered}
             highlight={preselected?.role === 'poster'}
             highlightPlan={preselected?.role === 'poster' ? preselected.plan : null}
           />
@@ -109,6 +122,7 @@ export function MembershipClient() {
             role="pro"
             country={country}
             market={market}
+            trialOffered={trialOffered}
             highlight={preselected?.role === 'pro'}
             highlightPlan={preselected?.role === 'pro' ? preselected.plan : null}
           />
@@ -122,12 +136,15 @@ function RoleCard({
   role,
   country,
   market,
+  trialOffered,
   highlight = false,
   highlightPlan = null,
 }: {
   role: Role;
   country: string;
   market: Market;
+  /** False once this account has spent its one free trial. */
+  trialOffered: boolean;
   /** This is the role the user picked at sign-up — draw attention to it. */
   highlight?: boolean;
   /** The plan they picked, so its row reads as the one left to confirm. */
@@ -199,7 +216,8 @@ function RoleCard({
     market.monetization.model === 'subscription'
       ? market.monetization.trialDays
       : 0;
-  const subscribeCta = trialDays > 0 ? t('startTrial') : t('subscribe');
+  const subscribeCta =
+    trialDays > 0 && trialOffered ? t('startTrial') : t('subscribe');
   // Still inside the free trial → cancelling costs them nothing at all.
   const inTrial = !!membership?.trialEnd && membership.trialEnd > Date.now();
 

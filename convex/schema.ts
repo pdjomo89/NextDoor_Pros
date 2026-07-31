@@ -223,6 +223,21 @@ export default defineSchema({
     .index('by_user_role', ['userId', 'role'])
     .index('by_stripeSubscription', ['stripeSubscriptionId']),
 
+  // ─── Free-trial ledger ────────────────────────────────────────────────────
+  //
+  // One row the first time an account starts a trialing subscription. The free
+  // trial is a new-account offer, so re-subscribing after cancelling bills from
+  // day one. Keyed by user AND by email: the email copy is what stops someone
+  // from deleting the account and signing up again with the same address to
+  // farm another free month. Rows are never deleted — that is the whole point.
+  membershipTrials: defineTable({
+    userId: v.id('users'),
+    email: v.optional(v.string()), // normalized (trimmed + lowercased)
+    startedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_email', ['email']),
+
   // ─── Pro payout accounts (Stripe Connect) ────────────────────────────────
   //
   // A pro's Stripe Connect (Express) account, so the platform can pay them out

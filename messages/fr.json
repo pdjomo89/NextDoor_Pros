@@ -641,7 +641,8 @@
       "errStartingAtInvalid": "Le prix de départ doit être entre 0 et 50 000 000 FCFA.",
       "errCityRequired": "Veuillez choisir votre ville de service.",
       "errServicesRequired": "Sélectionnez au moins un service.",
-      "errContactRequired": "Ajoutez au moins un moyen de contact."
+      "errContactRequired": "Ajoutez au moins un moyen de contact.",
+      "errMembershipRequired": "Vous devez avoir un abonnement actif avant de publier une fiche. Choisissez un forfait et ajoutez vos informations de paiement sur la page d'abonnement."
     }
   },
   "Footer": {
@@ -720,6 +721,7 @@
     "subscribe": "S'abonner",
     "startTrial": "Commencer l'essai gratuit",
     "trialBanner": "{months, plural, one {Votre premier mois est gratuit.} other {Vos # premiers mois sont gratuits.}} Choisissez un forfait et ajoutez votre carte — aucun prélèvement avant la fin de l'essai, annulable à tout moment.",
+    "trialUsedBanner": "Votre essai gratuit a déjà été utilisé sur ce compte — il s'agit d'une offre unique réservée aux nouveaux membres. Le forfait que vous choisirez ci-dessous sera facturé immédiatement, et vous pouvez annuler à tout moment.",
     "subscribing": "Redirection…",
     "activeTitle": "Abonnement actif",
     "statusActive": "Actif",
@@ -746,7 +748,8 @@
     "successBanner": "Tout est prêt — votre abonnement est actif.",
     "cancelBanner": "Paiement annulé — aucun montant n'a été prélevé.",
     "checkoutFailedBanner": "Votre compte est prêt, mais nous n'avons pas pu ouvrir le paiement. Choisissez une formule ci-dessous pour terminer.",
-    "errGeneric": "Une erreur s'est produite. Veuillez réessayer."
+    "errGeneric": "Une erreur s'est produite. Veuillez réessayer.",
+    "requiredBanner": "Vos outils pro s'ouvriront dès que votre abonnement sera actif. Choisissez un forfait ci-dessous et ajoutez vos informations de paiement pour terminer la création de votre compte."
   },
   "Payouts": {
     "title": "Recevoir vos paiements",

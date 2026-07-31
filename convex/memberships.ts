@@ -16,6 +16,7 @@ import {
   type SubscriptionInterval,
 } from './stripeSubscriptions';
 import {
+  countryOfCity,
   membershipPlanConfig,
   membershipTrialDays,
   monetizationModel,
@@ -163,6 +164,117 @@ export const myMembership = query({
   },
 });
 
+// ── pro access gate (subscription markets) ───────────────────────────────────
+
+/**
+ * Which market a pro belongs to, from the most trustworthy signal available.
+ * Their listing's city is server-derived and wins; before onboarding there is no
+ * listing, so we fall back to the market their membership was bought in, then to
+ * the request's geo-IP country. Unknown → the default (pay-as-you-go) market, so
+ * an unrecognised signal can never lock a pro out of a market that has no
+ * memberships to buy in the first place.
+ */
+async function proCountry(
+  ctx: QueryCtx,
+  userId: Id<'users'>,
+  membership: Doc<'memberships'> | null,
+  geoCountry?: string,
+): Promise<string | undefined> {
+  const contractor = await ctx.db
+    .query('contractors')
+    .withIndex('by_owner', (q) => q.eq('ownerId', userId))
+    .unique();
+  if (contractor) return countryOfCity(contractor.citySlug);
+  return membership?.country ?? geoCountry ?? undefined;
+}
+
+/**
+ * Whether the signed-in user may use the pro area. In subscription markets a pro
+ * must hold an active membership — a card entered at Stripe Checkout — before
+ * onboarding or the dashboard opens to them; a trialing subscription counts as
+ * active, so the free trial grants access immediately. Pay-as-you-go markets are
+ * never gated (there is nothing to subscribe to).
+ */
+export const proAccess = query({
+  args: { geoCountry: v.optional(v.string()) },
+  handler: async (ctx, { geoCountry }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return { signedIn: false, required: false, blocked: false, country: null, status: null };
+
+    const membership = await ctx.db
+      .query('memberships')
+      .withIndex('by_user_role', (q) => q.eq('userId', userId).eq('role', 'pro'))
+      .order('desc')
+      .first();
+
+    const country = await proCountry(ctx, userId, membership, geoCountry);
+    const required = monetizationModel(country) === 'subscription';
+    const active = membership?.status === 'active';
+    return {
+      signedIn: true,
+      required,
+      blocked: required && !active,
+      country: country ?? null,
+      status: membership?.status ?? null,
+    };
+  },
+});
+
+// ── free trial: new accounts only ────────────────────────────────────────────
+
+const normalizeEmail = (email?: string | null) =>
+  email ? email.trim().toLowerCase() : undefined;
+
+/**
+ * Whether this account has already had its free trial. True when any of:
+ *   - a trial was recorded for this user, or for this email address (which
+ *     survives the account being deleted and re-created);
+ *   - the account already holds a membership row of any status — having
+ *     subscribed before, even a cancelled one, means it is not a new account.
+ * The trial is a joining offer; cancelling and re-subscribing bills from day one.
+ */
+async function trialAlreadyUsed(
+  ctx: QueryCtx,
+  userId: Id<'users'>,
+  email?: string,
+): Promise<boolean> {
+  const byUser = await ctx.db
+    .query('membershipTrials')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .first();
+  if (byUser) return true;
+
+  const normalized = normalizeEmail(email);
+  if (normalized) {
+    const byEmail = await ctx.db
+      .query('membershipTrials')
+      .withIndex('by_email', (q) => q.eq('email', normalized))
+      .first();
+    if (byEmail) return true;
+  }
+
+  for (const role of ['poster', 'pro'] as const) {
+    const prior = await ctx.db
+      .query('memberships')
+      .withIndex('by_user_role', (q) => q.eq('userId', userId).eq('role', role))
+      .first();
+    if (prior) return true;
+  }
+  return false;
+}
+
+/** Whether the signed-in account can still be offered a free trial. */
+export const trialAvailable = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return true; // no account yet — a sign-up is a new account
+    const user = await ctx.db.get(userId);
+    const email = (user as { email?: string } | null)?.email;
+    return !(await trialAlreadyUsed(ctx, userId, email));
+  },
+});
+
 // ── start a subscription (hosted Stripe Checkout) ────────────────────────────
 
 export const startContext = internalQuery({
@@ -170,16 +282,65 @@ export const startContext = internalQuery({
   handler: async (
     ctx,
     { role },
-  ): Promise<{ userId: Id<'users'>; email?: string; alreadyActive: boolean }> => {
+  ): Promise<{
+    userId: Id<'users'>;
+    email?: string;
+    alreadyActive: boolean;
+    trialUsed: boolean;
+    customerId?: string;
+  }> => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error('NOT_SIGNED_IN');
     const user = await ctx.db.get(userId);
+    const email = (user as { email?: string } | null)?.email;
     const active = await getActiveMembership(ctx, userId, role);
+
+    // Re-use the Stripe customer from any earlier membership so a returning
+    // subscriber keeps one billing history instead of spawning a new customer
+    // per checkout — and so their saved cards are already there.
+    const prior = await ctx.db
+      .query('memberships')
+      .withIndex('by_user_role', (q) => q.eq('userId', userId).eq('role', role))
+      .order('desc')
+      .first();
+
     return {
       userId,
-      email: (user as { email?: string } | null)?.email,
+      email,
       alreadyActive: !!active,
+      trialUsed: await trialAlreadyUsed(ctx, userId, email),
+      customerId: prior?.stripeCustomerId,
     };
+  },
+});
+
+/** Record that this account consumed its free trial. Idempotent. */
+async function writeTrialUse(
+  ctx: MutationCtx,
+  userId: Id<'users'>,
+): Promise<void> {
+  const existing = await ctx.db
+    .query('membershipTrials')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .first();
+  if (existing) return;
+  const user = await ctx.db.get(userId);
+  if (!user) return;
+  await ctx.db.insert('membershipTrials', {
+    userId,
+    email: normalizeEmail((user as { email?: string }).email),
+    startedAt: Date.now(),
+  });
+}
+
+/**
+ * Mark an account's trial as spent without waiting for a Stripe webhook — used
+ * to backfill accounts that subscribed before this ledger existed.
+ */
+export const recordTrialUse = internalMutation({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    await writeTrialUse(ctx, userId as Id<'users'>);
   },
 });
 
@@ -217,7 +378,9 @@ export const startMembership = action({
       country,
       successUrl: `${siteUrl}/${locale}/membership?status=success`,
       cancelUrl: `${siteUrl}/${locale}/membership?status=cancel`,
-      trialDays: membershipTrialDays(country),
+      // New accounts only — a returning subscriber is billed from day one.
+      trialDays: context.trialUsed ? 0 : membershipTrialDays(country),
+      customerId: context.customerId,
     });
     return { url };
   },
@@ -242,6 +405,12 @@ export const upsertFromStripe = internalMutation({
   handler: async (ctx, args) => {
     const status = toLocalStatus(args.stripeStatus);
     const plan = args.interval === 'year' ? 'yearly' : 'monthly';
+
+    // Burn the trial only once Stripe confirms one actually started, so an
+    // abandoned checkout doesn't cost someone their free month.
+    if (args.trialEnd) {
+      await writeTrialUse(ctx, args.userId as Id<'users'>);
+    }
 
     const patch = {
       status,

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { isAuthenticatedNextjs } from '@convex-dev/auth/nextjs/server';
 import { DashboardClient } from '@/components/dashboard-client';
 import { getConvexEnv } from '@/lib/convex-env';
+import { requireProMembership } from '@/lib/pro-access';
 import type { Locale } from '@/i18n/routing';
 
 export const metadata: Metadata = { title: 'Dashboard', robots: { index: false, follow: false } };
@@ -20,6 +21,8 @@ export default async function ProDashboardPage({
 
   const authed = await isAuthenticatedNextjs();
   if (!authed) redirect(`/${locale}/auth/sign-in`);
+  // Subscription markets: the dashboard opens only once membership is paid up.
+  await requireProMembership(locale);
 
   const t = await getTranslations('Pros.dashboard');
   return (

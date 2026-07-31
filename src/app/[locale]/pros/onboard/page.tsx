@@ -5,6 +5,7 @@ import { isAuthenticatedNextjs } from '@convex-dev/auth/nextjs/server';
 import { OnboardForm } from '@/components/onboard-form';
 import { JobsHero } from '@/components/jobs-hero';
 import { getConvexEnv } from '@/lib/convex-env';
+import { requireProMembership } from '@/lib/pro-access';
 import type { Locale } from '@/i18n/routing';
 
 export const metadata: Metadata = { title: 'Your business listing', robots: { index: false, follow: false } };
@@ -29,6 +30,8 @@ export default async function OnboardPage({
 
   const authed = await isAuthenticatedNextjs();
   if (!authed) redirect(`/${locale}/auth/sign-in`);
+  // Subscription markets: no listing without a paid-up membership.
+  await requireProMembership(locale);
 
   const t = await getTranslations('Pros.onboard');
 

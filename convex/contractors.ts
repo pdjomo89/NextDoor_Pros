@@ -1,7 +1,8 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
-import { countryOfCity } from './markets';
+import { countryOfCity, monetizationModel } from './markets';
+import { getActiveMembership } from './memberships';
 
 /**
  * Return the signed-in user's contractor listing (or null).
@@ -195,6 +196,14 @@ export const upsertMine = mutation({
     // Country is derived server-side from the city — never trusted from the
     // client — so a listing's market always matches its location.
     const country = countryOfCity(args.citySlug);
+
+    // In subscription markets a listing requires a paid-up pro membership. The
+    // page-level gate sends people to checkout first; this is what actually
+    // enforces it, since a mutation can be called without ever loading the page.
+    if (monetizationModel(country) === 'subscription') {
+      const membership = await getActiveMembership(ctx, userId, 'pro');
+      if (!membership) throw new Error('MEMBERSHIP_REQUIRED');
+    }
 
     const existing = await ctx.db
       .query('contractors')

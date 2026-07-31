@@ -107,6 +107,8 @@ export async function createSubscriptionCheckout(input: {
   cancelUrl: string;
   /** Free-trial length in days (card collected, first charge deferred). 0 = none. */
   trialDays?: number;
+  /** Existing Stripe customer to bill, if this account has one already. */
+  customerId?: string;
 }): Promise<{ url: string; sessionId: string }> {
   const form = new URLSearchParams();
   form.set('mode', 'subscription');
@@ -117,7 +119,10 @@ export async function createSubscriptionCheckout(input: {
   form.set('line_items[0][price_data][unit_amount]', String(input.amountMinor));
   form.set('line_items[0][price_data][recurring][interval]', input.interval);
   form.set('line_items[0][price_data][product_data][name]', input.productName);
-  if (input.email) form.set('customer_email', input.email);
+  // Stripe rejects both together: bill a known customer when we have one, and
+  // only prefill an address for a first-time subscriber.
+  if (input.customerId) form.set('customer', input.customerId);
+  else if (input.email) form.set('customer_email', input.email);
   form.set('client_reference_id', input.userId);
   if (input.trialDays && input.trialDays > 0) {
     // Free trial: collect the card now, defer the first charge until it ends.

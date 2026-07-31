@@ -125,7 +125,12 @@ export function OnboardForm({ locale }: { locale: Locale }) {
       router.push(`/${locale}/pros/dashboard`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const raw = err instanceof Error ? err.message : String(err);
+      // The server rejects listings from pros without an active membership; say
+      // so in plain language instead of surfacing the raw error code.
+      setError(
+        raw.includes('MEMBERSHIP_REQUIRED') ? t('errMembershipRequired') : raw,
+      );
     } finally {
       setSubmitting(false);
     }
