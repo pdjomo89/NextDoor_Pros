@@ -162,9 +162,11 @@ function InfoRow({
   value: string;
   href?: string;
 }) {
+  // Brand-tinted card — the same forest→navy wash as the featured phone card,
+  // held lighter so the phone card stays the loudest thing in the column.
   return (
-    <div className="flex items-start gap-4 rounded-2xl border border-navy/10 bg-white/80 p-5 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-forest/30 hover:shadow-md">
-      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-forest/15 to-navy/10 text-forest">
+    <div className="flex items-start gap-4 rounded-2xl border border-navy/10 bg-gradient-to-br from-forest/[0.09] via-white to-navy/[0.07] p-5 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-forest/30 hover:from-forest/[0.14] hover:to-navy/[0.1] hover:shadow-md">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-forest/20 to-navy/10 text-forest">
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
