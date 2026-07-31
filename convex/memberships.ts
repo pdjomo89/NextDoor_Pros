@@ -12,6 +12,7 @@ import type { MutationCtx, QueryCtx } from './_generated/server';
 import {
   createPortalSession,
   createSubscriptionCheckout,
+  setSubscriptionCancelAtPeriodEnd,
   type SubscriptionInterval,
 } from './stripeSubscriptions';
 import {
@@ -151,10 +152,13 @@ export const myMembership = query({
       active: membership.status === 'active',
       currentPeriodEnd: membership.currentPeriodEnd,
       cancelAtPeriodEnd: membership.cancelAtPeriodEnd ?? false,
+      trialEnd: membership.trialEnd,
       quota,
       used,
       remaining: Math.max(0, quota - used),
       hasBilling: !!membership.stripeCustomerId,
+      // Only a live Stripe subscription can be cancelled in-app.
+      canCancel: !!membership.stripeSubscriptionId,
     };
   },
 });
@@ -229,6 +233,7 @@ export const upsertFromStripe = internalMutation({
     currentPeriodStart: v.optional(v.number()),
     currentPeriodEnd: v.optional(v.number()),
     cancelAtPeriodEnd: v.boolean(),
+    trialEnd: v.optional(v.number()),
     interval: v.optional(v.union(v.literal('month'), v.literal('year'))),
     userId: v.string(),
     role: v.string(),
@@ -247,6 +252,7 @@ export const upsertFromStripe = internalMutation({
       currentPeriodStart: args.currentPeriodStart,
       currentPeriodEnd: args.currentPeriodEnd,
       cancelAtPeriodEnd: args.cancelAtPeriodEnd,
+      trialEnd: args.trialEnd,
       country: args.country,
     };
 
@@ -280,6 +286,85 @@ export const upsertFromStripe = internalMutation({
       role: args.role,
       ...patch,
     });
+  },
+});
+
+// ── cancel / resume the subscription in-app ──────────────────────────────────
+//
+// Cancelling sets Stripe's `cancel_at_period_end` rather than deleting the
+// subscription: the member keeps the access they already paid for until the
+// period ends, and someone still inside the free trial is never charged at all
+// (Stripe just lets it expire at trial end). The same action resumes — flipping
+// the flag back — as long as the period hasn't ended yet. Stripe stays the
+// source of truth; we persist what it returns and the webhook confirms it again.
+
+export const subscriptionContext = internalQuery({
+  args: { role: v.union(v.literal('poster'), v.literal('pro')) },
+  handler: async (ctx, { role }): Promise<{ subscriptionId: string | null }> => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error('NOT_SIGNED_IN');
+    // Looked up from the caller's own row, so a user can only ever act on their
+    // own subscription — the client never supplies a subscription id.
+    const membership = await ctx.db
+      .query('memberships')
+      .withIndex('by_user_role', (q) => q.eq('userId', userId).eq('role', role))
+      .order('desc')
+      .first();
+    return { subscriptionId: membership?.stripeSubscriptionId ?? null };
+  },
+});
+
+/** Persist an auto-renew flip. Narrow patch — it must not race the webhook's status. */
+export const applyAutoRenew = internalMutation({
+  args: {
+    subscriptionId: v.string(),
+    cancelAtPeriodEnd: v.boolean(),
+    currentPeriodEnd: v.optional(v.number()),
+    trialEnd: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const membership = await ctx.db
+      .query('memberships')
+      .withIndex('by_stripeSubscription', (q) =>
+        q.eq('stripeSubscriptionId', args.subscriptionId),
+      )
+      .first();
+    if (!membership) return;
+    await ctx.db.patch(membership._id, {
+      cancelAtPeriodEnd: args.cancelAtPeriodEnd,
+      currentPeriodEnd: args.currentPeriodEnd,
+      trialEnd: args.trialEnd,
+    });
+  },
+});
+
+export const setAutoRenew = action({
+  args: {
+    role: v.union(v.literal('poster'), v.literal('pro')),
+    /** false = cancel at period end, true = resume. */
+    renew: v.boolean(),
+  },
+  handler: async (
+    ctx,
+    { role, renew },
+  ): Promise<{ cancelAtPeriodEnd: boolean; endsAt?: number }> => {
+    const { subscriptionId } = await ctx.runQuery(
+      internal.memberships.subscriptionContext,
+      { role },
+    );
+    if (!subscriptionId) throw new Error('NO_SUBSCRIPTION');
+
+    const sub = await setSubscriptionCancelAtPeriodEnd(subscriptionId, !renew);
+    await ctx.runMutation(internal.memberships.applyAutoRenew, {
+      subscriptionId: sub.id,
+      cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+      currentPeriodEnd: sub.currentPeriodEnd,
+      trialEnd: sub.trialEnd,
+    });
+    return {
+      cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+      endsAt: sub.currentPeriodEnd,
+    };
   },
 });
 

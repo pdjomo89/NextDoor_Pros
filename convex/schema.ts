@@ -214,6 +214,9 @@ export default defineSchema({
     currentPeriodStart: v.optional(v.number()),
     currentPeriodEnd: v.optional(v.number()),
     cancelAtPeriodEnd: v.optional(v.boolean()),
+    // End of the free trial, if the subscription started with one. Kept so the
+    // UI can say "cancel before this date and you're never charged".
+    trialEnd: v.optional(v.number()),
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
   })

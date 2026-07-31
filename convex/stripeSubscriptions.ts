@@ -159,6 +159,8 @@ export type StripeSubscription = {
   currentPeriodStart?: number; // ms
   currentPeriodEnd?: number; // ms
   cancelAtPeriodEnd: boolean;
+  /** End of the free trial, if any (ms). */
+  trialEnd?: number;
   interval?: SubscriptionInterval;
   metadata: Record<string, string>;
 };
@@ -166,20 +168,32 @@ export type StripeSubscription = {
 function normalizeSubscription(s: Record<string, unknown>): StripeSubscription {
   const items = (s.items as { data?: unknown[] } | undefined)?.data;
   const firstItem = items?.[0] as
-    | { price?: { recurring?: { interval?: string } } }
+    | {
+        price?: { recurring?: { interval?: string } };
+        current_period_start?: number;
+        current_period_end?: number;
+      }
     | undefined;
   const rawInterval = firstItem?.price?.recurring?.interval;
   const interval =
     rawInterval === 'month' || rawInterval === 'year' ? rawInterval : undefined;
   const secToMs = (n: unknown) =>
     typeof n === 'number' ? n * 1000 : undefined;
+  // Current-period bounds live on the subscription ITEM in recent Stripe API
+  // versions and on the subscription root in older ones. Read the item first and
+  // fall back, so the period is populated either way — quota windows and the
+  // "renews / ends on" dates both depend on it.
   return {
     id: s.id as string,
     status: String(s.status ?? ''),
     customerId: typeof s.customer === 'string' ? s.customer : undefined,
-    currentPeriodStart: secToMs(s.current_period_start),
-    currentPeriodEnd: secToMs(s.current_period_end),
+    currentPeriodStart:
+      secToMs(firstItem?.current_period_start) ??
+      secToMs(s.current_period_start),
+    currentPeriodEnd:
+      secToMs(firstItem?.current_period_end) ?? secToMs(s.current_period_end),
     cancelAtPeriodEnd: Boolean(s.cancel_at_period_end),
+    trialEnd: secToMs(s.trial_end),
     interval,
     metadata: (s.metadata as Record<string, string> | undefined) ?? {},
   };
@@ -190,6 +204,28 @@ export async function retrieveSubscription(
 ): Promise<StripeSubscription> {
   const s = await stripeFetch(`/subscriptions/${encodeURIComponent(id)}`, {
     method: 'GET',
+  });
+  return normalizeSubscription(s);
+}
+
+// ── cancel / resume (auto-renew switch) ──────────────────────────────────────
+
+/**
+ * Flip a subscription's `cancel_at_period_end`. Cancelling this way is never
+ * immediate: the member keeps what they paid for until the period ends, and a
+ * subscription still in its free trial simply expires at trial end with no
+ * charge ever taken. Passing `false` undoes a pending cancellation.
+ * Returns Stripe's authoritative post-update state.
+ */
+export async function setSubscriptionCancelAtPeriodEnd(
+  id: string,
+  cancelAtPeriodEnd: boolean,
+): Promise<StripeSubscription> {
+  const form = new URLSearchParams();
+  form.set('cancel_at_period_end', cancelAtPeriodEnd ? 'true' : 'false');
+  const s = await stripeFetch(`/subscriptions/${encodeURIComponent(id)}`, {
+    method: 'POST',
+    body: form,
   });
   return normalizeSubscription(s);
 }

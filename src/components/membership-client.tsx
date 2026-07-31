@@ -138,8 +138,10 @@ function RoleCard({
   const membership = useQuery(api.memberships.myMembership, { role, country });
   const start = useAction(api.memberships.startMembership);
   const portal = useAction(api.memberships.openBillingPortal);
+  const setAutoRenew = useAction(api.memberships.setAutoRenew);
   const [busy, setBusy] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [confirmingCancel, setConfirmingCancel] = React.useState(false);
 
   const plan =
     market.monetization.model === 'subscription'
@@ -175,6 +177,20 @@ function RoleCard({
     }
   }
 
+  /** Cancel (renew=false) keeps access to the end of the period; resume undoes it. */
+  async function changeAutoRenew(renew: boolean) {
+    setError(null);
+    setBusy(renew ? 'resume' : 'cancel');
+    try {
+      await setAutoRenew({ role, renew });
+      setConfirmingCancel(false);
+    } catch {
+      setError(t('errGeneric'));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const roleLabel = role === 'poster' ? t('roleEmployer') : t('rolePro');
   const roleDesc = role === 'poster' ? t('roleEmployerDesc') : t('roleProDesc');
   const quotaLabel =
@@ -184,6 +200,8 @@ function RoleCard({
       ? market.monetization.trialDays
       : 0;
   const subscribeCta = trialDays > 0 ? t('startTrial') : t('subscribe');
+  // Still inside the free trial → cancelling costs them nothing at all.
+  const inTrial = !!membership?.trialEnd && membership.trialEnd > Date.now();
 
   return (
     <div
@@ -224,17 +242,94 @@ function RoleCard({
                   })}
             </p>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={manage}
-            disabled={busy === 'manage' || !membership.hasBilling}
-          >
-            {busy === 'manage' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : null}
-            {busy === 'manage' ? t('opening') : t('manageBilling')}
-          </Button>
+
+          {membership.cancelAtPeriodEnd ? (
+            <div className="rounded-xl border border-navy/10 bg-navy/[0.02] px-4 py-3">
+              <p className="text-sm text-navy/70">
+                {inTrial ? t('canceledTrialNote') : t('canceledNote')}
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="mt-3"
+                onClick={() => changeAutoRenew(true)}
+                disabled={busy === 'resume'}
+              >
+                {busy === 'resume' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                {busy === 'resume' ? t('resuming') : t('resume')}
+              </Button>
+            </div>
+          ) : confirmingCancel ? (
+            <div className="rounded-xl border border-navy/15 bg-navy/[0.03] px-4 py-3">
+              <p className="text-sm text-navy/80">
+                {inTrial && membership.trialEnd
+                  ? t('cancelConfirmTrial', {
+                      date: new Date(membership.trialEnd).toLocaleDateString(
+                        locale,
+                      ),
+                    })
+                  : t('cancelConfirmBody', {
+                      date: membership.currentPeriodEnd
+                        ? new Date(
+                            membership.currentPeriodEnd,
+                          ).toLocaleDateString(locale)
+                        : '',
+                    })}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => changeAutoRenew(false)}
+                  disabled={busy === 'cancel'}
+                >
+                  {busy === 'cancel' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : null}
+                  {busy === 'cancel' ? t('cancelling') : t('cancelConfirmCta')}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setConfirmingCancel(false)}
+                  disabled={busy === 'cancel'}
+                >
+                  {t('keepSubscription')}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={manage}
+              disabled={busy === 'manage' || !membership.hasBilling}
+            >
+              {busy === 'manage' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : null}
+              {busy === 'manage' ? t('opening') : t('manageBilling')}
+            </Button>
+            {membership.canCancel &&
+              !membership.cancelAtPeriodEnd &&
+              !confirmingCancel && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-navy/60"
+                  onClick={() => {
+                    setError(null);
+                    setConfirmingCancel(true);
+                  }}
+                >
+                  {t('cancelSubscription')}
+                </Button>
+              )}
+          </div>
         </div>
       ) : (
         plan && (

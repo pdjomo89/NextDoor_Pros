@@ -96,6 +96,7 @@ http.route({
       currentPeriodStart: sub.currentPeriodStart,
       currentPeriodEnd: sub.currentPeriodEnd,
       cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+      trialEnd: sub.trialEnd,
       interval: sub.interval,
       userId,
       role,
