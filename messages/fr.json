@@ -205,12 +205,63 @@
       "tech": {
         "title": "Tech et logiciels",
         "description": "Applications web et mobiles sur mesure, sites Internet, soutien informatique, configuration infonuagique et solutions logicielles par des développeurs locaux."
+      },
+      "tutoring": {
+        "title": "Cours à domicile",
+        "description": "Répétiteurs à domicile ou en ligne — mathématiques, sciences, langues, préparation aux examens et aide aux devoirs, à tous les niveaux."
+      },
+      "liaison": {
+        "title": "Agent de liaison",
+        "description": "Un seul contact local de confiance qui s'occupe de vos comptes essentiels — Internet, mobile et téléphone résidentiel, gaz et électricité, télévision, prévoyance, prêt hypothécaire et sécurité à domicile — en plus du crédit et des paiements téléphoniques à bas prix, des chauffe-eau, des thermostats et bien plus."
+      },
+      "digitalsecurity": {
+        "title": "Sécurité numérique",
+        "description": "Antivirus, gestionnaires de mots de passe, nettoyage d'appareils et protection contre la fraude en ligne, les arnaques et le vol d'identité."
+      },
+      "gaselectricity": {
+        "title": "Gaz et électricité",
+        "description": "Raccordements d'électricité et de gaz, installation de compteurs, paiement de factures, recharges prépayées et changement de fournisseur."
+      },
+      "homephone": {
+        "title": "Téléphone résidentiel",
+        "description": "Installation de lignes fixes, combinés, forfaits d'appels et réparation des raccordements existants."
+      },
+      "internet": {
+        "title": "Internet",
+        "description": "Internet résidentiel et d'affaires — fibre, sans-fil et données mobiles, configuration du routeur et correction de la couverture Wi-Fi."
+      },
+      "mobility": {
+        "title": "Mobilité",
+        "description": "Lignes mobiles, cartes SIM, forfaits de données et téléphonie — et de l'aide pour choisir l'offre la moins chère selon votre usage."
+      },
+      "mortgage": {
+        "title": "Prêt hypothécaire",
+        "description": "Prêts hypothécaires et financement immobilier — des courtiers qui comparent les prêteurs, montent votre dossier et vous guident jusqu'à l'approbation."
+      },
+      "protection": {
+        "title": "Prévoyance",
+        "description": "Assurance vie, invalidité, santé et protection familiale — des conseillers qui adaptent le bon régime à votre situation."
+      },
+      "securityautomation": {
+        "title": "Sécurité et domotique",
+        "description": "Systèmes d'alarme, caméras de surveillance et sonnettes vidéo, serrures intelligentes, éclairage et chauffage connectés."
+      },
+      "television": {
+        "title": "Télévision",
+        "description": "Forfaits de télévision, installation satellite et câble, décodeurs et diffusion en continu, réparation d'antennes et de paraboles."
+      },
+      "other": {
+        "title": "Autres",
+        "description": "Tout ce qui n'entre pas dans les catégories ci-dessus — dites-nous ce dont vous avez besoin et nous vous mettrons en lien avec le bon pro local."
       }
     },
     "viewPros": "Voir les pros disponibles",
     "viewAll": "Voir tous les pros",
     "comingSoon": "Bientôt à {city}",
     "backToAll": "Tous les services",
+    "backToParent": "Retour à {service}",
+    "subServicesTitle": "Ce que couvre {service}",
+    "subServicesSubtitle": "Choisissez exactement ce dont vous avez besoin, ou contactez un agent ci-dessous et il s'en occupe pour vous.",
     "findInCity": "Trouvez des pros en {service} par ville",
     "listings": {
       "loading": "Chargement des pros...",

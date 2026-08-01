@@ -25,6 +25,18 @@ import {
   ShoppingBasket,
   Frame,
   Laptop,
+  GraduationCap,
+  Handshake,
+  Fingerprint,
+  Zap,
+  PhoneCall,
+  Wifi,
+  Smartphone,
+  Landmark,
+  Umbrella,
+  Cctv,
+  Tv,
+  Grid3x3,
   type LucideIcon,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -54,6 +66,18 @@ const ICONS: Record<ServiceKey, LucideIcon> = {
   groceries: ShoppingBasket,
   decoration: Frame,
   tech: Laptop,
+  tutoring: GraduationCap,
+  liaison: Handshake,
+  digitalsecurity: Fingerprint,
+  gaselectricity: Zap,
+  homephone: PhoneCall,
+  internet: Wifi,
+  mobility: Smartphone,
+  mortgage: Landmark,
+  protection: Umbrella,
+  securityautomation: Cctv,
+  television: Tv,
+  other: Grid3x3,
 };
 
 export function ServiceCard({ category }: { category: ServiceCategory }) {

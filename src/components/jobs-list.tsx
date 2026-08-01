@@ -6,7 +6,11 @@ import { useQuery } from 'convex/react';
 import { Loader2 } from 'lucide-react';
 import { useCity } from '@/components/city-picker-context';
 import { JobCard } from '@/components/job-card';
-import { SERVICE_CATEGORIES } from '@/lib/services';
+import {
+  TOP_LEVEL_SERVICE_CATEGORIES,
+  getSubcategories,
+  type ServiceKey,
+} from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { JobDoc, JobCategory } from '@/lib/job-types';
 import { cn } from '@/lib/utils';
@@ -19,20 +23,29 @@ export function JobsList() {
   const { city, country } = useCity();
   const [filter, setFilter] = React.useState<FilterCat>('all');
 
+  // Only top-level services get a chip; a parent matches its sub-services too,
+  // so jobs posted under one stay reachable without crowding the filter row.
+  const categories = React.useMemo(
+    () =>
+      filter === 'all'
+        ? undefined
+        : [filter, ...getSubcategories(filter as ServiceKey).map((c) => c.key)],
+    [filter],
+  );
+
   const jobs = useQuery(api.jobs.list, {
     // Scope to the active market; a chosen city narrows further within it.
     country,
     citySlug: city?.slug,
-    category: filter === 'all' ? undefined : filter,
+    categories,
   }) as JobDoc[] | undefined;
 
   const filters: { key: FilterCat; label: string }[] = [
     { key: 'all', label: t('filterAll') },
-    ...SERVICE_CATEGORIES.map((c) => ({
+    ...TOP_LEVEL_SERVICE_CATEGORIES.map((c) => ({
       key: c.key as FilterCat,
       label: tCat(`${c.key}.title`),
     })),
-    { key: 'other' as FilterCat, label: t('categoryOther') },
   ];
 
   return (

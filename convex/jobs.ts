@@ -11,14 +11,19 @@ import { assertMembershipQuota } from './memberships';
 /**
  * Public list of open jobs. Optionally scope by country (market isolation),
  * and filter by city slug and/or category.
+ *
+ * `categories` is a set rather than a single value because the browse filter
+ * shows top-level services only: picking a parent has to match jobs posted
+ * under any of its sub-services. The taxonomy lives in the frontend
+ * (`src/lib/services.ts`), so the caller sends the already-expanded list.
  */
 export const list = query({
   args: {
     country: v.optional(v.string()),
     citySlug: v.optional(v.string()),
-    category: v.optional(v.string()),
+    categories: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, { country, citySlug, category }) => {
+  handler: async (ctx, { country, citySlug, categories }) => {
     // Country-scoped browse uses the by_country_status index; otherwise fall
     // back to all open jobs. (No second market exists yet, so callers don't
     // pass `country` today — the path is here + indexed for when one launches.)
@@ -35,9 +40,10 @@ export const list = query({
           .withIndex('by_status', (q) => q.eq('status', 'open'))
           .order('desc')
           .collect();
+    const wanted = categories?.length ? new Set(categories) : undefined;
     return rows.filter((j) => {
       if (citySlug && j.citySlug !== citySlug) return false;
-      if (category && j.category !== category) return false;
+      if (wanted && !wanted.has(j.category)) return false;
       return true;
     });
   },

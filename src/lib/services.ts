@@ -19,7 +19,19 @@ export type ServiceKey =
   | 'shipping'
   | 'groceries'
   | 'decoration'
-  | 'tech';
+  | 'tech'
+  | 'tutoring'
+  | 'liaison'
+  | 'digitalsecurity'
+  | 'gaselectricity'
+  | 'homephone'
+  | 'internet'
+  | 'mobility'
+  | 'mortgage'
+  | 'protection'
+  | 'securityautomation'
+  | 'television'
+  | 'other';
 
 export type ServiceCategory = {
   slug: string;
@@ -27,10 +39,17 @@ export type ServiceCategory = {
   accent: 'navy' | 'forest';
   /** Hero/thumbnail image for the category (local path or remote URL). */
   image: string;
+  /**
+   * Set on a sub-service to nest it under a parent category. Nested services
+   * stay real, bookable categories with their own page — they're just kept out
+   * of the top-level grids and surfaced from the parent instead.
+   */
+  parent?: ServiceKey;
 };
 
-const unsplash = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=70`;
+/** Pass `h` for portrait originals so the CDN, not object-cover, picks the crop. */
+const unsplash = (id: string, h?: number) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600${h ? `&h=${h}` : ''}&q=70`;
 
 export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: 'home', key: 'home', accent: 'navy', image: unsplash('1581578731548-c64695cc6952') },
@@ -54,4 +73,26 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: 'groceries', key: 'groceries', accent: 'navy', image: unsplash('1596040033229-a9821ebd058d') },
   { slug: 'decoration', key: 'decoration', accent: 'forest', image: unsplash('1621419203897-20b66b98d495') },
   { slug: 'tech', key: 'tech', accent: 'navy', image: unsplash('1517694712202-14dd9538aa97') },
+  { slug: 'home-tutoring', key: 'tutoring', accent: 'forest', image: unsplash('1503676260728-1c00da094a0b') },
+  { slug: 'liaison-agent', key: 'liaison', accent: 'navy', image: unsplash('1689848693914-7ba25d9f3334', 1000) },
+  // Handled through a liaison agent — nested under the 'liaison' category above.
+  { slug: 'digital-security', key: 'digitalsecurity', accent: 'forest', image: unsplash('1550751827-4bd374c3f58b'), parent: 'liaison' },
+  { slug: 'gas-electricity', key: 'gaselectricity', accent: 'navy', image: unsplash('1555009784-ae7e7d1b97aa'), parent: 'liaison' },
+  { slug: 'home-phone', key: 'homephone', accent: 'forest', image: unsplash('1560268744-aaab797cdfc4'), parent: 'liaison' },
+  { slug: 'internet', key: 'internet', accent: 'navy', image: unsplash('1606904825846-647eb07f5be2'), parent: 'liaison' },
+  { slug: 'mobility', key: 'mobility', accent: 'forest', image: unsplash('1554672408-17407e0322ce'), parent: 'liaison' },
+  { slug: 'mortgage', key: 'mortgage', accent: 'navy', image: unsplash('1560518883-ce09059eeffa'), parent: 'liaison' },
+  { slug: 'protection', key: 'protection', accent: 'forest', image: unsplash('1475503572774-15a45e5d60b9'), parent: 'liaison' },
+  { slug: 'security-automation', key: 'securityautomation', accent: 'navy', image: unsplash('1557597774-9d273605dfa9'), parent: 'liaison' },
+  { slug: 'television', key: 'television', accent: 'forest', image: unsplash('1593784991251-92ded75ea290'), parent: 'liaison' },
+  { slug: 'others', key: 'other', accent: 'navy', image: unsplash('1740065592719-052d3e5ec6fb') },
 ];
+
+/** Categories shown in the service grids — sub-services surface from their parent. */
+export const TOP_LEVEL_SERVICE_CATEGORIES = SERVICE_CATEGORIES.filter((c) => !c.parent);
+
+export const getSubcategories = (key: ServiceKey) =>
+  SERVICE_CATEGORIES.filter((c) => c.parent === key);
+
+export const getCategoryByKey = (key: ServiceKey) =>
+  SERVICE_CATEGORIES.find((c) => c.key === key);

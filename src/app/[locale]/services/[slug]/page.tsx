@@ -6,8 +6,14 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { CityBanner } from '@/components/city-banner';
+import { ServiceCard } from '@/components/service-card';
 import { ServiceListings } from '@/components/service-listings';
-import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
+import {
+  SERVICE_CATEGORIES,
+  getCategoryByKey,
+  getSubcategories,
+  type ServiceKey,
+} from '@/lib/services';
 import { FEATURED_CITIES } from '@/data/geography';
 import { SITE_URL, SITE_NAME, pageMetadata, JsonLd } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
@@ -55,6 +61,10 @@ export default async function ServiceDetailPage({
   const name = t(`categories.${category.key}.title`);
   const description = t(`categories.${category.key}.description`);
 
+  const subcategories = getSubcategories(category.key);
+  const parent = category.parent ? getCategoryByKey(category.parent) : undefined;
+  const parentName = parent ? t(`categories.${parent.key}.title`) : undefined;
+
   const serviceLd = {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -71,7 +81,22 @@ export default async function ServiceDetailPage({
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_URL}/${locale}` },
       { '@type': 'ListItem', position: 2, name: t('title'), item: `${SITE_URL}/${locale}/services` },
-      { '@type': 'ListItem', position: 3, name, item: `${SITE_URL}/${locale}/services/${slug}` },
+      ...(parent
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: parentName,
+              item: `${SITE_URL}/${locale}/services/${parent.slug}`,
+            },
+          ]
+        : []),
+      {
+        '@type': 'ListItem',
+        position: parent ? 4 : 3,
+        name,
+        item: `${SITE_URL}/${locale}/services/${slug}`,
+      },
     ],
   };
 
@@ -79,9 +104,9 @@ export default async function ServiceDetailPage({
     <div className="container py-12">
       <JsonLd data={[serviceLd, breadcrumbLd]} />
       <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link href="/services">
+        <Link href={parent ? `/services/${parent.slug}` : '/services'}>
           <ArrowLeft className="h-4 w-4" />
-          {t('backToAll')}
+          {parent ? t('backToParent', { service: parentName! }) : t('backToAll')}
         </Link>
       </Button>
 
@@ -106,6 +131,20 @@ export default async function ServiceDetailPage({
           </p>
         </div>
       </header>
+
+      {subcategories.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-navy">
+            {t('subServicesTitle', { service: name })}
+          </h2>
+          <p className="mt-1 text-sm text-navy/70">{t('subServicesSubtitle')}</p>
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {subcategories.map((c) => (
+              <ServiceCard key={c.slug} category={c} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="mt-8">
         <CityBanner locale={locale as Locale} />

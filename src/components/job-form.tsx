@@ -7,7 +7,7 @@ import { Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { useCity } from '@/components/city-picker-context';
-import { SERVICE_CATEGORIES } from '@/lib/services';
+import { TOP_LEVEL_SERVICE_CATEGORIES, getSubcategories } from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { JobCategory } from '@/lib/job-types';
 import type { Locale } from '@/i18n/routing';
@@ -15,7 +15,6 @@ import type { Locale } from '@/i18n/routing';
 export function JobForm({ locale }: { locale: Locale }) {
   const t = useTranslations('Jobs.form');
   const tCat = useTranslations('Services.categories');
-  const tJobs = useTranslations('Jobs');
   const { city } = useCity();
   const createJob = useMutation(api.jobs.create);
 
@@ -75,12 +74,23 @@ export function JobForm({ locale }: { locale: Locale }) {
           onChange={(e) => setCategory(e.target.value as JobCategory)}
           className="form-input"
         >
-          {SERVICE_CATEGORIES.map((c) => (
-            <option key={c.key} value={c.key}>
-              {tCat(`${c.key}.title`)}
-            </option>
-          ))}
-          <option value="other">{tJobs('categoryOther')}</option>
+          {TOP_LEVEL_SERVICE_CATEGORIES.map((c) => {
+            const subs = getSubcategories(c.key);
+            return (
+              <React.Fragment key={c.key}>
+                <option value={c.key}>{tCat(`${c.key}.title`)}</option>
+                {subs.length > 0 && (
+                  <optgroup label={tCat(`${c.key}.title`)}>
+                    {subs.map((s) => (
+                      <option key={s.key} value={s.key}>
+                        {tCat(`${s.key}.title`)}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </React.Fragment>
+            );
+          })}
         </select>
       </Field>
 

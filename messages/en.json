@@ -205,12 +205,63 @@
       "tech": {
         "title": "Tech & software",
         "description": "Custom web and mobile apps, websites, IT support, cloud setup, and software solutions from local developers."
+      },
+      "tutoring": {
+        "title": "Home tutoring",
+        "description": "Private tutors at home or online — maths, sciences, languages, exam prep, and homework help for every level."
+      },
+      "liaison": {
+        "title": "Liaison agent",
+        "description": "One trusted local contact who handles your essential household accounts — internet, mobile and home phone, gas and electricity, TV, protection, mortgages, and home security — plus cheap phone credit and payments, water heaters, thermostats, and more."
+      },
+      "digitalsecurity": {
+        "title": "Digital security",
+        "description": "Antivirus, password managers, device clean-ups, and protection against online fraud, scams, and identity theft."
+      },
+      "gaselectricity": {
+        "title": "Gas & electricity",
+        "description": "Power and gas connections, meter set-up, bill payments, prepaid top-ups, and help switching to a cheaper supplier."
+      },
+      "homephone": {
+        "title": "Home phone",
+        "description": "Landline installation, home phone lines and handsets, calling plans, and repairs to existing connections."
+      },
+      "internet": {
+        "title": "Internet",
+        "description": "Home and business internet — fibre, wireless, and mobile broadband, router set-up, and Wi-Fi coverage fixes."
+      },
+      "mobility": {
+        "title": "Mobility",
+        "description": "Mobile lines, SIM cards, data bundles, and phone plans — plus help picking the cheapest deal for how you use your phone."
+      },
+      "mortgage": {
+        "title": "Mortgage",
+        "description": "Mortgages and home loans — brokers who compare lenders, prepare your file, and walk you through approval."
+      },
+      "protection": {
+        "title": "Protection",
+        "description": "Life, income, health, and family protection cover — advisers who match the right plan to your situation."
+      },
+      "securityautomation": {
+        "title": "Security & automation",
+        "description": "Alarm systems, CCTV and doorbell cameras, smart locks, and connected lighting, heating, and home automation."
+      },
+      "television": {
+        "title": "Television",
+        "description": "TV packages, satellite and cable installation, decoders and streaming set-up, plus aerial and dish repairs."
+      },
+      "other": {
+        "title": "Others",
+        "description": "Anything that doesn't fit the categories above — tell us what you need and we'll match you with the right local pro."
       }
     },
     "viewPros": "View available pros",
     "viewAll": "View all pros",
     "comingSoon": "Coming soon to {city}",
     "backToAll": "All services",
+    "backToParent": "Back to {service}",
+    "subServicesTitle": "What {service} covers",
+    "subServicesSubtitle": "Pick the exact thing you need help with, or contact an agent below and they'll sort it out for you.",
     "findInCity": "Find {service} pros by city",
     "listings": {
       "loading": "Loading pros...",

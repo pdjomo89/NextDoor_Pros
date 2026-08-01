@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ServiceCard } from '@/components/service-card';
 import { CityBanner } from '@/components/city-banner';
 import { FeaturedTitle } from '@/components/featured-title';
-import { SERVICE_CATEGORIES } from '@/lib/services';
+import { TOP_LEVEL_SERVICE_CATEGORIES } from '@/lib/services';
 import type { Locale } from '@/i18n/routing';
 
 export default async function HomePage({
@@ -76,7 +76,7 @@ export default async function HomePage({
           <p className="mt-3 text-lg text-navy/70">{t('featuredSubtitle')}</p>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICE_CATEGORIES.map((c) => (
+          {TOP_LEVEL_SERVICE_CATEGORIES.map((c) => (
             <ServiceCard key={c.slug} category={c} />
           ))}
         </div>

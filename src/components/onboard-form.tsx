@@ -8,7 +8,11 @@ import { Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CityPicker } from '@/components/city-picker';
 import { useCity } from '@/components/city-picker-context';
-import { SERVICE_CATEGORIES, type ServiceKey } from '@/lib/services';
+import {
+  TOP_LEVEL_SERVICE_CATEGORIES,
+  getSubcategories,
+  type ServiceKey,
+} from '@/lib/services';
 import { api } from '../../convex/_generated/api';
 import type { ContractorDoc } from '@/lib/contractor-types';
 import type { Locale } from '@/i18n/routing';
@@ -169,31 +173,35 @@ export function OnboardForm({ locale }: { locale: Locale }) {
 
         <Field label={t('services')} required>
           <div className="grid gap-2 sm:grid-cols-2">
-            {SERVICE_CATEGORIES.map((c) => {
-              const on = services.includes(c.key);
-              return (
-                <label
-                  key={c.slug}
-                  className={cn(
-                    'flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 transition-colors',
-                    on
-                      ? 'border-forest bg-forest/5 text-forest'
-                      : 'border-navy/15 hover:bg-navy/5',
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={on}
-                    onChange={() => toggleService(c.key)}
-                    className="h-4 w-4 accent-forest"
-                  />
-                  <span className="text-sm font-medium">
-                    {tCat(`${c.key}.title`)}
-                  </span>
-                </label>
-              );
-            })}
+            {TOP_LEVEL_SERVICE_CATEGORIES.map((c) => (
+              <ServiceCheckbox
+                key={c.slug}
+                label={tCat(`${c.key}.title`)}
+                checked={services.includes(c.key)}
+                onToggle={() => toggleService(c.key)}
+              />
+            ))}
           </div>
+
+          {TOP_LEVEL_SERVICE_CATEGORIES.filter((c) => getSubcategories(c.key).length > 0).map(
+            (parent) => (
+              <div key={parent.slug} className="mt-4 rounded-lg border border-navy/10 bg-navy/[0.02] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-navy/60">
+                  {tCat(`${parent.key}.title`)}
+                </p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {getSubcategories(parent.key).map((c) => (
+                    <ServiceCheckbox
+                      key={c.slug}
+                      label={tCat(`${c.key}.title`)}
+                      checked={services.includes(c.key)}
+                      onToggle={() => toggleService(c.key)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ),
+          )}
         </Field>
 
         <div className="rounded-xl border border-forest/30 bg-forest/[0.04] p-4 text-sm text-navy/70">
@@ -270,6 +278,33 @@ export function OnboardForm({ locale }: { locale: Locale }) {
         `}</style>
       </form>
     </>
+  );
+}
+
+function ServiceCheckbox({
+  label,
+  checked,
+  onToggle,
+}: {
+  label: string;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <label
+      className={cn(
+        'flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 transition-colors',
+        checked ? 'border-forest bg-forest/5 text-forest' : 'border-navy/15 hover:bg-navy/5',
+      )}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onToggle}
+        className="h-4 w-4 accent-forest"
+      />
+      <span className="text-sm font-medium">{label}</span>
+    </label>
   );
 }
 
