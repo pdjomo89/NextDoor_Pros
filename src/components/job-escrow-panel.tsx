@@ -179,7 +179,7 @@ export function JobEscrowPanel({
             <p>{t('awaitingConfirm', { days: AUTO_RELEASE_DAYS })}</p>
           ) : (
             <div className="space-y-2">
-              <p>{t('heldPro')}</p>
+              <p>{t('heldPro', { days: AUTO_RELEASE_DAYS })}</p>
               <Button
                 variant="secondary"
                 size="sm"
@@ -194,7 +194,7 @@ export function JobEscrowPanel({
         )}
         {escrow?.status === 'held' && role === 'employer' && (
           <div className="space-y-2">
-            <p>{t('heldEmployer')}</p>
+            <p>{t('heldEmployer', { days: AUTO_RELEASE_DAYS })}</p>
             <p className="text-xs text-navy/55">
               {t('feeNote', { pct, proReceives: fmt(escrow.proReceives) })}
             </p>

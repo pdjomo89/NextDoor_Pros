@@ -24,9 +24,13 @@ import { countryOfCity, currencyForCountry, monetizationModel } from './markets'
 // the pro is paid out once the work is confirmed done, minus commission.
 //
 //   1. Pro sends a payment request (agreed amount)     → escrow 'requested'
-//   2. Employer pays via hosted Checkout               → charge held on platform
-//   3. Pro marks the work done                         → starts the release clock
-//   4. Employer confirms (or 7 days pass)              → Transfer to pro − 5%
+//   2. Employer pays via hosted Checkout               → charge held, clock starts
+//   3. Pro marks the work done                         → informational only
+//   4. Employer confirms (or 2 days pass)              → Transfer to pro − 5%
+//
+// The release clock runs from step 2, not step 3, so a pro who never marks the
+// job done cannot leave the money stranded. Step 3 only changes what the two
+// sides see in the UI. The employer's refund window is therefore step 2 + 2d.
 //
 // Money uses Stripe "separate charges & transfers": the charge lands on the
 // platform balance; a Transfer pays the pro's connected account. Only runs in
@@ -36,7 +40,9 @@ import { countryOfCity, currencyForCountry, monetizationModel } from './markets'
 /** Platform commission kept from each job payment (basis points; 500 = 5%). */
 export const JOB_COMMISSION_BPS = 500;
 /**
- * Days after the pro marks a job done before escrow auto-releases to them.
+ * Days after the employer's payment lands before escrow auto-releases to the
+ * pro. Runs whether or not the pro ever marks the job done, so funds are never
+ * stranded; the employer can still confirm early or refund inside the window.
  * Mirrored in the UI copy — keep src/components/job-escrow-panel.tsx in sync.
  */
 export const ESCROW_AUTO_RELEASE_DAYS = 2;
@@ -206,6 +212,7 @@ export const markEscrowHeld = internalMutation({
     await ctx.db.patch(escrow._id, {
       status: 'held',
       stripePaymentIntentId: paymentIntentId,
+      heldAt: Date.now(), // starts the auto-release clock
     });
   },
 });
@@ -370,9 +377,14 @@ export const dueForAutoRelease = internalQuery({
       .withIndex('by_status', (q) => q.eq('status', 'held'))
       .take(200);
     return held
-      .filter(
-        (e) => e.proMarkedDoneAt !== undefined && e.proMarkedDoneAt <= cutoff,
-      )
+      .filter((e) => {
+        // The clock runs from the moment the employer's payment landed, not
+        // from the pro marking the work done — a pro who never marks it used
+        // to strand the money here forever. `heldAt` is absent on escrows paid
+        // before it existed, so fall back to the row's creation time.
+        const startedAt = e.heldAt ?? e._creationTime;
+        return startedAt <= cutoff;
+      })
       .map((e) => e._id);
   },
 });

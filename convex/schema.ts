@@ -275,7 +275,8 @@ export default defineSchema({
     stripeSessionId: v.optional(v.string()),
     stripePaymentIntentId: v.optional(v.string()), // charge id (transfer source + refund)
     stripeTransferId: v.optional(v.string()),
-    proMarkedDoneAt: v.optional(v.number()), // starts the auto-release clock
+    heldAt: v.optional(v.number()), // payment landed — starts the auto-release clock
+    proMarkedDoneAt: v.optional(v.number()), // informational; does not change release timing
     releasedAt: v.optional(v.number()),
   })
     .index('by_job', ['jobId'])
