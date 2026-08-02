@@ -108,22 +108,29 @@ export function SiteHeader({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-navy/10 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
       <div className="container flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center" aria-label={t('brand')}>
+        {/* shrink-0 throughout: the brand is a flex item, so without it a long
+            nav (French labels, or English below ~1024px) squeezes the logo
+            horizontally while its height holds — down to a sliver. */}
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center"
+            aria-label={t('brand')}
+          >
             <Image
               src="/logo.png"
               alt={t('brand')}
               width={1254}
               height={1254}
               priority
-              className="h-12 w-12 sm:h-14 sm:w-14"
+              className="h-12 w-12 shrink-0 sm:h-14 sm:w-14"
             />
             <span className="sr-only">{t('brand')}</span>
           </Link>
           <LanguageToggle />
         </div>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 xl:flex">
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href;
             return (
@@ -131,7 +138,7 @@ export function SiteHeader({
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium transition-colors',
                   active
                     ? 'bg-forest/10 text-forest'
                     : 'text-navy/80 hover:bg-navy/5 hover:text-navy',
@@ -143,7 +150,7 @@ export function SiteHeader({
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 xl:flex">
           <CountryPicker locale={locale} />
           <CityPicker locale={locale} />
           {signedIn ? (
@@ -175,7 +182,7 @@ export function SiteHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="xl:hidden"
           aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
           onClick={() => setMobileOpen((v) => !v)}
         >
@@ -184,7 +191,7 @@ export function SiteHeader({
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-navy/10 bg-white md:hidden">
+        <div className="border-t border-navy/10 bg-white xl:hidden">
           <div className="container flex flex-col gap-3 py-4">
             <nav className="flex flex-col gap-1">
               {NAV_ITEMS.map((item) => {
