@@ -20,13 +20,24 @@ function secretKey(): string {
 
 async function stripeFetch(
   path: string,
-  init: { method: 'GET' | 'POST'; body?: URLSearchParams },
+  init: {
+    method: 'GET' | 'POST';
+    body?: URLSearchParams;
+    /**
+     * Stripe dedupes POSTs carrying the same key, returning the original
+     * response instead of repeating the side effect. Stripe retains a key for
+     * 24h, so this protects retries inside that window — long enough for the
+     * escrow auto-release cron, which retries every 6h.
+     */
+    idempotencyKey?: string;
+  },
 ): Promise<Record<string, unknown>> {
   const res = await fetch(`${STRIPE_API}${path}`, {
     method: init.method,
     headers: {
       Authorization: `Bearer ${secretKey()}`,
       ...(init.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+      ...(init.idempotencyKey ? { 'Idempotency-Key': init.idempotencyKey } : {}),
     },
     body: init.body,
   });
@@ -105,13 +116,20 @@ export async function retrieveConnectAccount(
   return normalizeAccount(a);
 }
 
-/** Transfer escrowed funds from the platform balance to a connected account. */
+/**
+ * Transfer escrowed funds from the platform balance to a connected account.
+ *
+ * Pass `idempotencyKey` (callers use the escrow id) so a retry after a partial
+ * failure — transfer created, but the local status write lost — returns the
+ * original transfer instead of paying the pro twice.
+ */
 export async function createTransfer(input: {
   amountMinor: number;
   currency: string;
   destination: string;
   sourceTransaction?: string; // the charge to draw from, when set
   metadata?: Record<string, string>;
+  idempotencyKey?: string;
 }): Promise<{ id: string }> {
   const form = new URLSearchParams();
   form.set('amount', String(input.amountMinor));
@@ -123,7 +141,11 @@ export async function createTransfer(input: {
   for (const [k, val] of Object.entries(input.metadata ?? {})) {
     form.set(`metadata[${k}]`, val);
   }
-  const t = await stripeFetch('/transfers', { method: 'POST', body: form });
+  const t = await stripeFetch('/transfers', {
+    method: 'POST',
+    body: form,
+    idempotencyKey: input.idempotencyKey,
+  });
   const id = t.id as string | undefined;
   if (!id) throw new Error(`Stripe transfer missing id: ${JSON.stringify(t)}`);
   return { id };

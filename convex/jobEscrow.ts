@@ -35,8 +35,11 @@ import { countryOfCity, currencyForCountry, monetizationModel } from './markets'
 
 /** Platform commission kept from each job payment (basis points; 500 = 5%). */
 export const JOB_COMMISSION_BPS = 500;
-/** Days after the pro marks a job done before escrow auto-releases to them. */
-export const ESCROW_AUTO_RELEASE_DAYS = 7;
+/**
+ * Days after the pro marks a job done before escrow auto-releases to them.
+ * Mirrored in the UI copy — keep src/components/job-escrow-panel.tsx in sync.
+ */
+export const ESCROW_AUTO_RELEASE_DAYS = 2;
 
 const MIN_AMOUNT_MINOR = 100;
 const MAX_AMOUNT_MINOR = 50_000_000;
@@ -297,6 +300,10 @@ async function doRelease(
     destination: info.destination,
     sourceTransaction: sourceCharge ?? undefined,
     metadata: { escrowId },
+    // An escrow releases exactly once, so its id is a stable key: if the
+    // transfer landed but `setEscrowReleased` below didn't, the cron retry
+    // re-reads the same transfer instead of paying the pro a second time.
+    idempotencyKey: `escrow-release-${escrowId}`,
   });
   await ctx.runMutation(internal.jobEscrow.setEscrowReleased, {
     escrowId,

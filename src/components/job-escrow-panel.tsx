@@ -13,6 +13,13 @@ import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 
 /**
+ * Days before a done-marked escrow auto-releases. Mirrors
+ * ESCROW_AUTO_RELEASE_DAYS in convex/jobEscrow.ts — that module can't be
+ * imported here (it pulls in server-only code), so keep the two in sync.
+ */
+const AUTO_RELEASE_DAYS = 2;
+
+/**
  * Escrow controls for a job, shown to the two participants (the pro who unlocked
  * the lead, and the employer/poster). Pro requests payment → employer pays →
  * platform holds → pro marks done → employer confirms (or auto-release) → payout
@@ -169,7 +176,7 @@ export function JobEscrowPanel({
         {/* Held */}
         {escrow?.status === 'held' && role === 'pro' && (
           escrow.proMarkedDone ? (
-            <p>{t('awaitingConfirm', { days: 7 })}</p>
+            <p>{t('awaitingConfirm', { days: AUTO_RELEASE_DAYS })}</p>
           ) : (
             <div className="space-y-2">
               <p>{t('heldPro')}</p>
