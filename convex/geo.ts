@@ -25,7 +25,7 @@ export type GeoCity = {
 };
 
 /** Fallback market for unknown/legacy city slugs. Mirrors DEFAULT_COUNTRY. */
-export const DEFAULT_COUNTRY = 'CM';
+export const DEFAULT_COUNTRY = 'CA';
 
 export const GEO_REGIONS: GeoRegion[] = [
   // ── Cameroon ──

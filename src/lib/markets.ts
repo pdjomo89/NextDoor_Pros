@@ -104,11 +104,12 @@ export const MARKETS: Record<CountryCode, Market> = {
 };
 
 /**
- * The country the app defaults to until listings carry their own country
- * (Phase 3) and a country selector exists. Single source of truth for the
- * "current market" during the single-country era.
+ * The country the app defaults to: the market a visitor sees before picking a
+ * city, and the fallback for any row that doesn't carry its own country. Note
+ * this also selects the fallback payment rail (CA → Stripe subscriptions), so
+ * a row with no country is billed as Canadian.
  */
-export const DEFAULT_COUNTRY: CountryCode = 'CM';
+export const DEFAULT_COUNTRY: CountryCode = 'CA';
 
 export const DEFAULT_MARKET: Market = MARKETS[DEFAULT_COUNTRY];
 

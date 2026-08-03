@@ -86,7 +86,7 @@ export const MARKETS: Record<CountryCode, Market> = {
   },
 };
 
-export const DEFAULT_COUNTRY: CountryCode = 'CM';
+export const DEFAULT_COUNTRY: CountryCode = 'CA';
 
 /**
  * Country a city belongs to; unknown/empty slugs fall back to the default.

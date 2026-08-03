@@ -478,7 +478,7 @@
       "descriptionPlaceholder": "The role, responsibilities, hours, pay, and what you're looking for in a candidate.",
       "city": "City",
       "budget": "Pay",
-      "budgetPlaceholder": "e.g. 3000 FCFA/hr, 200000 FCFA/month, negotiable",
+      "budgetPlaceholder": "e.g. $30/hr, $4,000/month, negotiable",
       "timing": "Schedule",
       "timingPlaceholder": "e.g. Start ASAP, weekends, flexible hours",
       "contactSection": "How candidates reach you",
