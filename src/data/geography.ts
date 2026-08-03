@@ -63,14 +63,24 @@ export function regionsForCountry(country: CountryCode): Region[] {
   return REGIONS.filter((r) => r.country === country);
 }
 
-/** Largest / highest-traffic cities — used to pre-render & sitemap per-city service pages. */
+/**
+ * Largest / highest-traffic cities — used to pre-render & sitemap per-city
+ * service pages. Canada's biggest metros, with a spread across provinces so the
+ * long-tail pages in each region have a prerendered neighbour to link from.
+ */
 export const FEATURED_CITY_SLUGS = [
-  'douala',
-  'yaounde',
-  'bafoussam',
   'toronto',
   'montreal',
   'vancouver',
+  'calgary',
+  'edmonton',
+  'ottawa',
+  'winnipeg',
+  'quebec-city',
+  'hamilton',
+  'mississauga',
+  'halifax',
+  'surrey',
 ] as const;
 
 export const FEATURED_CITIES: City[] = FEATURED_CITY_SLUGS.map(
