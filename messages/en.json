@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "NextDoor Pros — Trusted local services across Cameroon",
+    "title": "NextDoor Pros — Trusted local services across Canada",
     "description": "Book vetted local pros for home, beauty, outdoor, moving, seasonal, and handyman jobs in your city."
   },
   "Nav": {
@@ -43,7 +43,7 @@
       "rating": "Average rating"
     },
     "featuredTitle": "Popular services in {city}",
-    "featuredTitleNoCity": "Popular services across Cameroon",
+    "featuredTitleNoCity": "Popular services across Canada",
     "featuredSubtitle": "Browse the categories our customers book most.",
     "howItWorks": {
       "title": "How it works",
@@ -556,7 +556,7 @@
     "proCtaBody": "List your business free and get found by customers looking for {service} in {city}.",
     "proCtaButton": "List my business",
     "nearbyTitle": "{service} in other {province} cities",
-    "browseAll": "Browse {service} across Cameroon"
+    "browseAll": "Browse {service} across Canada"
   },
   "WhatsApp": {
     "label": "Chat on WhatsApp",

@@ -35,8 +35,8 @@ export async function generateMetadata({
   const description = t(`categories.${category.key}.description`);
   const title =
     locale === 'fr'
-      ? `${name} — pros locaux vérifiés partout au Cameroun`
-      : `${name} — trusted local pros across Cameroon`;
+      ? `${name} — pros locaux vérifiés partout au Canada`
+      : `${name} — trusted local pros across Canada`;
   return pageMetadata({
     locale: locale as Locale,
     path: `/services/${slug}`,
@@ -72,7 +72,7 @@ export default async function ServiceDetailPage({
     description,
     serviceType: name,
     provider: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/${locale}` },
-    areaServed: { '@type': 'Country', name: 'Cameroon' },
+    areaServed: { '@type': 'Country', name: 'Canada' },
     url: `${SITE_URL}/${locale}/services/${slug}`,
   };
   const breadcrumbLd = {

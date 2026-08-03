@@ -31,7 +31,7 @@ export async function generateMetadata({
     description,
     keywords: [
       'local services',
-      'home services Cameroon',
+      'home services Canada',
       'find a contractor',
       'hire a pro',
       'cleaning',
@@ -86,7 +86,7 @@ export default async function LocaleLayout({
     logo: `${SITE_URL}/logo.png`,
     description: meta('description'),
     email: 'hello@mynextdoorpros.com',
-    areaServed: { '@type': 'Country', name: 'Cameroon' },
+    areaServed: { '@type': 'Country', name: 'Canada' },
   };
   const siteLd = {
     '@context': 'https://schema.org',

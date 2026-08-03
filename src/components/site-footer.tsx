@@ -106,7 +106,7 @@ export function SiteFooter() {
           <span>
             © {year} {tNav('brand')}. {t('rights')}
           </span>
-          <span>Made in Cameroon 🇨🇲</span>
+          <span>Made in Canada 🇨🇦</span>
         </div>
       </div>
     </footer>

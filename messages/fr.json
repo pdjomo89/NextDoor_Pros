@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "NextDoor Pros — Services locaux de confiance partout au Cameroun",
+    "title": "NextDoor Pros — Services locaux de confiance partout au Canada",
     "description": "Réservez des pros locaux vérifiés pour la maison, la beauté, l'extérieur, le déménagement, les services saisonniers et les petits travaux dans votre ville."
   },
   "Nav": {
@@ -43,7 +43,7 @@
       "rating": "Note moyenne"
     },
     "featuredTitle": "Services populaires à {city}",
-    "featuredTitleNoCity": "Services populaires au Cameroun",
+    "featuredTitleNoCity": "Services populaires au Canada",
     "featuredSubtitle": "Découvrez les catégories les plus réservées par nos clients.",
     "howItWorks": {
       "title": "Comment ça marche",
@@ -556,7 +556,7 @@
     "proCtaBody": "Inscrivez votre entreprise gratuitement et soyez trouvé par les clients qui cherchent {service} à {city}.",
     "proCtaButton": "Inscrire mon entreprise",
     "nearbyTitle": "{service} dans d'autres villes ({province})",
-    "browseAll": "Voir {service} partout au Cameroun"
+    "browseAll": "Voir {service} partout au Canada"
   },
   "WhatsApp": {
     "label": "Clavarder sur WhatsApp",
