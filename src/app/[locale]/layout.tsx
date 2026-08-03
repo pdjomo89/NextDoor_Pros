@@ -45,7 +45,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
-      locale: locale === 'fr' ? 'fr_CM' : 'en_CM',
+      locale: locale === 'fr' ? 'fr_CA' : 'en_CA',
       url: `${SITE_URL}/${locale}`,
       title,
       description,
@@ -93,7 +93,7 @@ export default async function LocaleLayout({
     '@type': 'WebSite',
     name: SITE_NAME,
     url: SITE_URL,
-    inLanguage: locale === 'fr' ? 'fr-CM' : 'en-CM',
+    inLanguage: locale === 'fr' ? 'fr-CA' : 'en-CA',
   };
 
   return (
