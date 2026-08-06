@@ -306,10 +306,10 @@
     "perYear": "/year",
     "bestValue": "Best value",
     "cta": "Become a pro",
-    "freeTrial": "1st month free",
-    "freeBanner": "Your first month is on us — start free, cancel anytime.",
-    "ctaTrial": "Start 1 month free",
-    "trialNote": "No charge today. After your free month, membership renews automatically until you cancel.",
+    "freeTrial": "First 3 months free",
+    "freeBanner": "Your first 3 months are on us — start free, cancel anytime.",
+    "ctaTrial": "Start 3 months free",
+    "trialNote": "No charge today. After your 3 free months, membership renews automatically until you cancel.",
     "monthly": {
       "name": "Monthly",
       "tagline": "Flexible — cancel anytime",
@@ -722,6 +722,12 @@
     "messageLabel": "Message",
     "composerPlaceholder": "Write a message…",
     "redactionNotice": "Phone numbers, emails and links are removed automatically. Keep conversations on NextDoor Pros.",
+    "unlockTitle": "Unlock this conversation to reply",
+    "unlockBody": "Pay {fee} once to reply to this customer. It covers the whole conversation — every later reply is free. The customer is never charged.",
+    "unlockBodyGeneric": "Unlock this conversation to reply to the customer.",
+    "unlockCta": "Unlock and reply",
+    "unlockPending": "Confirming your payment…",
+    "unlockError": "We couldn't start the payment. Please try again.",
     "sendInquiry": "Send message",
     "sending": "Sending…",
     "send": "Send",
@@ -750,7 +756,9 @@
     "copied": "Copied!",
     "guestNoneTitle": "No conversations on this device",
     "guestNoneBody": "When you message a pro, it's saved here on this device so you can come back to it anytime.",
-    "proInboxHint": "Are you a pro?"
+    "proInboxHint": "Are you a pro?",
+    "declinedTitle": "This request was closed",
+    "declinedBody": "The customer waited 2 days without a reply, so we closed the request and suggested they contact another pro. You can no longer reply in this conversation."
   },
   "Membership": {
     "title": "Membership",

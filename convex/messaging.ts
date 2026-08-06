@@ -3,6 +3,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { internalAction, internalMutation, mutation, query } from './_generated/server';
 import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
+import { canReplyFree } from './inquiryUnlocks';
 
 const MAX_BODY_LEN = 2000;
 const MAX_NAME_LEN = 80;
@@ -124,6 +125,17 @@ export const startGuestConversation = mutation({
 
     const contractorWasUnread = convo?.contractorUnread ?? 0;
 
+    // Start the follow-up clock on a thread the pro has never replied to, so an
+    // inquiry can't sit unanswered forever behind the reply fee. Set once per
+    // waiting period — a chasing customer must not push the deadline out.
+    const proHasReplied = await ctx.db
+      .query('messages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', conversationId))
+      .filter((q) => q.eq(q.field('senderRole'), 'contractor'))
+      .first();
+    const startsWaiting =
+      !proHasReplied && convo?.awaitingReplySince === undefined;
+
     await ctx.db.insert('messages', {
       conversationId,
       senderRole: 'customer',
@@ -137,6 +149,7 @@ export const startGuestConversation = mutation({
       lastSenderRole: 'customer',
       contractorUnread: contractorWasUnread + 1,
       ...(cleanName && !convo?.customerName ? { customerName: cleanName } : {}),
+      ...(startsWaiting ? { awaitingReplySince: now } : {}),
     });
 
     // Notify the pro (only on the first message of an unread streak).
@@ -510,6 +523,16 @@ export const sendMessage = mutation({
     const convo = await ctx.db.get(conversationId);
     if (!convo) throw new Error('NOT_FOUND');
     if (convo.contractorOwnerId !== userId) throw new Error('FORBIDDEN');
+    // Auto-declined for going unanswered — the customer has been told to look
+    // elsewhere, so a late reply would be worse than none.
+    if (convo.status === 'declined') throw new Error('INQUIRY_DECLINED');
+
+    // Pay-as-you-go markets charge the pro to reply to an inbound guest
+    // inquiry. The customer is never charged, and the fee is per thread, not
+    // per message — see convex/inquiryUnlocks.ts.
+    if (!(await canReplyFree(ctx, userId, convo))) {
+      throw new Error('INQUIRY_UNLOCK_REQUIRED');
+    }
 
     const trimmed = body.trim().slice(0, MAX_BODY_LEN);
     if (!trimmed) throw new Error('EMPTY');
@@ -527,6 +550,9 @@ export const sendMessage = mutation({
       lastMessagePreview: text.slice(0, 140),
       lastSenderRole: 'contractor',
       customerUnread: convo.customerUnread + 1,
+      // The pro answered — stop the nudge/auto-decline clock.
+      awaitingReplySince: undefined,
+      nudgedAt: undefined,
     });
 
     // Email the customer their private link on the first reply of a streak.
@@ -638,8 +664,14 @@ export const unreadCount = query({
  * the conversation on-platform. No-ops when RESEND_API_KEY is unset.
  */
 export const notifyByEmail = internalAction({
-  args: { toEmail: v.string(), link: v.string(), intro: v.string() },
-  handler: async (_ctx, { toEmail, link, intro }) => {
+  args: {
+    toEmail: v.string(),
+    link: v.string(),
+    intro: v.string(),
+    /** Overrides the default "new message" subject (nudges, declines, …). */
+    subject: v.optional(v.string()),
+  },
+  handler: async (_ctx, { toEmail, link, intro, subject }) => {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return;
 
@@ -656,7 +688,7 @@ export const notifyByEmail = internalAction({
         body: JSON.stringify({
           from,
           to: [toEmail],
-          subject: 'New message on NextDoor Pros',
+          subject: subject ?? 'New message on NextDoor Pros',
           text: [
             intro,
             '',

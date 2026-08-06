@@ -1,11 +1,20 @@
 'use client';
 
 import * as React from 'react';
-import { useMutation, useQuery } from 'convex/react';
-import { useTranslations } from 'next-intl';
-import { ArrowLeft, Loader2, MessageSquare, Send, ShieldCheck } from 'lucide-react';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+  ArrowLeft,
+  Loader2,
+  Lock,
+  MessageSquare,
+  Send,
+  ShieldCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getConvexEnv } from '@/lib/convex-env';
+import { formatMoney } from '@/lib/currency';
+import { regionForCurrency } from '@/lib/markets';
 import { api } from '../../convex/_generated/api';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +26,14 @@ type Conversation = {
   lastMessageAt: number;
   lastMessagePreview: string;
   unread: number;
+};
+
+type ReplyAccess = {
+  locked: boolean;
+  pending: boolean;
+  declined: boolean;
+  fee: number | null;
+  currency: string | null;
 };
 
 type ThreadMessage = {
@@ -47,6 +64,7 @@ export function MessagesClient({
   initialConversationId: string | null;
 }) {
   const t = useTranslations('Messages');
+  const locale = useLocale();
   const configured = getConvexEnv().configured;
 
   const conversations = useQuery(
@@ -65,11 +83,23 @@ export function MessagesClient({
       : 'skip',
   ) as { myRole: string; messages: ThreadMessage[] } | null | undefined;
 
+  // Pay-as-you-go markets charge the pro to reply to an inbound guest inquiry.
+  // `locked` is false in every other case (subscription market, job thread,
+  // already paid), so the composer renders unchanged for them.
+  const replyAccess = useQuery(
+    api.inquiryUnlocks.replyAccess,
+    configured && selectedId ? { conversationId: selectedId as never } : 'skip',
+  ) as ReplyAccess | null | undefined;
+
   const sendMessage = useMutation(api.messaging.sendMessage);
   const markRead = useMutation(api.messaging.markRead);
+  const startUnlock = useAction(api.inquiryUnlocks.startInquiryUnlock);
+  const refreshUnlock = useAction(api.inquiryUnlocks.refreshInquiryUnlock);
 
   const [draft, setDraft] = React.useState('');
   const [sending, setSending] = React.useState(false);
+  const [paying, setPaying] = React.useState(false);
+  const [payError, setPayError] = React.useState<string | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   const selected = conversations?.find((c) => c._id === selectedId) ?? null;
@@ -84,6 +114,30 @@ export function MessagesClient({
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [msgCount, selectedId]);
+
+  // A payment left pending means the provider webhook hasn't landed (or was
+  // missed) — re-check it against the provider so the pro isn't stuck behind a
+  // charge they already made.
+  React.useEffect(() => {
+    if (!selectedId || !replyAccess?.pending) return;
+    refreshUnlock({ conversationId: selectedId as never }).catch(() => {});
+  }, [selectedId, replyAccess?.pending, refreshUnlock]);
+
+  async function onPayToReply() {
+    if (!selectedId || paying) return;
+    setPayError(null);
+    setPaying(true);
+    try {
+      const { link } = await startUnlock({
+        conversationId: selectedId as never,
+        locale,
+      });
+      window.location.href = link; // provider-hosted checkout
+    } catch {
+      setPayError(t('unlockError'));
+      setPaying(false);
+    }
+  }
 
   async function doSend() {
     const body = draft.trim();
@@ -253,6 +307,59 @@ export function MessagesClient({
               <div ref={bottomRef} />
             </div>
 
+            {replyAccess?.declined ? (
+              <div className="border-t border-navy/10 px-4 py-4">
+                <div className="rounded-xl border border-navy/15 bg-navy/[0.04] px-4 py-3">
+                  <p className="flex items-center gap-1.5 text-sm font-semibold text-navy/75">
+                    <Lock className="h-4 w-4 text-navy/45" />
+                    {t('declinedTitle')}
+                  </p>
+                  <p className="mt-1 text-xs text-navy/55">{t('declinedBody')}</p>
+                </div>
+              </div>
+            ) : replyAccess?.locked ? (
+              <div className="border-t border-navy/10 px-4 py-4">
+                <div className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3">
+                  <p className="flex items-center gap-1.5 text-sm font-semibold text-navy">
+                    <Lock className="h-4 w-4 text-amber-600" />
+                    {t('unlockTitle')}
+                  </p>
+                  <p className="mt-1 text-xs text-navy/65">
+                    {replyAccess.fee !== null && replyAccess.currency
+                      ? t('unlockBody', {
+                          fee: formatMoney(
+                            replyAccess.fee,
+                            replyAccess.currency,
+                            locale,
+                            regionForCurrency(replyAccess.currency),
+                          ),
+                        })
+                      : t('unlockBodyGeneric')}
+                  </p>
+                  {replyAccess.pending ? (
+                    <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-navy/70">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {t('unlockPending')}
+                    </p>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="mt-3"
+                      disabled={paying}
+                      onClick={() => void onPayToReply()}
+                    >
+                      {paying && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {t('unlockCta')}
+                    </Button>
+                  )}
+                  {payError && (
+                    <p className="mt-2 text-xs text-red-600">{payError}</p>
+                  )}
+                </div>
+              </div>
+            ) : (
             <form onSubmit={onSubmit} className="border-t border-navy/10 px-4 py-3">
               <p className="mb-2 flex items-center gap-1.5 text-[11px] text-navy/50">
                 <ShieldCheck className="h-3.5 w-3.5 text-forest" />
@@ -288,6 +395,7 @@ export function MessagesClient({
                 </Button>
               </div>
             </form>
+            )}
           </>
         )}
       </section>

@@ -12,4 +12,14 @@ crons.interval(
   {},
 );
 
+// Chase pros sitting on an unanswered customer inquiry, in every market: a
+// reminder after INQUIRY_NUDGE_HOURS, then auto-decline after
+// INQUIRY_DECLINE_DAYS so the customer isn't left waiting indefinitely.
+crons.interval(
+  'follow up on unanswered inquiries',
+  { hours: 1 },
+  internal.inquiryFollowUps.runInquiryFollowUps,
+  {},
+);
+
 export default crons;

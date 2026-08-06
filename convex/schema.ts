@@ -153,12 +153,24 @@ export default defineSchema({
     customerUnread: v.number(),
     contractorUnread: v.number(),
 
-    status: v.string(), // 'active' | 'archived'
+    status: v.string(), // 'active' | 'archived' | 'declined'
+
+    // ─── Unanswered-inquiry follow-up (see convex/inquiryFollowUps.ts) ──────
+    // When the customer's first message landed on a thread the pro has never
+    // replied to. Set on that message, cleared the moment the pro replies —
+    // so it doubles as "is this thread still waiting on the pro?". The cron
+    // nudges, then auto-declines, off this timestamp; absent = nothing owed.
+    awaitingReplySince: v.optional(v.number()),
+    /** When the pro was nudged about this thread (once per waiting period). */
+    nudgedAt: v.optional(v.number()),
+    /** When the thread was auto-declined for going unanswered. */
+    declinedAt: v.optional(v.number()),
   })
     .index('by_contractorOwner', ['contractorOwnerId', 'lastMessageAt'])
     .index('by_guestToken', ['guestToken'])
     .index('by_contractor_email', ['contractorId', 'customerEmail'])
-    .index('by_job_email', ['jobId', 'customerEmail']),
+    .index('by_job_email', ['jobId', 'customerEmail'])
+    .index('by_awaitingReplySince', ['awaitingReplySince']),
 
   messages: defineTable({
     conversationId: v.id('conversations'),
@@ -194,6 +206,32 @@ export default defineSchema({
   })
     .index('by_transId', ['transId'])
     .index('by_pro_job', ['proId', 'jobId'])
+    .index('by_pro', ['proId']),
+
+  // ─── Inquiry unlocks (pay-as-you-go markets, e.g. Cameroon) ──────────────
+  //
+  // A guest customer messages a pro for free; the PRO pays a small fee to reply
+  // to that thread. One row per (pro, conversation) attempt, flipped to
+  // 'successful' by the provider webhook, after which the pro may send in that
+  // thread forever (the fee buys the thread, not the message). Customers are
+  // never charged. Subscription markets (Canada) are not gated — replying is
+  // part of the membership. See convex/inquiryUnlocks.ts + convex/http.ts.
+  inquiryUnlocks: defineTable({
+    proId: v.id('users'),
+    conversationId: v.id('conversations'),
+    // ISO 3166-1 alpha-2 market of the pro's listing (derived from its city).
+    country: v.optional(v.string()),
+    provider: v.string(), // ProviderName: 'fapshi' | 'stripe'
+    transId: v.optional(v.string()), // provider transaction id (set after initiate-pay)
+    externalId: v.string(), // idempotency key we send to the provider
+    amount: v.number(), // minor units of `currency`
+    currency: v.string(), // lowercase ISO 4217, e.g. 'xaf'
+    // 'created' | 'pending' | 'successful' | 'failed' | 'expired'
+    status: v.string(),
+    link: v.optional(v.string()), // hosted-checkout URL
+  })
+    .index('by_transId', ['transId'])
+    .index('by_pro_conversation', ['proId', 'conversationId'])
     .index('by_pro', ['proId']),
 
   // ─── Memberships (subscription markets, e.g. Canada) ─────────────────────

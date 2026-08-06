@@ -306,10 +306,10 @@
     "perYear": "/an",
     "bestValue": "Meilleure offre",
     "cta": "Devenir pro",
-    "freeTrial": "1er mois gratuit",
-    "freeBanner": "Votre premier mois est offert — commencez gratuitement, annulez à tout moment.",
-    "ctaTrial": "Commencer 1 mois gratuit",
-    "trialNote": "Aucun frais aujourd'hui. Après votre mois gratuit, l'abonnement se renouvelle automatiquement jusqu'à l'annulation.",
+    "freeTrial": "3 premiers mois gratuits",
+    "freeBanner": "Vos 3 premiers mois sont offerts — commencez gratuitement, annulez à tout moment.",
+    "ctaTrial": "Commencer 3 mois gratuits",
+    "trialNote": "Aucun frais aujourd'hui. Après vos 3 mois gratuits, l'abonnement se renouvelle automatiquement jusqu'à l'annulation.",
     "monthly": {
       "name": "Mensuel",
       "tagline": "Souple — annulable à tout moment",
@@ -722,6 +722,12 @@
     "messageLabel": "Message",
     "composerPlaceholder": "Écrivez un message…",
     "redactionNotice": "Les numéros de téléphone, courriels et liens sont retirés automatiquement. Gardez vos échanges sur NextDoor Pros.",
+    "unlockTitle": "Débloquez cette conversation pour répondre",
+    "unlockBody": "Payez {fee} une seule fois pour répondre à ce client. Cela couvre toute la conversation — chaque réponse suivante est gratuite. Le client ne paie jamais.",
+    "unlockBodyGeneric": "Débloquez cette conversation pour répondre au client.",
+    "unlockCta": "Débloquer et répondre",
+    "unlockPending": "Confirmation de votre paiement…",
+    "unlockError": "Impossible de démarrer le paiement. Veuillez réessayer.",
     "sendInquiry": "Envoyer le message",
     "sending": "Envoi…",
     "send": "Envoyer",
@@ -750,7 +756,9 @@
     "copied": "Copié !",
     "guestNoneTitle": "Aucune conversation sur cet appareil",
     "guestNoneBody": "Lorsque vous écrivez à un pro, la conversation est enregistrée sur cet appareil pour que vous puissiez y revenir à tout moment.",
-    "proInboxHint": "Vous êtes un pro ?"
+    "proInboxHint": "Vous êtes un pro ?",
+    "declinedTitle": "Cette demande a été clôturée",
+    "declinedBody": "Le client a attendu 2 jours sans réponse : nous avons clôturé la demande et lui avons suggéré de contacter un autre pro. Vous ne pouvez plus répondre dans cette conversation."
   },
   "Membership": {
     "title": "Abonnement",

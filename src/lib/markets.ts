@@ -1,115 +1,79 @@
 import type { Locale } from '@/i18n/routing';
+import {
+  DEFAULT_COUNTRY,
+  getMarketConfig,
+  MARKET_CONFIG,
+  membershipTrialDays,
+  monetizationModel,
+  type CountryCode,
+  type MarketConfig,
+  type MembershipPlanConfig,
+  type MembershipRole,
+  type Monetization,
+  type MonetizationModel,
+  type PaymentProvider,
+} from '../../convex/marketsConfig';
 
 /**
  * ─── Markets (multi-country foundation) ────────────────────────────────────
  *
  * A "market" is a country the marketplace operates in. Everything that used to
  * be hardcoded to Cameroon (currency, supported languages, payment rail, and
- * — later — geography) is expressed here as per-country config, so adding a
- * country is a data change rather than a code hunt.
+ * geography) is expressed as per-country config, so adding a country is a data
+ * change rather than a code hunt.
  *
- * Phase 1 keeps Cameroon as the only (and default) market; no listing carries a
- * country yet. The `country` dimension on stored data (contractors/jobs/etc.)
- * and the payment-provider *adapters* land in later phases — this file is the
- * registry those phases read from.
+ * What a market CHARGES — prices, per-lead fee, trial length, quotas — lives in
+ * convex/marketsConfig.ts, imported by this file and by the Convex backend
+ * alike. That module is authoritative: it is what actually reaches Stripe and
+ * Fapshi, and this file only presents it. The two used to be separate copies,
+ * which let a pricing edit change the displayed price without changing the
+ * charged one.
  *
- * NOTE: this module is imported by the Next.js app only. Convex functions
- * bundle just the `convex/` directory, so when Phase 2 needs market/provider
- * routing on the backend, the pure data below should move to a location both
- * sides can import (or be mirrored under `convex/`). Kept frontend-only for now
- * to avoid premature indirection.
+ * What this file adds is presentation-only: the country's display name and the
+ * languages its UI is offered in. Those never affect billing, so they stay on
+ * the frontend side.
  */
 
-/** ISO 3166-1 alpha-2 country code. */
-export type CountryCode = 'CM' | 'CA';
-
-/** Payment rails a market can be wired to. Adapters arrive in Phase 2. */
-export type PaymentProvider = 'fapshi' | 'stripe';
-
-/** The two sides of the marketplace that can be monetized. */
-export type MembershipRole = 'poster' | 'pro';
-
-/**
- * How a market charges. MIRRORS convex/markets.ts — keep the two in sync.
- * Amounts are always in the currency's MINOR UNIT (XAF→francs, CAD→cents).
- *
- *  - 'payg'         Cameroon: pros pay a small fee per lead unlocked; posting is
- *                   free.
- *  - 'subscription' Canada: posters and pros each hold a monthly/yearly
- *                   membership with a per-period quota.
- */
-export type MonetizationModel = 'payg' | 'subscription';
-
-export type MembershipPlanConfig = {
-  monthlyMinor: number;
-  yearlyMinor: number;
-  quotaPerPeriod: number;
+export type {
+  CountryCode,
+  MembershipPlanConfig,
+  MembershipRole,
+  Monetization,
+  MonetizationModel,
+  PaymentProvider,
 };
+export { DEFAULT_COUNTRY, membershipTrialDays, monetizationModel };
 
-export type Monetization =
-  | { model: 'payg'; leadUnlockFeeMinor: number }
-  | {
-      model: 'subscription';
-      /** Free-trial length (days) — card collected but not charged until it ends. */
-      trialDays: number;
-      poster: MembershipPlanConfig;
-      pro: MembershipPlanConfig;
-    };
-
-export type Market = {
-  /** ISO 3166-1 alpha-2, e.g. 'CM'. Also used as the region in BCP 47 locales. */
-  country: CountryCode;
+/** Presentation-only per-country fields; the rest of a Market comes from the
+ *  shared config. */
+type MarketPresentation = {
   /** Human-readable country name, per supported UI language. */
   name: Record<Locale, string>;
-  /** ISO 4217 currency code, e.g. 'XAF'. Minor units are derived from this. */
-  currency: string;
   /** UI languages offered in this market (subset of the app's routing locales). */
   locales: Locale[];
   /** Preferred language when the visitor has no explicit preference. */
   defaultLocale: Locale;
-  /** Payment rail used to collect fees in this market. */
-  paymentProvider: PaymentProvider;
-  /** How this market charges (mirrors convex/markets.ts — TODO(pricing) values). */
-  monetization: Monetization;
+};
+
+export type Market = MarketConfig & MarketPresentation;
+
+const PRESENTATION: Record<CountryCode, MarketPresentation> = {
+  CM: {
+    name: { en: 'Cameroon', fr: 'Cameroun' },
+    locales: ['en', 'fr'],
+    defaultLocale: 'en',
+  },
+  CA: {
+    name: { en: 'Canada', fr: 'Canada' },
+    locales: ['en', 'fr'],
+    defaultLocale: 'en',
+  },
 };
 
 export const MARKETS: Record<CountryCode, Market> = {
-  CM: {
-    country: 'CM',
-    name: { en: 'Cameroon', fr: 'Cameroun' },
-    currency: 'XAF',
-    locales: ['en', 'fr'],
-    defaultLocale: 'en',
-    paymentProvider: 'fapshi',
-    // Confirmed 2026-07-29: pro pays 300 XAF per lead unlocked.
-    monetization: { model: 'payg', leadUnlockFeeMinor: 300 },
-  },
-  CA: {
-    country: 'CA',
-    name: { en: 'Canada', fr: 'Canada' },
-    currency: 'CAD',
-    locales: ['en', 'fr'],
-    defaultLocale: 'en',
-    paymentProvider: 'stripe',
-    // Confirmed 2026-07-29: $15/mo, $160/yr, both sides; hard cap of 2
-    // actions/billing period (block until renewal — no overage). Card collected
-    // at checkout, but the first 30 days (~1 month) are free.
-    monetization: {
-      model: 'subscription',
-      trialDays: 30,
-      poster: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
-      pro: { monthlyMinor: 1500, yearlyMinor: 16000, quotaPerPeriod: 2 },
-    },
-  },
+  CM: { ...MARKET_CONFIG.CM, ...PRESENTATION.CM },
+  CA: { ...MARKET_CONFIG.CA, ...PRESENTATION.CA },
 };
-
-/**
- * The country the app defaults to: the market a visitor sees before picking a
- * city, and the fallback for any row that doesn't carry its own country. Note
- * this also selects the fallback payment rail (CA → Stripe subscriptions), so
- * a row with no country is billed as Canadian.
- */
-export const DEFAULT_COUNTRY: CountryCode = 'CA';
 
 export const DEFAULT_MARKET: Market = MARKETS[DEFAULT_COUNTRY];
 
@@ -120,13 +84,7 @@ export function allMarkets(): Market[] {
 
 /** Look up a market by country code; falls back to the default market. */
 export function getMarket(country?: string | null): Market {
-  if (country && country in MARKETS) return MARKETS[country as CountryCode];
-  return DEFAULT_MARKET;
-}
-
-/** How a market charges: pay-as-you-go (CM) or subscription (CA). */
-export function monetizationModel(country?: string | null): MonetizationModel {
-  return getMarket(country).monetization.model;
+  return MARKETS[getMarketConfig(country).country];
 }
 
 /**
@@ -151,8 +109,11 @@ export function leadUnlockFeeMinor(country?: string | null): number | null {
   return m.model === 'payg' ? m.leadUnlockFeeMinor : null;
 }
 
-/** Free-trial length (days) for a subscription market; 0 if not applicable. */
-export function membershipTrialDays(country?: string | null): number {
+/**
+ * The fee (minor units) a pro pays to reply to one inbound guest inquiry;
+ * `null` if the market is subscription-based (replying covered by membership).
+ */
+export function inquiryReplyFeeMinor(country?: string | null): number | null {
   const m = getMarket(country).monetization;
-  return m.model === 'subscription' ? m.trialDays : 0;
+  return m.model === 'payg' ? m.inquiryReplyFeeMinor : null;
 }

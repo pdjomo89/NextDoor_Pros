@@ -10,12 +10,14 @@ import { retrieveEscrowSession } from './stripeEscrow';
 const http = httpRouter();
 auth.addHttpRoutes(http);
 
-// ─── Fapshi webhook — per-lead unlock fees (Cameroon) ─────────────────────────
+// ─── Fapshi webhook — pro-side fees (Cameroon) ───────────────────────────────
 //
 // Fapshi authenticates with the `x-wh-secret` header. We never trust the body's
 // status: after verifying + extracting the transaction id, we re-fetch the
-// authoritative status via getStatus, then settle the matching lead unlock
-// (idempotent; no-op on an unknown transId).
+// authoritative status via getStatus, then settle the matching row. A transId
+// belongs to exactly one of the two payment kinds (per-lead unlock, or the fee
+// to reply to a guest inquiry), so both settlers run and the one that doesn't
+// own it no-ops. Idempotent either way.
 //   Configure Fapshi to POST here: https://<deployment>.convex.site/fapshi/webhook
 http.route({
   path: '/fapshi/webhook',
@@ -28,6 +30,10 @@ http.route({
     }
     const remote = await provider.getStatus(verified.transId);
     await ctx.runMutation(internal.leadUnlocks.applyUnlockResult, {
+      transId: verified.transId,
+      status: remote.status,
+    });
+    await ctx.runMutation(internal.inquiryUnlocks.applyInquiryUnlockResult, {
       transId: verified.transId,
       status: remote.status,
     });
