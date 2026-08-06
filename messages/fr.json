@@ -758,7 +758,10 @@
     "guestNoneBody": "Lorsque vous écrivez à un pro, la conversation est enregistrée sur cet appareil pour que vous puissiez y revenir à tout moment.",
     "proInboxHint": "Vous êtes un pro ?",
     "declinedTitle": "Cette demande a été clôturée",
-    "declinedBody": "Le client a attendu 2 jours sans réponse : nous avons clôturé la demande et lui avons suggéré de contacter un autre pro. Vous ne pouvez plus répondre dans cette conversation."
+    "declinedBody": "Le client a attendu 2 jours sans réponse : nous avons clôturé la demande et lui avons suggéré de contacter un autre pro. Vous ne pouvez plus répondre dans cette conversation.",
+    "sentTitle": "Message envoyé — consultez vos courriels",
+    "sentBody": "Vous avez déjà une conversation avec ce pro : nous y avons ajouté votre message et envoyé le lien privé à cette adresse. Ouvrez le lien pour lire ses réponses et poursuivre.",
+    "sentClose": "Compris"
   },
   "Membership": {
     "title": "Abonnement",

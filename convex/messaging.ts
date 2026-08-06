@@ -62,9 +62,18 @@ export function redactContactInfo(input: string): { text: string; flagged: boole
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * A guest customer contacts a pro: email + a first message. Returns a secret
- * `guestToken` that authorizes access to the thread via a private link.
- * Re-uses an existing thread when the same email contacts the same pro.
+ * A guest customer contacts a pro: email + a first message.
+ *
+ * The `guestToken` is a bearer secret: whoever holds it reads the whole thread.
+ * This mutation is public and the email address is unverified, so the token is
+ * returned to the caller ONLY for a thread created by this very call — where
+ * the only history is the message they just wrote.
+ *
+ * When the thread already exists (same email, same pro) the message is
+ * appended, but the token is NOT returned: it is emailed to the address on
+ * file instead, and the caller is told to check that inbox. Otherwise anyone
+ * who knew a customer's email address could hand it to this mutation and be
+ * given read access to that customer's existing conversation.
  */
 export const startGuestConversation = mutation({
   args: {
@@ -165,17 +174,22 @@ export const startGuestConversation = mutation({
       }
     }
 
-    // On a brand-new thread, email the customer their private link.
-    if (isNew) {
-      await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
-        toEmail: cleanEmail,
-        link: `${siteUrl()}/${loc}/messages/guest?t=${guestToken}`,
-        intro:
-          'Thanks for your message — the pro has been notified. Use the link below any time to see their reply and continue the conversation.',
-      });
-    }
+    // Email the customer their private link. On a brand-new thread this is a
+    // convenience — the browser already has the token. On a reused thread it is
+    // the ONLY way the link is handed out, which is what stops an unverified
+    // email address from buying read access to someone else's conversation.
+    await ctx.scheduler.runAfter(0, internal.messaging.notifyByEmail, {
+      toEmail: cleanEmail,
+      link: `${siteUrl()}/${loc}/messages/guest?t=${guestToken}`,
+      intro: isNew
+        ? 'Thanks for your message — the pro has been notified. Use the link below any time to see their reply and continue the conversation.'
+        : 'Your message has been added to your existing conversation with this pro. Use the link below to read it and continue — we email it rather than opening it directly so that only you, at this address, can reach the thread.',
+    });
 
-    return { guestToken, conversationId };
+    // Only ever hand back the token for a thread this call created.
+    return isNew
+      ? { guestToken, conversationId, emailed: false as const }
+      : { guestToken: null, conversationId: null, emailed: true as const };
   },
 });
 

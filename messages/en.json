@@ -758,7 +758,10 @@
     "guestNoneBody": "When you message a pro, it's saved here on this device so you can come back to it anytime.",
     "proInboxHint": "Are you a pro?",
     "declinedTitle": "This request was closed",
-    "declinedBody": "The customer waited 2 days without a reply, so we closed the request and suggested they contact another pro. You can no longer reply in this conversation."
+    "declinedBody": "The customer waited 2 days without a reply, so we closed the request and suggested they contact another pro. You can no longer reply in this conversation.",
+    "sentTitle": "Message sent — check your email",
+    "sentBody": "You already have a conversation with this pro, so we've added your message to it and emailed the private link to that address. Open the link to read their replies and continue.",
+    "sentClose": "Got it"
   },
   "Membership": {
     "title": "Membership",

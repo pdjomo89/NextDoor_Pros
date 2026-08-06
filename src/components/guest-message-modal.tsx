@@ -22,12 +22,17 @@ export function GuestMessageModal({
 }: {
   title: string;
   intro: string;
+  /**
+   * Runs the right mutation. A `null` guestToken means the server declined to
+   * hand the private link to the browser and emailed it instead — see
+   * convex/messaging.startGuestConversation.
+   */
   submit: (args: {
     email?: string;
     name?: string;
     body: string;
     locale: string;
-  }) => Promise<{ guestToken: string }>;
+  }) => Promise<{ guestToken: string | null }>;
   onClose: () => void;
   /**
    * When true the sender is a signed-in user (their email comes from their
@@ -44,6 +49,8 @@ export function GuestMessageModal({
   const [body, setBody] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  // Message delivered, but the thread link was emailed rather than opened.
+  const [sent, setSent] = React.useState(false);
 
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -70,6 +77,12 @@ export function GuestMessageModal({
         body: body.trim(),
         locale,
       });
+      if (!guestToken) {
+        // Existing thread — the link went to the address on file instead.
+        setSent(true);
+        setBusy(false);
+        return;
+      }
       rememberGuestThread(guestToken);
       router.push(`/messages/guest?t=${guestToken}`);
     } catch (err) {
@@ -86,6 +99,22 @@ export function GuestMessageModal({
         if (!busy) onClose();
       }}
     >
+      {sent ? (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"
+        >
+          <header>
+            <h3 className="text-lg font-semibold text-navy">{t('sentTitle')}</h3>
+            <p className="mt-1 text-sm text-navy/70">{t('sentBody')}</p>
+          </header>
+          <div className="flex justify-end">
+            <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+              {t('sentClose')}
+            </Button>
+          </div>
+        </div>
+      ) : (
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={onSubmit}
@@ -186,6 +215,7 @@ export function GuestMessageModal({
           }
         `}</style>
       </form>
+      )}
     </div>,
     document.body,
   );
